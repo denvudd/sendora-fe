@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  WON
+  LOST
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CANCELLED
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum WorkspaceSubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+model Workspace {
+  id                  String                  @id @default(cuid())
+  ownerUserId         String
+  name                String
+  slug                String                  @unique
+  logoUrl             String?
+  primaryColor        String?
+  isWhiteLabelEnabled Boolean                 @default(false)
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  leads               Lead[]
+  bookings            Booking[]
+  payments            Payment[]
+  featureOverrides    WorkspaceFeature[]
+  subscriptions       WorkspaceSubscription[]
+
+  @@index([ownerUserId])
+}
+
+model Plan {
+  id                String                  @id @default(cuid())
+  code              String                  @unique
+  name              String
+  description       String?
+  monthlyPriceCents Int
+  yearlyPriceCents  Int?
+  isActive          Boolean                 @default(true)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  features          PlanFeature[]
+  subscriptions     WorkspaceSubscription[]
+}
+
+model Feature {
+  id                String             @id @default(cuid())
+  code              String             @unique
+  name              String
+  description       String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  plans             PlanFeature[]
+  workspaceSettings WorkspaceFeature[]
+}
+
+model PlanFeature {
+  id         String   @id @default(cuid())
+  planId     String
+  featureId  String
+  isEnabled  Boolean  @default(true)
+  limitValue Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  plan       Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature    Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureId])
+  @@index([featureId])
+}
+
+model WorkspaceFeature {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  featureId     String
+  isEnabled     Boolean   @default(true)
+  limitOverride Int?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  feature       Feature   @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, featureId])
+  @@index([featureId])
+}
+
+model WorkspaceSubscription {
+  id                   String                      @id @default(cuid())
+  workspaceId          String
+  planId               String
+  billingInterval      BillingInterval
+  status               WorkspaceSubscriptionStatus @default(TRIALING)
+  stripeSubscriptionId String?                     @unique
+  stripePriceId        String?
+  currentPeriodStartAt DateTime?
+  currentPeriodEndAt   DateTime?
+  cancelAtPeriodEnd    Boolean                     @default(false)
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  workspace            Workspace                   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan                 Plan                        @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId, status])
+  @@index([planId])
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  workspaceId String
+  email       String
+  firstName   String?
+  lastName    String?
+  phone       String?
+  source      String?
+  status      LeadStatus @default(NEW)
+  score       Int?
+  notes       String?
+  metadata    Json?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  bookings    Booking[]
+  payments    Payment[]
+
+  @@unique([workspaceId, email])
+  @@unique([id, workspaceId])
+  @@index([workspaceId, status, createdAt])
+}
+
+model Booking {
+  id                  String        @id @default(cuid())
+  workspaceId         String
+  leadId              String?
+  title               String
+  startsAt            DateTime
+  endsAt              DateTime
+  timezone            String
+  status              BookingStatus @default(PENDING)
+  externalCalendarRef String?
+  expectedValueCents  Int?
+  note                String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead                Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  payments            Payment[]
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, startsAt])
+  @@index([leadId])
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  workspaceId           String
+  leadId                String?
+  bookingId             String?
+  amountCents           Int
+  currency              String        @default("USD")
+  status                PaymentStatus @default(PENDING)
+  stripePaymentIntentId String?       @unique
+  stripeChargeId        String?       @unique
+  stripeCustomerId      String?
+  paidAt                DateTime?
+  refundedAt            DateTime?
+  metadata              Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  workspace             Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead                  Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  booking               Booking?      @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, status, createdAt])
+  @@index([leadId])
+  @@index([bookingId])
+}

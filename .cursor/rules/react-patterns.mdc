@@ -1,0 +1,30 @@
+---
+description: React and component patterns for this Next.js template
+globs: src/**/*.tsx
+alwaysApply: false
+---
+
+# React Component Patterns
+
+- Use function components with explicit props types.
+- Use named exports for components, hooks, and utilities.
+- Keep components small and focused; extract subcomponents instead of nesting deeply.
+- Avoid deeply nested ternaries; use early returns.
+- Avoid inline complex business logic in JSX.
+
+## Hooks and Side Effects
+
+- Put shared hooks in `src/shared/hooks`.
+- Put feature hooks in `src/features/<feature>/hooks`.
+- Keep side effects in handlers/hooks, not mixed into presentational components.
+
+## Next.js Component Guidance
+
+- Server Components by default.
+- Add `'use client'` only when using client-only APIs (state, effects, browser APIs, event handlers).
+- Keep client boundaries narrow and local.
+
+## UI Composition
+
+- Reuse shared building blocks from `src/shared/components`.
+- Keep feature-specific UI under `src/features/<feature>/components`.

@@ -1,0 +1,47 @@
+name: Initialize Project README
+
+on:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  initialize-readme:
+    if: ${{ !github.event.repository.is_template && github.ref_name == github.event.repository.default_branch }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check initialization state
+        id: check
+        run: |
+          if [ -f ".template-initialized" ]; then
+            echo "already_initialized=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_initialized=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -f "README.project.md" ]; then
+            echo "project_readme_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "project_readme_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Replace README with project version
+        if: ${{ steps.check.outputs.already_initialized == 'false' && steps.check.outputs.project_readme_exists == 'true' }}
+        run: |
+          cp README.project.md README.md
+          rm README.project.md
+          touch .template-initialized
+          rm .github/workflows/initialize-project-readme.yml
+
+      - name: Commit initialized README
+        if: ${{ steps.check.outputs.already_initialized == 'false' && steps.check.outputs.project_readme_exists == 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A README.md README.project.md .template-initialized .github/workflows/initialize-project-readme.yml
+          git commit -m "chore: initialize project README and remove setup workflow"
+          git push

@@ -1,0 +1,40 @@
+---
+description: Core architecture and coding standards for this Next.js template
+alwaysApply: true
+---
+
+# Project Architecture & General Rules
+
+- Stack: Next.js (App Router) + TypeScript + Tailwind CSS + Zod + React Hook Form + Zustand.
+- Top-level layers:
+  - `src/app`: framework shell, layouts, route entrypoints.
+  - `src/features`: feature modules (ui, hooks, state, actions).
+  - `src/shared`: reusable components, constants, hooks, types, utilities.
+- Dependency direction: `shared` -> `features` -> `app`.
+- Never import `features` from `shared`.
+- Keep route files in `src/app` thin; push domain logic to `src/features`.
+
+## TypeScript & Style
+
+- Avoid `any`; use explicit types for public APIs.
+- Prefer named exports over default exports.
+- Keep files focused; avoid unrelated helpers in the same file.
+- Destructure object params in function signatures.
+- Prefer object parameters over positional arguments for complex inputs.
+
+## State, Validation, and Forms
+
+- Use feature-scoped Zustand stores where client state is needed.
+- Keep Zod schemas close to the feature domain.
+- Use React Hook Form with Zod resolvers for form validation.
+
+## Next.js Rules
+
+- Prefer Server Components by default; add `'use client'` only when required.
+- Keep shared UI primitives in `src/shared/components`.
+- Do not place business logic directly in `src/app/layout.tsx` or `src/app/page.tsx`.
+
+## Package manager
+
+- Use Bun as a primary package manager
+- Manage features (disable/enable) using Bun if needed

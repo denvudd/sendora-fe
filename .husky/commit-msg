@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+if ! bun --no -- commitlint --edit "$1"; then
+  printf "\n\033[31m✖ Invalid commit message format.\033[0m\n"
+  printf "\033[33mUse Conventional Commits:\033[0m <type>(<scope>): <subject>\n\n"
+  printf "Examples:\n"
+  printf "  feat(auth): add login with email link\n"
+  printf "  fix(ci): correct release workflow trigger\n"
+  printf "  chore(deps): update eslint config\n\n"
+  printf "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert\n\n"
+  exit 1
+fi
+
+exit 0

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":disableRateLimiting"],
+  "enabledManagers": ["bun"],
+  "rangeStrategy": "bump",
+  "minimumReleaseAge": "3 days",
+  "bun": {
+    "postUpdateOptions": ["bunDedupe"]
+  },
+  "labels": ["dependencies"],
+  "dependencyDashboard": true,
+  "packageRules": [
+    {
+      "matchManagers": ["bun"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "prod dependencies (minor/patch)",
+      "schedule": ["after 19:00 on sunday"],
+      "automerge": false
+    },
+    {
+      "matchManagers": ["bun"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "dev dependencies (minor/patch)",
+      "schedule": ["after 19:00 on sunday"],
+      "automerge": false
+    },
+    {
+      "matchManagers": ["bun"],
+      "matchDepTypes": ["dependencies", "devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "major dependencies",
+      "schedule": ["after 19:00 on sunday"],
+      "automerge": false
+    }
+  ]
+}
