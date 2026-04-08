@@ -44,3 +44,6 @@ next-env.d.ts
 
 # local docs
 _docs
+
+# claude workspace
+.claude/

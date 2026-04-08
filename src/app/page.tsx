@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
-import { MarketingHomePage } from '@features/marketing/components/marketing-home-page'
+import { HomePage } from '@features/home/components/home-page'
 
-const Home = (): ReactElement => <MarketingHomePage />
+const Home = (): ReactElement => <HomePage />
 
 export default Home
