@@ -1,7 +1,7 @@
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
 import eslintConfigPrettier from 'eslint-config-prettier'
-import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
+// import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
 import perfectionist from 'eslint-plugin-perfectionist'
 import eslintPluginPrettier from 'eslint-plugin-prettier/recommended'
 import unusedImports from 'eslint-plugin-unused-imports'
@@ -11,21 +11,21 @@ import { parser as eslintParserTypeScript } from 'typescript-eslint'
 
 export default defineConfig([
   {
-    ignores: ['.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+    ignores: ['.next/**', 'out/**', 'build/**', 'next-env.d.ts', '.claude/**'],
   },
   ...nextVitals,
   ...nextTs,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   eslintPluginPrettier,
-  { extends: [eslintPluginBetterTailwindcss.configs.recommended] },
-  {
-    settings: {
-      'better-tailwindcss': {
-        entryPoint: 'src/app/globals.css',
-      },
-    },
-  },
+  // { extends: [eslintPluginBetterTailwindcss.configs.recommended] },
+  // {
+  //   settings: {
+  //     'better-tailwindcss': {
+  //       entryPoint: 'src/app/globals.css',
+  //     },
+  //   },
+  // },
   {
     files: ['**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
