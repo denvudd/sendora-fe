@@ -13,3 +13,4 @@ export {
   listPaymentsByWorkspace,
   updatePaymentStatus,
 } from './payment-repository'
+export { createWorkspace, findWorkspaceByOwner } from './workspace-repository'

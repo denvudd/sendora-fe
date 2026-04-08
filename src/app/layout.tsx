@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactElement, ReactNode } from 'react'
 
+import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 
 import '@/env'
@@ -23,14 +24,16 @@ export const metadata: Metadata = {
 }
 
 const RootLayout = ({ children }: { children: ReactNode }): ReactElement => (
-  <html
-    className={[geistSans.variable, geistMono.variable, 'h-full antialiased']
-      .filter(Boolean)
-      .join(' ')}
-    lang="en"
-  >
-    <body className="flex min-h-full flex-col">{children}</body>
-  </html>
+  <ClerkProvider>
+    <html
+      className={[geistSans.variable, geistMono.variable, 'h-full antialiased']
+        .filter(Boolean)
+        .join(' ')}
+      lang="en"
+    >
+      <body className="flex min-h-full flex-col">{children}</body>
+    </html>
+  </ClerkProvider>
 )
 
 export default RootLayout
