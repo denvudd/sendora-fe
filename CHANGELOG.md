@@ -1,3 +1,14 @@
+# [1.1.0](https://github.com/denvudd/sendora-fe/compare/v1.0.0...v1.1.0) (2026-04-10)
+
+### Bug Fixes
+
+- **prisma:** changed features & plans seeds ([b66f9c8](https://github.com/denvudd/sendora-fe/commit/b66f9c86f9a1c86bba4398f4a95d7ac75224712f))
+
+### Features
+
+- **app-layout:** created app-layout and dashboard, removed imageUrl from User schema ([dd50a0c](https://github.com/denvudd/sendora-fe/commit/dd50a0c2eec76423632706695bd9a423beb60653))
+- **onboarding:** improved onbloarding proccess ([4077671](https://github.com/denvudd/sendora-fe/commit/40776712e4ed5268cd107326fe1a996396e1ea48))
+
 # 1.0.0 (2026-04-08)
 
 ### Features
