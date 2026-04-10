@@ -1,34 +1,22 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import {
   createWorkspace,
-  findWorkspaceByOwner,
+  findOrCreateUser,
+  findWorkspaceByUserId,
 } from '@features/commercial/repositories'
+import { createWorkspaceSchema } from '@features/onboarding/schemas'
 import { Prisma } from '@prisma/client'
+import { getOptionalTrimmedString } from '@shared/utils/form-data'
 import { redirect } from 'next/navigation'
-import { z } from 'zod'
-
-const CreateWorkspaceSchema = z.object({
-  name: z
-    .string()
-    .min(2, 'Workspace name must be at least 2 characters.')
-    .trim(),
-  slug: z
-    .string()
-    .min(2, 'Slug must be at least 2 characters.')
-    .max(48, 'Slug must be 48 characters or fewer.')
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Slug may only contain lowercase letters, numbers, and hyphens.',
-    )
-    .trim(),
-})
 
 interface CreateWorkspaceState {
   errors?: {
     name?: string[]
     slug?: string[]
+    logoUrl?: string[]
+    primaryColor?: string[]
   }
   message?: string
 }
@@ -37,21 +25,37 @@ export async function createWorkspaceAction(
   _prevState: CreateWorkspaceState,
   formData: FormData,
 ): Promise<CreateWorkspaceState> {
-  const { userId } = await auth()
+  const { userId: clerkId } = await auth()
 
-  if (!userId) {
+  if (!clerkId) {
     redirect('/sign-in')
   }
 
-  const existing = await findWorkspaceByOwner({ ownerUserId: userId })
+  const clerkUser = await currentUser()
+
+  if (!clerkUser) {
+    redirect('/sign-in')
+  }
+
+  const dbUser = await findOrCreateUser({
+    clerkId,
+    email: clerkUser.emailAddresses[0].emailAddress,
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+    imageUrl: clerkUser.imageUrl,
+  })
+
+  const existing = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (existing) {
     redirect('/dashboard')
   }
 
-  const validated = CreateWorkspaceSchema.safeParse({
+  const validated = createWorkspaceSchema.safeParse({
     name: formData.get('name'),
     slug: formData.get('slug'),
+    logoUrl: getOptionalTrimmedString(formData, 'logoUrl'),
+    primaryColor: getOptionalTrimmedString(formData, 'primaryColor'),
   })
 
   if (!validated.success) {
@@ -62,9 +66,11 @@ export async function createWorkspaceAction(
 
   try {
     await createWorkspace({
+      userId: dbUser.id,
       name: validated.data.name,
-      ownerUserId: userId,
       slug: validated.data.slug,
+      logoUrl: validated.data.logoUrl || null,
+      primaryColor: validated.data.primaryColor || null,
     })
   } catch (error) {
     if (

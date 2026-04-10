@@ -1,35 +1,37 @@
 import { prisma } from '@shared/utils/prisma'
 
 interface CreateWorkspaceParams {
+  userId: string
   name: string
-  ownerUserId: string
   slug: string
+  logoUrl?: string | null
+  primaryColor?: string | null
 }
 
-interface FindWorkspaceByOwnerParams {
-  ownerUserId: string
+interface FindWorkspaceByUserIdParams {
+  userId: string
 }
 
 export async function createWorkspace({
-  ownerUserId,
+  userId,
   name,
   slug,
+  logoUrl,
+  primaryColor,
 }: CreateWorkspaceParams) {
   return prisma.workspace.create({
     data: {
+      userId,
       name,
-      ownerUserId,
       slug,
+      logoUrl: logoUrl ?? null,
+      primaryColor: primaryColor ?? null,
     },
   })
 }
 
-export async function findWorkspaceByOwner({
-  ownerUserId,
-}: FindWorkspaceByOwnerParams) {
-  return prisma.workspace.findFirst({
-    where: {
-      ownerUserId,
-    },
-  })
+export async function findWorkspaceByUserId({
+  userId,
+}: FindWorkspaceByUserIdParams) {
+  return prisma.workspace.findUnique({ where: { userId } })
 }
