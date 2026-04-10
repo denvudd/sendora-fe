@@ -7,7 +7,6 @@ import { Button } from '@shared/components/ui/button'
 import { Field, FieldError } from '@shared/components/ui/field'
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
-import { UploadcareUploader } from '@shared/components/ui/uploadcare-uploader'
 import { useActionState, useEffect, useRef } from 'react'
 
 import { CardContent, CardFooter } from '@/shared/components/ui/card'
@@ -15,11 +14,9 @@ import { CardContent, CardFooter } from '@/shared/components/ui/card'
 interface OnboardingStepProfileProps {
   firstName: string
   lastName: string
-  imageUrl: string
   onContinueSuccess: () => void
   onFirstNameChange: (value: string) => void
   onLastNameChange: (value: string) => void
-  onImageUrlChange: (value: string) => void
 }
 
 interface ProfileFormState {
@@ -27,7 +24,6 @@ interface ProfileFormState {
   errors?: {
     firstName?: string[]
     lastName?: string[]
-    imageUrl?: string[]
   }
   message?: string
 }
@@ -35,11 +31,9 @@ interface ProfileFormState {
 export function OnboardingStepProfile({
   firstName,
   lastName,
-  imageUrl,
   onContinueSuccess,
   onFirstNameChange,
   onLastNameChange,
-  onImageUrlChange,
 }: OnboardingStepProfileProps): ReactElement {
   const [state, action, isPending] = useActionState<ProfileFormState, FormData>(
     updateUserAction,
@@ -93,19 +87,6 @@ export function OnboardingStepProfile({
             <FieldError>{state.errors.lastName[0]}</FieldError>
           )}
         </Field>
-
-        <UploadcareUploader
-          description="(optional)"
-          error={state.errors?.imageUrl?.[0]}
-          label="Profile photo"
-          multiple={false}
-          multipleMax={1}
-          name="imageUrl"
-          previewShape="circle"
-          value={imageUrl}
-          cloudImageEditorAutoOpen
-          onCdnUrlChange={onImageUrlChange}
-        />
 
         {state.message && <FieldError>{state.message}</FieldError>}
       </CardContent>

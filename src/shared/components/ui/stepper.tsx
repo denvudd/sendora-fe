@@ -74,23 +74,23 @@ export function StepperList({
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                   isActive &&
                     'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20',
+                  isDone &&
+                    !isActive &&
+                    'border-green-500 bg-muted/30 text-foreground',
                   !isActive &&
                     !isDone &&
                     'border-border bg-muted/40 text-muted-foreground hover:bg-muted/60',
-                  isDone &&
-                    !isActive &&
-                    'border-primary/40 bg-muted/30 text-foreground',
                 )}
                 disabled={isStepDisabled?.(step.id) ?? false}
               >
                 <Indicator
                   className={cn(
-                    'flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold tabular-nums',
+                    'flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold tabular-nums transition-colors',
                     isActive &&
                       'border-primary bg-primary text-primary-foreground',
                     isDone &&
                       !isActive &&
-                      'border-primary bg-primary text-primary-foreground',
+                      'border-green-500 bg-green-500 text-primary-foreground',
                     !isActive &&
                       !isDone &&
                       'border-muted-foreground/40 bg-background text-muted-foreground',

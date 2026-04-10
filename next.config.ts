@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
         hostname: 'ucarecdn.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '*.ucarecdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ucr.io',
+      },
     ],
   },
 }

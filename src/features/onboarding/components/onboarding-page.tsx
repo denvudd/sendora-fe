@@ -18,10 +18,17 @@ import {
 } from '@shared/components/ui/stepper'
 import { useMemo, useState } from 'react'
 
-export function OnboardingPage(): ReactElement {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
+interface OnboardingPageProps {
+  clerkFirstName: string | null
+  clerkLastName: string | null
+}
+
+export function OnboardingPage({
+  clerkFirstName,
+  clerkLastName,
+}: OnboardingPageProps): ReactElement {
+  const [firstName, setFirstName] = useState(clerkFirstName ?? '')
+  const [lastName, setLastName] = useState(clerkLastName ?? '')
   const [workspaceName, setWorkspaceName] = useState('')
   const [workspaceSlug, setWorkspaceSlug] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
@@ -66,13 +73,11 @@ export function OnboardingPage(): ReactElement {
               <Stepper.Content step="profile">
                 <OnboardingStepProfile
                   firstName={firstName}
-                  imageUrl={imageUrl}
                   lastName={lastName}
                   onContinueSuccess={() => {
                     stepper.navigation.goTo('workspace')
                   }}
                   onFirstNameChange={setFirstName}
-                  onImageUrlChange={setImageUrl}
                   onLastNameChange={setLastName}
                 />
               </Stepper.Content>

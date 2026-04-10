@@ -26,7 +26,6 @@ const Dashboard = async (): Promise<ReactElement> => {
     email: clerkUser.emailAddresses[0].emailAddress,
     firstName: clerkUser.firstName,
     lastName: clerkUser.lastName,
-    imageUrl: clerkUser.imageUrl,
   })
 
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
