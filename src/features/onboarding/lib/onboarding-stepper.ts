@@ -11,4 +11,9 @@ export const { Stepper, useStepper } = defineStepper(
     title: 'Workspace',
     description: 'Set up your Sendora workspace to get started.',
   },
+  {
+    id: 'plan',
+    title: 'Choose a plan',
+    description: 'Select the plan that fits your needs.',
+  },
 )

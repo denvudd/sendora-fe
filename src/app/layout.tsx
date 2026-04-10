@@ -24,7 +24,13 @@ export const metadata: Metadata = {
 }
 
 const RootLayout = ({ children }: { children: ReactNode }): ReactElement => (
-  <ClerkProvider>
+  <ClerkProvider
+    appearance={{
+      options: {
+        unsafe_disableDevelopmentModeWarnings: true,
+      },
+    }}
+  >
     <html
       className={[geistSans.variable, geistMono.variable, 'h-full antialiased']
         .filter(Boolean)

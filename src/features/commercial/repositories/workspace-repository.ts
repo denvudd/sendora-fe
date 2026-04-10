@@ -12,6 +12,15 @@ interface FindWorkspaceByUserIdParams {
   userId: string
 }
 
+interface UpdateWorkspaceStripeCustomerParams {
+  workspaceId: string
+  stripeCustomerId: string
+}
+
+interface FindWorkspaceByStripeCustomerIdParams {
+  stripeCustomerId: string
+}
+
 export async function createWorkspace({
   userId,
   name,
@@ -34,4 +43,20 @@ export async function findWorkspaceByUserId({
   userId,
 }: FindWorkspaceByUserIdParams) {
   return prisma.workspace.findUnique({ where: { userId } })
+}
+
+export async function updateWorkspaceStripeCustomerId({
+  workspaceId,
+  stripeCustomerId,
+}: UpdateWorkspaceStripeCustomerParams) {
+  return prisma.workspace.update({
+    where: { id: workspaceId },
+    data: { stripeCustomerId },
+  })
+}
+
+export async function findWorkspaceByStripeCustomerId({
+  stripeCustomerId,
+}: FindWorkspaceByStripeCustomerIdParams) {
+  return prisma.workspace.findUnique({ where: { stripeCustomerId } })
 }
