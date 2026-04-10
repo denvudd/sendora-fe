@@ -1,0 +1,64 @@
+import type { ReactElement, ReactNode } from 'react'
+
+import { auth, currentUser } from '@clerk/nextjs/server'
+import { AppSidebar } from '@features/app-layout/components/app-sidebar'
+import {
+  findOrCreateUser,
+  findWorkspaceByUserId,
+  listDomainsByWorkspace,
+} from '@features/commercial/repositories'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@shared/components/ui/sidebar'
+import { redirect } from 'next/navigation'
+
+const AppLayout = async ({
+  children,
+}: {
+  children: ReactNode
+}): Promise<ReactElement> => {
+  const { userId: clerkId } = await auth()
+
+  if (!clerkId) {
+    redirect('/sign-in')
+  }
+
+  const clerkUser = await currentUser({
+    treatPendingAsSignedOut: true,
+  })
+
+  if (!clerkUser) {
+    redirect('/sign-in')
+  }
+
+  const dbUser = await findOrCreateUser({
+    clerkId,
+    email: clerkUser.emailAddresses[0].emailAddress,
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+  })
+
+  const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
+
+  if (!workspace) {
+    redirect('/onboarding')
+  }
+
+  const domains = await listDomainsByWorkspace({ workspaceId: workspace.id })
+
+  return (
+    <SidebarProvider>
+      <AppSidebar domains={domains} workspace={workspace} />
+      <SidebarInset>
+        <header className="flex h-12 items-center gap-2 border-b border-border px-4 md:hidden">
+          <SidebarTrigger />
+        </header>
+        <div className="flex flex-col gap-4 p-4">{children}</div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
+}
+
+export default AppLayout

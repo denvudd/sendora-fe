@@ -4,6 +4,13 @@ export {
   updateBookingStatus,
 } from './booking-repository'
 export {
+  createDomain,
+  deleteDomain,
+  listDomainsByWorkspace,
+  setPrimaryDomain,
+  updateDomainVerification,
+} from './domain-repository'
+export {
   createLead,
   listLeadsByWorkspace,
   updateLeadStatus,
@@ -13,4 +20,9 @@ export {
   listPaymentsByWorkspace,
   updatePaymentStatus,
 } from './payment-repository'
-export { createWorkspace, findWorkspaceByOwner } from './workspace-repository'
+export {
+  findOrCreateUser,
+  findUserByClerkId,
+  updateUser,
+} from './user-repository'
+export { createWorkspace, findWorkspaceByUserId } from './workspace-repository'

@@ -4,6 +4,7 @@ import { z } from 'zod'
 export const env = createEnv({
   client: {
     NEXT_PUBLIC_APP_URL: z.url().optional(),
+    NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY: z.string().min(1),
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
     NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: z.string().min(1),
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1),
@@ -15,6 +16,8 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY:
+      process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL:
