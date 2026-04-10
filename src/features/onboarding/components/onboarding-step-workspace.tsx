@@ -9,7 +9,7 @@ import { Field, FieldError } from '@shared/components/ui/field'
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
 import { UploadcareUploader } from '@shared/components/ui/uploadcare-uploader'
-import { useActionState } from 'react'
+import { useActionState, useRef } from 'react'
 
 import { CardContent, CardFooter } from '@/shared/components/ui/card'
 
@@ -33,6 +33,19 @@ interface OnboardingFormState {
   message?: string
 }
 
+/** Maps workspace display name to a slug matching createWorkspaceSchema (lowercase, hyphens, max 48). */
+function deriveWorkspaceSlugFromName(rawName: string): string {
+  return rawName
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48)
+}
+
 export function OnboardingStepWorkspace({
   name,
   slug,
@@ -46,6 +59,7 @@ export function OnboardingStepWorkspace({
     OnboardingFormState,
     FormData
   >(createWorkspaceAction, {})
+  const isSlugManuallyEditedRef = useRef(false)
 
   return (
     <form action={action}>
@@ -59,7 +73,12 @@ export function OnboardingStepWorkspace({
             value={name}
             required
             onChange={e => {
-              onNameChange(e.target.value)
+              const nextName = e.target.value
+              onNameChange(nextName)
+
+              if (!isSlugManuallyEditedRef.current) {
+                onSlugChange(deriveWorkspaceSlugFromName(nextName))
+              }
             }}
           />
           {state.errors?.name && (
@@ -76,6 +95,7 @@ export function OnboardingStepWorkspace({
             value={slug}
             required
             onChange={e => {
+              isSlugManuallyEditedRef.current = true
               onSlugChange(e.target.value)
             }}
           />

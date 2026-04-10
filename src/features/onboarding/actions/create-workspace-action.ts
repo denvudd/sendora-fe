@@ -42,7 +42,6 @@ export async function createWorkspaceAction(
     email: clerkUser.emailAddresses[0].emailAddress,
     firstName: clerkUser.firstName,
     lastName: clerkUser.lastName,
-    imageUrl: clerkUser.imageUrl,
   })
 
   const existing = await findWorkspaceByUserId({ userId: dbUser.id })

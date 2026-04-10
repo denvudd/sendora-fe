@@ -11,7 +11,6 @@ export const updateUserSchema = z.object({
     .trim()
     .min(1, 'Last name is required.')
     .max(64, 'Last name must be 64 characters or fewer.'),
-  imageUrl: z.string().url('Invalid image URL.').optional(),
 })
 
 /** Client gate: first and last name required before navigating to workspace step. */

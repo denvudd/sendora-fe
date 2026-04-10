@@ -3,7 +3,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { findOrCreateUser, updateUser } from '@features/commercial/repositories'
 import { updateUserSchema } from '@features/onboarding/schemas'
-import { getOptionalTrimmedString } from '@shared/utils/form-data'
 import { redirect } from 'next/navigation'
 
 interface UpdateUserState {
@@ -11,7 +10,6 @@ interface UpdateUserState {
   errors?: {
     firstName?: string[]
     lastName?: string[]
-    imageUrl?: string[]
   }
   message?: string
 }
@@ -37,13 +35,11 @@ export async function updateUserAction(
     email: clerkUser.emailAddresses[0].emailAddress,
     firstName: clerkUser.firstName,
     lastName: clerkUser.lastName,
-    imageUrl: clerkUser.imageUrl,
   })
 
   const validated = updateUserSchema.safeParse({
     firstName: String(formData.get('firstName') ?? '').trim(),
     lastName: String(formData.get('lastName') ?? '').trim(),
-    imageUrl: getOptionalTrimmedString(formData, 'imageUrl'),
   })
 
   if (!validated.success) {
@@ -57,7 +53,6 @@ export async function updateUserAction(
       id: dbUser.id,
       firstName: validated.data.firstName ?? null,
       lastName: validated.data.lastName ?? null,
-      imageUrl: validated.data.imageUrl ?? null,
     })
   } catch {
     return { message: 'Something went wrong. Please try again.' }

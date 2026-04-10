@@ -5,7 +5,6 @@ interface FindOrCreateUserParams {
   email: string
   firstName?: string | null
   lastName?: string | null
-  imageUrl?: string | null
 }
 
 interface FindUserByClerkIdParams {
@@ -17,7 +16,6 @@ export async function findOrCreateUser({
   email,
   firstName,
   lastName,
-  imageUrl,
 }: FindOrCreateUserParams) {
   return prisma.user.upsert({
     where: { clerkId },
@@ -26,13 +24,11 @@ export async function findOrCreateUser({
       email,
       firstName: firstName ?? null,
       lastName: lastName ?? null,
-      imageUrl: imageUrl ?? null,
     },
     update: {
       email,
       firstName: firstName ?? null,
       lastName: lastName ?? null,
-      imageUrl: imageUrl ?? null,
     },
   })
 }
@@ -45,21 +41,18 @@ interface UpdateUserParams {
   id: string
   firstName?: string | null
   lastName?: string | null
-  imageUrl?: string | null
 }
 
 export async function updateUser({
   id,
   firstName,
   lastName,
-  imageUrl,
 }: UpdateUserParams) {
   return prisma.user.update({
     where: { id },
     data: {
       firstName: firstName ?? null,
       lastName: lastName ?? null,
-      imageUrl: imageUrl ?? null,
     },
   })
 }
