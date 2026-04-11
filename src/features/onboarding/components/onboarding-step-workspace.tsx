@@ -9,7 +9,7 @@ import { Field, FieldError } from '@shared/components/ui/field'
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
 import { UploadcareUploader } from '@shared/components/ui/uploadcare-uploader'
-import { useActionState, useRef } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 
 import { CardContent, CardFooter } from '@/shared/components/ui/card'
 
@@ -18,6 +18,7 @@ interface OnboardingStepWorkspaceProps {
   slug: string
   logoUrl: string
   onBack: () => void
+  onSuccess: (workspaceId: string) => void
   onNameChange: (value: string) => void
   onSlugChange: (value: string) => void
   onLogoUrlChange: (value: string) => void
@@ -31,6 +32,7 @@ interface OnboardingFormState {
     primaryColor?: string[]
   }
   message?: string
+  workspaceId?: string
 }
 
 /** Maps workspace display name to a slug matching createWorkspaceSchema (lowercase, hyphens, max 48). */
@@ -51,6 +53,7 @@ export function OnboardingStepWorkspace({
   slug,
   logoUrl,
   onBack,
+  onSuccess,
   onNameChange,
   onSlugChange,
   onLogoUrlChange,
@@ -60,6 +63,12 @@ export function OnboardingStepWorkspace({
     FormData
   >(createWorkspaceAction, {})
   const isSlugManuallyEditedRef = useRef(false)
+
+  useEffect(() => {
+    if (state.workspaceId) {
+      onSuccess(state.workspaceId)
+    }
+  }, [state.workspaceId, onSuccess])
 
   return (
     <form action={action}>

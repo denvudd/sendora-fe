@@ -8,6 +8,204 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id        String     @id @default(cuid())
+  clerkId   String     @unique
+  email     String     @unique
+  firstName String?
+  lastName  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  workspace Workspace?
+
+  @@index([clerkId])
+}
+
+model Workspace {
+  id                  String                  @id @default(cuid())
+  name                String
+  slug                String                  @unique
+  logoUrl             String?
+  primaryColor        String?
+  isWhiteLabelEnabled Boolean                 @default(false)
+  stripeCustomerId    String?                 @unique
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  userId              String                  @unique
+  bookings            Booking[]
+  domains             Domain[]
+  leads               Lead[]
+  payments            Payment[]
+  user                User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  featureOverrides    WorkspaceFeature[]
+  subscriptions       WorkspaceSubscription[]
+}
+
+model Domain {
+  id                String    @id @default(cuid())
+  workspaceId       String
+  hostname          String    @unique
+  isVerified        Boolean   @default(false)
+  isPrimary         Boolean   @default(false)
+  verificationToken String?   @unique
+  verifiedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model Plan {
+  id                   String                  @id @default(cuid())
+  code                 String                  @unique
+  name                 String
+  description          String?
+  monthlyPriceCents    Int
+  yearlyPriceCents     Int?
+  stripePriceIdMonthly String?
+  stripePriceIdYearly  String?
+  isActive             Boolean                 @default(true)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  features          PlanFeature[]
+  subscriptions     WorkspaceSubscription[]
+}
+
+model Feature {
+  id                String             @id @default(cuid())
+  code              String             @unique
+  name              String
+  description       String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  plans             PlanFeature[]
+  workspaceSettings WorkspaceFeature[]
+}
+
+model PlanFeature {
+  id         String   @id @default(cuid())
+  planId     String
+  featureId  String
+  isEnabled  Boolean  @default(true)
+  limitValue Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  feature    Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  plan       Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureId])
+  @@index([featureId])
+}
+
+model WorkspaceFeature {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  featureId     String
+  isEnabled     Boolean   @default(true)
+  limitOverride Int?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  feature       Feature   @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, featureId])
+  @@index([featureId])
+}
+
+model WorkspaceSubscription {
+  id                   String                      @id @default(cuid())
+  workspaceId          String
+  planId               String
+  billingInterval      BillingInterval
+  status               WorkspaceSubscriptionStatus @default(TRIALING)
+  stripeSubscriptionId String?                     @unique
+  stripePriceId        String?
+  currentPeriodStartAt DateTime?
+  currentPeriodEndAt   DateTime?
+  cancelAtPeriodEnd    Boolean                     @default(false)
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  plan                 Plan                        @relation(fields: [planId], references: [id])
+  workspace            Workspace                   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
+  @@index([planId])
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  workspaceId String
+  email       String
+  firstName   String?
+  lastName    String?
+  phone       String?
+  source      String?
+  status      LeadStatus @default(NEW)
+  score       Int?
+  notes       String?
+  metadata    Json?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  bookings    Booking[]
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  payments    Payment[]
+
+  @@unique([workspaceId, email])
+  @@unique([id, workspaceId])
+  @@index([workspaceId, status, createdAt])
+}
+
+model Booking {
+  id                  String        @id @default(cuid())
+  workspaceId         String
+  leadId              String?
+  title               String
+  startsAt            DateTime
+  endsAt              DateTime
+  timezone            String
+  status              BookingStatus @default(PENDING)
+  externalCalendarRef String?
+  expectedValueCents  Int?
+  note                String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  lead                Lead?         @relation(fields: [leadId], references: [id])
+  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  payments            Payment[]
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, startsAt])
+  @@index([leadId])
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  workspaceId           String
+  leadId                String?
+  bookingId             String?
+  amountCents           Int
+  currency              String        @default("USD")
+  status                PaymentStatus @default(PENDING)
+  stripePaymentIntentId String?       @unique
+  stripeChargeId        String?       @unique
+  stripeCustomerId      String?
+  paidAt                DateTime?
+  refundedAt            DateTime?
+  metadata              Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  booking               Booking?      @relation(fields: [bookingId], references: [id])
+  lead                  Lead?         @relation(fields: [leadId], references: [id])
+  workspace             Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId, status, createdAt])
+  @@index([leadId])
+  @@index([bookingId])
+}
+
 enum LeadStatus {
   NEW
   CONTACTED
@@ -44,199 +242,4 @@ enum WorkspaceSubscriptionStatus {
   PAST_DUE
   CANCELLED
   EXPIRED
-}
-
-model User {
-  id        String     @id @default(cuid())
-  clerkId   String     @unique
-  email     String     @unique
-  firstName String?
-  lastName  String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  workspace Workspace?
-
-  @@index([clerkId])
-}
-
-model Workspace {
-  id                  String                  @id @default(cuid())
-  userId              String                  @unique
-  name                String
-  slug                String                  @unique
-  logoUrl             String?
-  primaryColor        String?
-  isWhiteLabelEnabled Boolean                 @default(false)
-  createdAt           DateTime                @default(now())
-  updatedAt           DateTime                @updatedAt
-  user                User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  domains             Domain[]
-  leads               Lead[]
-  bookings            Booking[]
-  payments            Payment[]
-  featureOverrides    WorkspaceFeature[]
-  subscriptions       WorkspaceSubscription[]
-}
-
-model Domain {
-  id                String    @id @default(cuid())
-  workspaceId       String
-  hostname          String    @unique
-  isVerified        Boolean   @default(false)
-  isPrimary         Boolean   @default(false)
-  verificationToken String?   @unique
-  verifiedAt        DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-}
-
-model Plan {
-  id                String                  @id @default(cuid())
-  code              String                  @unique
-  name              String
-  description       String?
-  monthlyPriceCents Int
-  yearlyPriceCents  Int?
-  isActive          Boolean                 @default(true)
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
-  features          PlanFeature[]
-  subscriptions     WorkspaceSubscription[]
-}
-
-model Feature {
-  id                String             @id @default(cuid())
-  code              String             @unique
-  name              String
-  description       String?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  plans             PlanFeature[]
-  workspaceSettings WorkspaceFeature[]
-}
-
-model PlanFeature {
-  id         String   @id @default(cuid())
-  planId     String
-  featureId  String
-  isEnabled  Boolean  @default(true)
-  limitValue Int?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  plan       Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
-  feature    Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
-
-  @@unique([planId, featureId])
-  @@index([featureId])
-}
-
-model WorkspaceFeature {
-  id            String    @id @default(cuid())
-  workspaceId   String
-  featureId     String
-  isEnabled     Boolean   @default(true)
-  limitOverride Int?
-  expiresAt     DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  feature       Feature   @relation(fields: [featureId], references: [id], onDelete: Cascade)
-
-  @@unique([workspaceId, featureId])
-  @@index([featureId])
-}
-
-model WorkspaceSubscription {
-  id                   String                      @id @default(cuid())
-  workspaceId          String
-  planId               String
-  billingInterval      BillingInterval
-  status               WorkspaceSubscriptionStatus @default(TRIALING)
-  stripeSubscriptionId String?                     @unique
-  stripePriceId        String?
-  currentPeriodStartAt DateTime?
-  currentPeriodEndAt   DateTime?
-  cancelAtPeriodEnd    Boolean                     @default(false)
-  createdAt            DateTime                    @default(now())
-  updatedAt            DateTime                    @updatedAt
-  workspace            Workspace                   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  plan                 Plan                        @relation(fields: [planId], references: [id], onDelete: Restrict)
-
-  @@index([workspaceId, status])
-  @@index([planId])
-}
-
-model Lead {
-  id          String     @id @default(cuid())
-  workspaceId String
-  email       String
-  firstName   String?
-  lastName    String?
-  phone       String?
-  source      String?
-  status      LeadStatus @default(NEW)
-  score       Int?
-  notes       String?
-  metadata    Json?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  bookings    Booking[]
-  payments    Payment[]
-
-  @@unique([workspaceId, email])
-  @@unique([id, workspaceId])
-  @@index([workspaceId, status, createdAt])
-}
-
-model Booking {
-  id                  String        @id @default(cuid())
-  workspaceId         String
-  leadId              String?
-  title               String
-  startsAt            DateTime
-  endsAt              DateTime
-  timezone            String
-  status              BookingStatus @default(PENDING)
-  externalCalendarRef String?
-  expectedValueCents  Int?
-  note                String?
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  lead                Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  payments            Payment[]
-
-  @@unique([id, workspaceId])
-  @@index([workspaceId, startsAt])
-  @@index([leadId])
-}
-
-model Payment {
-  id                    String        @id @default(cuid())
-  workspaceId           String
-  leadId                String?
-  bookingId             String?
-  amountCents           Int
-  currency              String        @default("USD")
-  status                PaymentStatus @default(PENDING)
-  stripePaymentIntentId String?       @unique
-  stripeChargeId        String?       @unique
-  stripeCustomerId      String?
-  paidAt                DateTime?
-  refundedAt            DateTime?
-  metadata              Json?
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  workspace             Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  lead                  Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  booking               Booking?      @relation(fields: [bookingId], references: [id], onDelete: SetNull)
-
-  @@unique([id, workspaceId])
-  @@index([workspaceId, status, createdAt])
-  @@index([leadId])
-  @@index([bookingId])
 }

@@ -19,6 +19,7 @@ interface CreateWorkspaceState {
     primaryColor?: string[]
   }
   message?: string
+  workspaceId?: string
 }
 
 export async function createWorkspaceAction(
@@ -47,7 +48,7 @@ export async function createWorkspaceAction(
   const existing = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (existing) {
-    redirect('/dashboard')
+    return { workspaceId: existing.id }
   }
 
   const validated = createWorkspaceSchema.safeParse({
@@ -64,13 +65,15 @@ export async function createWorkspaceAction(
   }
 
   try {
-    await createWorkspace({
+    const workspace = await createWorkspace({
       userId: dbUser.id,
       name: validated.data.name,
       slug: validated.data.slug,
       logoUrl: validated.data.logoUrl || null,
       primaryColor: validated.data.primaryColor || null,
     })
+
+    return { workspaceId: workspace.id }
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -83,6 +86,4 @@ export async function createWorkspaceAction(
 
     return { message: 'Something went wrong. Please try again.' }
   }
-
-  redirect('/dashboard')
 }

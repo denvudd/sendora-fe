@@ -21,8 +21,20 @@ export {
   updatePaymentStatus,
 } from './payment-repository'
 export {
+  createSubscription,
+  findActiveSubscriptionByWorkspaceId,
+  findSubscriptionByStripeId,
+  updateSubscription,
+  cancelSubscription,
+} from './subscription-repository'
+export {
   findOrCreateUser,
   findUserByClerkId,
   updateUser,
 } from './user-repository'
-export { createWorkspace, findWorkspaceByUserId } from './workspace-repository'
+export {
+  createWorkspace,
+  findWorkspaceByUserId,
+  findWorkspaceByStripeCustomerId,
+  updateWorkspaceStripeCustomerId,
+} from './workspace-repository'

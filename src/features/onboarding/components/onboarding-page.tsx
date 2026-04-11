@@ -1,7 +1,9 @@
 'use client'
 
+import type { Feature, Plan, PlanFeature } from '@prisma/client'
 import type { ReactElement } from 'react'
 
+import { OnboardingStepPlan } from '@features/onboarding/components/onboarding-step-plan'
 import { OnboardingStepProfile } from '@features/onboarding/components/onboarding-step-profile'
 import { OnboardingStepWorkspace } from '@features/onboarding/components/onboarding-step-workspace'
 import { Stepper } from '@features/onboarding/lib/onboarding-stepper'
@@ -18,20 +20,27 @@ import {
 } from '@shared/components/ui/stepper'
 import { useMemo, useState } from 'react'
 
+type PlanWithFeatures = Plan & {
+  features: (PlanFeature & { feature: Feature })[]
+}
+
 interface OnboardingPageProps {
   clerkFirstName: string | null
   clerkLastName: string | null
+  plans: PlanWithFeatures[]
 }
 
 export function OnboardingPage({
   clerkFirstName,
   clerkLastName,
+  plans,
 }: OnboardingPageProps): ReactElement {
   const [firstName, setFirstName] = useState(clerkFirstName ?? '')
   const [lastName, setLastName] = useState(clerkLastName ?? '')
   const [workspaceName, setWorkspaceName] = useState('')
   const [workspaceSlug, setWorkspaceSlug] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null)
 
   const isProfileValid = useMemo(
     () =>
@@ -49,11 +58,21 @@ export function OnboardingPage({
             <Card className="w-full border-0 shadow-none sm:border sm:shadow-sm">
               <CardHeader className="space-y-4">
                 <StepperList
-                  isStepDisabled={stepId =>
-                    stepId === 'workspace' &&
-                    currentId === 'profile' &&
-                    !isProfileValid
-                  }
+                  isStepDisabled={stepId => {
+                    if (
+                      stepId === 'workspace' &&
+                      currentId === 'profile' &&
+                      !isProfileValid
+                    ) {
+                      return true
+                    }
+
+                    if (stepId === 'plan' && currentId !== 'plan') {
+                      return true
+                    }
+
+                    return false
+                  }}
                   // Safe cast: Item is the only step-ID-specific primitive;
                   // StepperList only reads step.id as string at runtime.
                   primitives={Stepper as unknown as StepperListPrimitives}
@@ -81,6 +100,7 @@ export function OnboardingPage({
                   onLastNameChange={setLastName}
                 />
               </Stepper.Content>
+
               <Stepper.Content step="workspace">
                 <OnboardingStepWorkspace
                   logoUrl={logoUrl}
@@ -92,7 +112,17 @@ export function OnboardingPage({
                   onLogoUrlChange={setLogoUrl}
                   onNameChange={setWorkspaceName}
                   onSlugChange={setWorkspaceSlug}
+                  onSuccess={id => {
+                    setWorkspaceId(id)
+                    stepper.navigation.goTo('plan')
+                  }}
                 />
+              </Stepper.Content>
+
+              <Stepper.Content step="plan">
+                {workspaceId && (
+                  <OnboardingStepPlan plans={plans} workspaceId={workspaceId} />
+                )}
               </Stepper.Content>
             </Card>
           )
