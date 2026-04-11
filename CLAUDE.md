@@ -36,6 +36,7 @@ Avoid reverse imports.
 - Follow existing architecture before introducing new patterns.
 - Reuse existing shared utilities/components before creating new ones.
 - If a rule conflicts with existing code patterns, follow the existing project pattern.
+- Don't forget to handle errors and potential edge cases
 
 ## Package manager
 

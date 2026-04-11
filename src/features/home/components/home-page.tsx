@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 
+import { HomePricingPlans } from '@features/home/components/home-pricing-plans'
 import { listActivePlans } from '@features/home/repositories/plan-repository'
 import { Badge } from '@shared/components/ui/badge'
 import { buttonVariants } from '@shared/components/ui/button'
@@ -7,7 +8,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@shared/components/ui/card'
@@ -114,15 +114,6 @@ const faqItems = [
     question: 'Is it suitable for agencies and resellers?',
   },
 ] as const
-
-function formatPrice(priceInCents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    currency: 'USD',
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0,
-    style: 'currency',
-  }).format(priceInCents / 100)
-}
 
 export async function HomePage(): Promise<ReactElement> {
   const plans = await listActivePlans()
@@ -321,89 +312,18 @@ export async function HomePage(): Promise<ReactElement> {
             lg:px-10
           "
         >
-          <div className="space-y-2">
-            <h2 className="text-3xl font-semibold tracking-tight">Pricing</h2>
-            <p className="text-muted-foreground">
-              Sendora is a subscription-based platform. Select a plan that fits
-              your needs and get started.
+          <div className="space-y-2 text-center">
+            <Badge variant="outline">Pricing</Badge>
+            <h2 className="text-3xl font-semibold tracking-tight">
+              Choose your right plan!
+            </h2>
+            <p className="text-muted-foreground mx-auto max-w-2xl">
+              Select from best plans, ensuring a perfect match. Need more or
+              less? Customize your subscription for a seamless fit!
             </p>
           </div>
 
-          {plans.length > 0 ? (
-            <div
-              className="
-                grid gap-6
-                lg:grid-cols-3
-              "
-            >
-              {plans.map(plan => (
-                <Card key={plan.id} className="relative overflow-hidden">
-                  <CardHeader>
-                    <CardTitle>{plan.name}</CardTitle>
-                    <CardDescription>
-                      {plan.description ?? 'Flexible plan for your team.'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent
-                    className="
-                    flex flex-1 flex-col justify-between gap-4
-                  "
-                  >
-                    <div className="h-full flex-1 space-y-4">
-                      <div className="text-3xl font-semibold">
-                        {formatPrice(plan.monthlyPriceCents)}
-                        <span
-                          className="
-                            ml-1 text-sm font-normal text-muted-foreground
-                          "
-                        >
-                          /month
-                        </span>
-                      </div>
-                      <ul className="space-y-2 text-sm">
-                        {plan.features
-                          .filter(planFeature => planFeature.isEnabled)
-                          .map(planFeature => (
-                            <li
-                              key={planFeature.id}
-                              className="
-                                flex items-center justify-between gap-3
-                              "
-                            >
-                              <span>{planFeature.feature.name}</span>
-                              <span className="text-muted-foreground">
-                                {planFeature.limitValue ?? 'Unlimited'}
-                              </span>
-                            </li>
-                          ))}
-                      </ul>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Link
-                      className={buttonVariants({
-                        className: 'mt-auto w-full',
-                        size: 'lg',
-                      })}
-                      href="/sign-up"
-                    >
-                      Get started
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No active plans yet</CardTitle>
-                <CardDescription>
-                  Seed your database to display pricing plans on this landing
-                  page.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
+          <HomePricingPlans plans={plans} />
         </div>
       </section>
 
