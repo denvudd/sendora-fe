@@ -45,6 +45,7 @@ model Domain {
   id                String    @id @default(cuid())
   workspaceId       String
   hostname          String    @unique
+  iconUrl           String?
   isVerified        Boolean   @default(false)
   isPrimary         Boolean   @default(false)
   verificationToken String?   @unique
@@ -68,8 +69,9 @@ model Plan {
   isActive             Boolean                 @default(true)
   createdAt            DateTime                @default(now())
   updatedAt            DateTime                @updatedAt
-  features          PlanFeature[]
-  subscriptions     WorkspaceSubscription[]
+  features             PlanFeature[]
+  subscriptions        WorkspaceSubscription[]
+  pendingSubscriptions WorkspaceSubscription[] @relation("PendingPlan")
 }
 
 model Feature {
@@ -115,20 +117,25 @@ model WorkspaceFeature {
 }
 
 model WorkspaceSubscription {
-  id                   String                      @id @default(cuid())
-  workspaceId          String
-  planId               String
-  billingInterval      BillingInterval
-  status               WorkspaceSubscriptionStatus @default(TRIALING)
-  stripeSubscriptionId String?                     @unique
-  stripePriceId        String?
-  currentPeriodStartAt DateTime?
-  currentPeriodEndAt   DateTime?
-  cancelAtPeriodEnd    Boolean                     @default(false)
-  createdAt            DateTime                    @default(now())
-  updatedAt            DateTime                    @updatedAt
-  plan                 Plan                        @relation(fields: [planId], references: [id])
-  workspace            Workspace                   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id                     String                      @id @default(cuid())
+  workspaceId            String
+  planId                 String
+  billingInterval        BillingInterval
+  status                 WorkspaceSubscriptionStatus @default(TRIALING)
+  stripeSubscriptionId   String?                     @unique
+  stripePriceId          String?
+  currentPeriodStartAt   DateTime?
+  currentPeriodEndAt     DateTime?
+  cancelAtPeriodEnd      Boolean                     @default(false)
+  pendingPlanId          String?
+  pendingBillingInterval BillingInterval?
+  pendingStripePriceId   String?
+  stripeScheduleId       String?                     @unique
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  plan                   Plan                        @relation(fields: [planId], references: [id])
+  pendingPlan            Plan?                       @relation("PendingPlan", fields: [pendingPlanId], references: [id])
+  workspace              Workspace                   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, status])
   @@index([planId])

@@ -27,31 +27,53 @@ export function HomePricingPlans({
   }
 
   return (
-    <div>
-      <div className="flex justify-center mb-16">
-        <PlanBillingIntervalToggle
-          size="lg"
-          value={billingInterval}
-          onChange={handleBillingIntervalChange}
-        />
+    <section className="bg-background" id="pricing">
+      <div
+        className="
+            mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16
+            lg:px-10
+          "
+      >
+        <div className="space-y-2 text-center">
+          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
+            Pricing
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Choose your right plan!
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            Select from best plans, ensuring a perfect match. Need more or less?
+            Customize your subscription for a seamless fit!
+          </p>
+        </div>
+
+        <div>
+          <div className="flex justify-center mb-16">
+            <PlanBillingIntervalToggle
+              size="lg"
+              value={billingInterval}
+              onChange={handleBillingIntervalChange}
+            />
+          </div>
+          <PlansGrid
+            billingInterval={billingInterval}
+            intervalLabelStyle="word"
+            plans={plans}
+            renderPlanFooter={() => (
+              <Link
+                className={buttonVariants({
+                  className: 'mt-auto w-full',
+                  size: 'lg',
+                })}
+                href="/sign-up"
+              >
+                Get started
+              </Link>
+            )}
+            variant="marketing"
+          />
+        </div>
       </div>
-      <PlansGrid
-        billingInterval={billingInterval}
-        intervalLabelStyle="word"
-        plans={plans}
-        renderPlanFooter={() => (
-          <Link
-            className={buttonVariants({
-              className: 'mt-auto w-full',
-              size: 'lg',
-            })}
-            href="/sign-up"
-          >
-            Get started
-          </Link>
-        )}
-        variant="marketing"
-      />
-    </div>
+    </section>
   )
 }

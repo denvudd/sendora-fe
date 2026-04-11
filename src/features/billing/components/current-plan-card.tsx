@@ -9,11 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@shared/components/ui/card'
+import { ArrowRight, Clock } from 'lucide-react'
 
-type SubscriptionWithPlan = WorkspaceSubscription & { plan: Plan }
+type SubscriptionWithPlans = WorkspaceSubscription & {
+  plan: Plan
+  pendingPlan: Plan | null
+}
 
 interface CurrentPlanCardProps {
-  subscription: SubscriptionWithPlan | null
+  subscription: SubscriptionWithPlans | null
 }
 
 function formatDate(date: Date | null | undefined): string {
@@ -61,6 +65,9 @@ export function CurrentPlanCard({
     )
   }
 
+  const hasPendingDowngrade =
+    !!subscription.pendingPlanId && !!subscription.pendingPlan
+
   return (
     <Card>
       <CardHeader>
@@ -85,11 +92,40 @@ export function CurrentPlanCard({
         {subscription.currentPeriodEndAt && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">
-              {subscription.cancelAtPeriodEnd ? 'Cancels on' : 'Next renewal'}
+              {subscription.cancelAtPeriodEnd
+                ? 'Cancels on'
+                : hasPendingDowngrade
+                  ? 'Current period ends'
+                  : 'Next renewal'}
             </span>
             <span>{formatDate(subscription.currentPeriodEndAt)}</span>
           </div>
         )}
+
+        {hasPendingDowngrade && subscription.pendingPlan && (
+          <div className="mt-3 rounded-lg border border-border bg-muted/50 p-3 space-y-1">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Clock className="size-3.5" />
+              Scheduled change
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium">{subscription.plan.name}</span>
+              <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
+              <span className="font-medium">
+                {subscription.pendingPlan.name}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your plan will switch to{' '}
+              <span className="font-medium text-foreground">
+                {subscription.pendingPlan.name}
+              </span>{' '}
+              on {formatDate(subscription.currentPeriodEndAt)}. You keep full
+              access to your current plan until then.
+            </p>
+          </div>
+        )}
+
         {subscription.cancelAtPeriodEnd && (
           <p className="text-xs text-muted-foreground">
             Your plan is scheduled to cancel at the end of the billing period.

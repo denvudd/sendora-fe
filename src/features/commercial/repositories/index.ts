@@ -6,8 +6,10 @@ export {
 export {
   createDomain,
   deleteDomain,
+  findDomainById,
   listDomainsByWorkspace,
   setPrimaryDomain,
+  updateDomain,
   updateDomainVerification,
 } from './domain-repository'
 export {

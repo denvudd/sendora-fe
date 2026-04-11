@@ -103,6 +103,30 @@ async function handleSubscriptionUpdated(
   const { currentPeriodStartAt, currentPeriodEndAt } =
     getSubscriptionPeriod(subscription)
 
+  // Check if this update is the scheduled downgrade phase completing
+  if (
+    existing.pendingStripePriceId &&
+    newPriceId === existing.pendingStripePriceId
+  ) {
+    await updateSubscription({
+      subscriptionId: existing.id,
+      planId: existing.pendingPlanId ?? undefined,
+      billingInterval: existing.pendingBillingInterval ?? undefined,
+      stripePriceId: newPriceId,
+      status: mapStripeStatus(subscription.status),
+      currentPeriodStartAt,
+      currentPeriodEndAt,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      // Clear pending fields
+      pendingPlanId: null,
+      pendingBillingInterval: null,
+      pendingStripePriceId: null,
+      stripeScheduleId: null,
+    })
+
+    return
+  }
+
   await updateSubscription({
     subscriptionId: existing.id,
     status: mapStripeStatus(subscription.status),

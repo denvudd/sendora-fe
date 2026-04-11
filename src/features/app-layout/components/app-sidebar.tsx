@@ -12,11 +12,15 @@ import { WorkflowSwitcher } from './workflow-switcher'
 interface AppSidebarProps {
   workspace: Workspace
   domains: Domain[]
+  canAddDomain: boolean
+  domainLimit: number | null
 }
 
 export function AppSidebar({
   workspace,
   domains,
+  canAddDomain,
+  domainLimit,
 }: AppSidebarProps): ReactElement {
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -29,7 +33,11 @@ export function AppSidebar({
       <SidebarSeparator />
       <SidebarNav />
       <SidebarSeparator />
-      <SidebarDomains domains={domains} />
+      <SidebarDomains
+        canAddDomain={canAddDomain}
+        domainLimit={domainLimit}
+        domains={domains}
+      />
       <SidebarUser />
     </Sidebar>
   )

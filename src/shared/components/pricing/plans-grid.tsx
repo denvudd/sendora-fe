@@ -109,7 +109,7 @@ export function PlansGrid({
                 !isSelectable &&
                   isCurrent &&
                   'border-primary ring-1 ring-primary',
-                !isSelected &&
+                !isSelectable &&
                   index === 1 &&
                   'border-primary ring-1 ring-primary',
               )}

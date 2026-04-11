@@ -51,7 +51,7 @@ export function SidebarNav(): ReactElement {
                   render={<Link href={item.href} />}
                   tooltip={item.label}
                 >
-                  <Icon className="size-6" />
+                  <Icon />
                   <span className="truncate font-medium text-md">
                     {item.label}
                   </span>

@@ -21,6 +21,19 @@ interface SetPrimaryDomainParams {
   workspaceId: string
 }
 
+interface FindDomainByIdParams {
+  domainId: string
+  workspaceId: string
+}
+
+interface UpdateDomainParams {
+  domainId: string
+  workspaceId: string
+  hostname?: string
+  iconUrl?: string | null
+  isPrimary?: boolean
+}
+
 interface UpdateDomainVerificationParams {
   domainId: string
   workspaceId: string
@@ -83,6 +96,51 @@ export async function setPrimaryDomain({
       data: { isPrimary: true },
     }),
   ])
+}
+
+export async function findDomainById({
+  domainId,
+  workspaceId,
+}: FindDomainByIdParams) {
+  return prisma.domain.findFirst({
+    where: { id: domainId, workspaceId },
+  })
+}
+
+export async function updateDomain({
+  domainId,
+  workspaceId,
+  hostname,
+  iconUrl,
+  isPrimary,
+}: UpdateDomainParams) {
+  if (isPrimary) {
+    const [, updated] = await prisma.$transaction([
+      prisma.domain.updateMany({
+        where: { workspaceId },
+        data: { isPrimary: false },
+      }),
+      prisma.domain.update({
+        where: { id: domainId, workspaceId },
+        data: {
+          ...(hostname !== undefined && { hostname }),
+          ...(iconUrl !== undefined && { iconUrl }),
+          isPrimary: true,
+        },
+      }),
+    ])
+
+    return updated
+  }
+
+  return prisma.domain.update({
+    where: { id: domainId, workspaceId },
+    data: {
+      ...(hostname !== undefined && { hostname }),
+      ...(iconUrl !== undefined && { iconUrl }),
+      ...(isPrimary !== undefined && { isPrimary }),
+    },
+  })
 }
 
 export async function updateDomainVerification({
