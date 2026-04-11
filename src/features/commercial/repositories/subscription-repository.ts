@@ -18,12 +18,16 @@ interface CreateSubscriptionParams {
 interface UpdateSubscriptionParams {
   subscriptionId: string
   status?: WorkspaceSubscriptionStatus
-  stripePriceId?: string
+  stripePriceId?: string | null
   currentPeriodStartAt?: Date
   currentPeriodEndAt?: Date
   cancelAtPeriodEnd?: boolean
   planId?: string
   billingInterval?: BillingInterval
+  pendingPlanId?: string | null
+  pendingBillingInterval?: BillingInterval | null
+  pendingStripePriceId?: string | null
+  stripeScheduleId?: string | null
 }
 
 interface FindActiveSubscriptionParams {
@@ -84,6 +88,7 @@ export async function findActiveSubscriptionByWorkspaceId({
           features: { include: { feature: true } },
         },
       },
+      pendingPlan: true,
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -107,6 +112,10 @@ export async function updateSubscription({
   cancelAtPeriodEnd,
   planId,
   billingInterval,
+  pendingPlanId,
+  pendingBillingInterval,
+  pendingStripePriceId,
+  stripeScheduleId,
 }: UpdateSubscriptionParams) {
   return prisma.workspaceSubscription.update({
     where: { id: subscriptionId },
@@ -118,6 +127,10 @@ export async function updateSubscription({
       ...(cancelAtPeriodEnd !== undefined && { cancelAtPeriodEnd }),
       ...(planId !== undefined && { planId }),
       ...(billingInterval !== undefined && { billingInterval }),
+      ...(pendingPlanId !== undefined && { pendingPlanId }),
+      ...(pendingBillingInterval !== undefined && { pendingBillingInterval }),
+      ...(pendingStripePriceId !== undefined && { pendingStripePriceId }),
+      ...(stripeScheduleId !== undefined && { stripeScheduleId }),
     },
   })
 }

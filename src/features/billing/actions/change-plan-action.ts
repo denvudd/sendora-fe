@@ -68,9 +68,16 @@ export async function changePlanAction(
     workspaceId: workspace.id,
   })
 
-  // Downgrading to free plan
+  // ── Downgrade to free plan ───────────────────────────────────────────────
   if (plan.monthlyPriceCents === 0) {
     if (currentSubscription?.stripeSubscriptionId) {
+      // Release any existing schedule before cancelling
+      if (currentSubscription.stripeScheduleId) {
+        await stripe.subscriptionSchedules.release(
+          currentSubscription.stripeScheduleId,
+        )
+      }
+
       await stripe.subscriptions.cancel(
         currentSubscription.stripeSubscriptionId,
       )
@@ -88,47 +95,115 @@ export async function changePlanAction(
     return {}
   }
 
-  // Upgrading or switching paid plans
+  // ── Resolve Stripe price ID ──────────────────────────────────────────────
   const stripePriceId =
     billingInterval === 'YEARLY'
       ? plan.stripePriceIdYearly
       : plan.stripePriceIdMonthly
 
   if (!stripePriceId) {
-    return {
-      message: 'This plan is not yet available for purchase.',
-    }
+    return { message: 'This plan is not yet available for purchase.' }
   }
 
-  // If there's an existing Stripe subscription, update it in-place
+  // ── Existing Stripe subscription: upgrade or downgrade ──────────────────
   if (currentSubscription?.stripeSubscriptionId) {
     const stripeSubscription = await stripe.subscriptions.retrieve(
       currentSubscription.stripeSubscriptionId,
     )
 
-    const itemId = stripeSubscription.items.data[0]?.id
+    const currentItem = stripeSubscription.items.data[0]
+    const itemId = currentItem?.id
+    const currentPriceId = currentItem?.price.id
+    const currentPeriodStart = currentItem?.current_period_start
+    const currentPeriodEnd = currentItem?.current_period_end
 
-    await stripe.subscriptions.update(
-      currentSubscription.stripeSubscriptionId,
-      {
-        items: [{ id: itemId, price: stripePriceId }],
-        proration_behavior: 'create_prorations',
-      },
-    )
+    const currentPriceCents = currentSubscription.plan.monthlyPriceCents ?? 0
+    const isUpgrade = plan.monthlyPriceCents > currentPriceCents
 
-    await updateSubscription({
-      subscriptionId: currentSubscription.id,
-      planId,
-      stripePriceId,
-      billingInterval,
-    })
+    if (isUpgrade) {
+      // ── UPGRADE: charge immediately ──────────────────────────────────────
+      // If there was a pending downgrade schedule, release it first
+      if (currentSubscription.stripeScheduleId) {
+        await stripe.subscriptionSchedules.release(
+          currentSubscription.stripeScheduleId,
+        )
+      }
+
+      await stripe.subscriptions.update(
+        currentSubscription.stripeSubscriptionId,
+        {
+          items: [{ id: itemId, price: stripePriceId }],
+          proration_behavior: 'always_invoice',
+        },
+      )
+
+      await updateSubscription({
+        subscriptionId: currentSubscription.id,
+        planId,
+        stripePriceId,
+        billingInterval,
+        // Clear any pending downgrade
+        pendingPlanId: null,
+        pendingBillingInterval: null,
+        pendingStripePriceId: null,
+        stripeScheduleId: null,
+      })
+    } else {
+      // ── DOWNGRADE: schedule at period end ────────────────────────────────
+      let scheduleId: string
+
+      if (
+        stripeSubscription.schedule &&
+        typeof stripeSubscription.schedule === 'string'
+      ) {
+        // Reuse existing schedule
+        scheduleId = stripeSubscription.schedule
+      } else if (
+        stripeSubscription.schedule &&
+        typeof stripeSubscription.schedule === 'object'
+      ) {
+        scheduleId = stripeSubscription.schedule.id
+      } else {
+        // Create a new schedule from the current subscription
+        const newSchedule = await stripe.subscriptionSchedules.create({
+          from_subscription: currentSubscription.stripeSubscriptionId,
+        })
+
+        scheduleId = newSchedule.id
+      }
+
+      // Set phase 1 = current plan until period end, phase 2 = new plan.
+      // start_date on phase 1 is required by Stripe to anchor end_date calculations.
+      await stripe.subscriptionSchedules.update(scheduleId, {
+        end_behavior: 'release',
+        phases: [
+          {
+            start_date: currentPeriodStart,
+            items: [{ price: currentPriceId }],
+            end_date: currentPeriodEnd,
+          },
+          {
+            items: [{ price: stripePriceId }],
+          },
+        ],
+      })
+
+      // Store pending downgrade — do NOT change planId yet
+      await updateSubscription({
+        subscriptionId: currentSubscription.id,
+        pendingPlanId: planId,
+        pendingBillingInterval: billingInterval,
+        pendingStripePriceId: stripePriceId,
+        stripeScheduleId: scheduleId,
+      })
+    }
 
     revalidatePath('/settings/billing')
 
     return {}
   }
 
-  // No existing subscription — start new Stripe checkout
+  // ── No existing Stripe subscription: start checkout ──────────────────────
   let stripeCustomerId = workspace.stripeCustomerId
 
   if (!stripeCustomerId) {
@@ -137,7 +212,9 @@ export async function changePlanAction(
       name: workspace.name,
       metadata: { workspaceId: workspace.id },
     })
+
     stripeCustomerId = customer.id
+
     await updateWorkspaceStripeCustomerId({
       workspaceId: workspace.id,
       stripeCustomerId,

@@ -44,4 +44,5 @@ Use Bun as a default package manager
 
 ## Styling, UI components, components
 
-Use ShadCN primitives as primary buidling bricks for the interface. Try to avoid hardcoded "plain" color values (HEX, rgba, etc.) and use Shadcn theme variables instead. Always add values and styling for the dark theme if it doesn't set by default.
+- Use ShadCN primitives as primary buidling bricks for the interface. Try to avoid hardcoded "plain" color values (HEX, rgba, etc.) and use Shadcn theme variables instead. Always add values and styling for the dark theme if it doesn't set by default.
+- Don't forget to handle responsive layout

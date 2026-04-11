@@ -4,6 +4,7 @@ import type { WorkspaceSubscription } from '@prisma/client'
 import type { PlanWithFeatures } from '@shared/types/plan'
 import type { ReactElement } from 'react'
 
+import { cancelPendingDowngradeAction } from '@features/billing/actions/cancel-pending-downgrade-action'
 import { cancelSubscriptionAction } from '@features/billing/actions/cancel-subscription-action'
 import { changePlanAction } from '@features/billing/actions/change-plan-action'
 import { BillingInterval as BillingIntervalEnum } from '@prisma/client'
@@ -13,6 +14,7 @@ import {
 } from '@shared/components/pricing'
 import { Button } from '@shared/components/ui/button'
 import { FieldError } from '@shared/components/ui/field'
+import { CalendarClock, X } from 'lucide-react'
 import { useActionState, useState } from 'react'
 
 interface PlanUpgradeCardProps {
@@ -39,12 +41,20 @@ export function PlanUpgradeCard({
     ActionState,
     FormData
   >(cancelSubscriptionAction, {})
+  const [
+    cancelDowngradeState,
+    cancelDowngradeAction,
+    isCancelDowngradePending,
+  ] = useActionState<ActionState, FormData>(cancelPendingDowngradeAction, {})
 
   const currentPlanId = currentSubscription?.planId
+  const pendingPlanId = currentSubscription?.pendingPlanId ?? null
+
   const canCancel =
     currentSubscription &&
     !currentSubscription.cancelAtPeriodEnd &&
-    currentSubscription.stripeSubscriptionId
+    currentSubscription.stripeSubscriptionId &&
+    !pendingPlanId
 
   return (
     <div className="space-y-4">
@@ -60,8 +70,23 @@ export function PlanUpgradeCard({
         billingInterval={billingInterval}
         currentPlanId={currentPlanId}
         plans={plans}
-        renderPlanFooter={(plan, { isCurrent }) =>
-          isCurrent ? null : (
+        renderPlanFooter={(plan, { isCurrent }) => {
+          if (isCurrent) {
+            return null
+          }
+
+          const isPendingDowngrade = plan.id === pendingPlanId
+
+          if (isPendingDowngrade) {
+            return (
+              <Button className="w-full" size="sm" variant="outline" disabled>
+                <CalendarClock className="size-3.5" />
+                Scheduled
+              </Button>
+            )
+          }
+
+          return (
             <form action={changeAction} className="w-full">
               <input name="planId" type="hidden" value={plan.id} />
               <input
@@ -86,16 +111,47 @@ export function PlanUpgradeCard({
               </Button>
             </form>
           )
-        }
+        }}
         variant="compact"
+        onPlanSelect={() => {}}
       />
 
       {changeState.message ? (
         <FieldError>{changeState.message}</FieldError>
       ) : null}
 
+      {/* Cancel scheduled downgrade */}
+      {pendingPlanId && currentSubscription?.stripeScheduleId && (
+        <div className="pt-2">
+          <form action={cancelDowngradeAction}>
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                Cancel the scheduled plan change and keep your current plan.
+              </p>
+              <Button
+                disabled={isCancelDowngradePending}
+                size="sm"
+                type="submit"
+                variant="outline"
+              >
+                <X className="size-3.5" />
+                {isCancelDowngradePending
+                  ? 'Cancelling…'
+                  : 'Cancel scheduled change'}
+              </Button>
+            </div>
+            {cancelDowngradeState.message ? (
+              <FieldError className="mt-2">
+                {cancelDowngradeState.message}
+              </FieldError>
+            ) : null}
+          </form>
+        </div>
+      )}
+
+      {/* Cancel subscription */}
       {canCancel ? (
-        <div className="border-t pt-4">
+        <div className="pt-2">
           <form action={cancelAction}>
             <div className="flex items-center justify-between gap-4">
               <p className="text-sm text-muted-foreground">

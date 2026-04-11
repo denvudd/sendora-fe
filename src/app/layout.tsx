@@ -2,18 +2,18 @@ import type { Metadata } from 'next'
 import type { ReactElement, ReactNode } from 'react'
 
 import { ClerkProvider } from '@clerk/nextjs'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist_Mono, Outfit } from 'next/font/google'
 
 import '@/env'
 
 import './globals.css'
 
-const geistSans = Geist({
+const fontSans = Outfit({
   subsets: ['latin'],
-  variable: '--font-geist-sans',
+  variable: '--font-sans',
 })
 
-const geistMono = Geist_Mono({
+const fontMono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-geist-mono',
 })
@@ -32,7 +32,7 @@ const RootLayout = ({ children }: { children: ReactNode }): ReactElement => (
     }}
   >
     <html
-      className={[geistSans.variable, geistMono.variable, 'h-full antialiased']
+      className={[fontSans.variable, fontMono.variable, 'h-full antialiased']
         .filter(Boolean)
         .join(' ')}
       lang="en"
