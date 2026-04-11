@@ -1,6 +1,6 @@
 'use client'
 
-import type { Feature, Plan, PlanFeature } from '@prisma/client'
+import type { PlanWithFeatures } from '@shared/types/plan'
 import type { ReactElement } from 'react'
 
 import { OnboardingStepPlan } from '@features/onboarding/components/onboarding-step-plan'
@@ -19,10 +19,6 @@ import {
   type StepperListPrimitives,
 } from '@shared/components/ui/stepper'
 import { useMemo, useState } from 'react'
-
-type PlanWithFeatures = Plan & {
-  features: (PlanFeature & { feature: Feature })[]
-}
 
 interface OnboardingPageProps {
   clerkFirstName: string | null
