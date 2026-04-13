@@ -251,7 +251,7 @@ Border radius is applied to the chat panel via Tailwind class mapping:
 
 **Provider:** OpenAI via Vercel AI SDK (`ai` + `@ai-sdk/openai`)  
 **Model:** `gpt-4o-mini` (cost-effective, fast)  
-**Streaming:** `streamText()` → `result.toTextStreamResponse()` → manual `fetch` + `ReadableStream` reader on the client
+**Streaming:** `streamText()` → `result.toTextStreamResponse()` → manual `fzetch` + `ReadableStream` reader on the client
 
 > Note: `ai` v6 renamed `toDataStreamResponse()` to `toTextStreamResponse()` and changed the `useChat` hook API significantly. The widget uses a manual `fetch` + streaming approach for full control over the stream format.
 

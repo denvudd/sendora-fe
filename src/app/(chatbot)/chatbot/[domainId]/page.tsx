@@ -10,6 +10,8 @@ import {
   fetchDomainHtml,
 } from '@features/domains/lib/check-domain-meta-tag'
 
+import { PLAN_CODE } from '@/shared/constants/plan-code'
+
 export const dynamic = 'force-dynamic'
 
 const DOMAIN_RECHECK_INTERVAL = 60 * 60 * 1000
@@ -53,8 +55,8 @@ async function ChatbotWidgetPage({ params }: PageProps): Promise<ReactElement> {
   }
 
   const activeSubscription = domain.workspace.subscriptions[0]
-  const planCode = activeSubscription?.plan.code ?? 'STANDARD'
-  const showBranding = planCode === 'STANDARD'
+  const planCode = activeSubscription?.plan.code ?? PLAN_CODE.STANDARD
+  const showBranding = planCode === PLAN_CODE.STANDARD
 
   return (
     <>
@@ -80,6 +82,10 @@ async function ChatbotWidgetPage({ params }: PageProps): Promise<ReactElement> {
 export default ChatbotWidgetPage
 
 function BlockedState(): ReactElement {
+  console.error(
+    '[Sendora] Your domain is not verified. Please verify your domain on Sendora dashboard to continue.',
+  )
+
   return (
     <div
       style={{

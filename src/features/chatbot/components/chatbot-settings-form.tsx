@@ -1,10 +1,14 @@
 'use client'
 
-import type { Chatbot, ChatbotQuestion } from '@prisma/client'
 import type { ReactElement } from 'react'
 
 import { createChatbotAction } from '@features/chatbot/actions/create-chatbot-action'
 import { updateChatbotSettingsAction } from '@features/chatbot/actions/update-chatbot-settings-action'
+import {
+  ChatbotButtonStyle,
+  type Chatbot,
+  type ChatbotQuestion,
+} from '@prisma/client'
 import { Button } from '@shared/components/ui/button'
 import {
   Card,
@@ -191,10 +195,10 @@ function EditChatbotCard({
               id="buttonStyle"
               name="buttonStyle"
             >
-              <NativeSelectOption value="BUBBLE">
+              <NativeSelectOption value={ChatbotButtonStyle.BUBBLE}>
                 Bubble (floating circle)
               </NativeSelectOption>
-              <NativeSelectOption value="BAR">
+              <NativeSelectOption value={ChatbotButtonStyle.BAR}>
                 Bar (bottom strip)
               </NativeSelectOption>
             </NativeSelect>

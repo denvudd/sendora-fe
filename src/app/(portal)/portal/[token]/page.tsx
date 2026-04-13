@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 
 import { findSessionByPortalToken } from '@features/commercial/repositories'
+import { format } from 'date-fns'
 import { notFound } from 'next/navigation'
 
 interface PortalPageProps {
@@ -53,12 +54,7 @@ const PortalPage = async ({
 
         <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
           <p className="text-xs text-muted-foreground">
-            Session started{' '}
-            {new Date(session.createdAt).toLocaleDateString(undefined, {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
+            Session started {format(session.createdAt, 'MMMM d, yyyy hh:mm a')}
           </p>
         </div>
       </div>

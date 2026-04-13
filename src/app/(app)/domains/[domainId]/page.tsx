@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
 import {
-  findChatbotByDomainId,
+  findChatbotWithPlanByDomainId,
   findDomainById,
   findOrCreateUser,
   findWorkspaceByUserId,
@@ -45,7 +45,7 @@ const DomainDetailPage = async ({
 
   const [domain, chatbot] = await Promise.all([
     findDomainById({ domainId, workspaceId: workspace.id }),
-    findChatbotByDomainId({ domainId }),
+    findChatbotWithPlanByDomainId({ domainId }),
   ])
 
   if (!domain) {

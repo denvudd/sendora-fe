@@ -1,4 +1,9 @@
-import type { Chatbot, ChatbotQuestion, Domain } from '@prisma/client'
+import type {
+  Chatbot,
+  ChatbotQuestion,
+  Domain,
+  WorkspaceSubscription,
+} from '@prisma/client'
 import type { ReactElement } from 'react'
 
 import { ChatbotPreview } from '@features/chatbot/components/chatbot-preview'
@@ -9,12 +14,34 @@ import { DomainSettingsForm } from '@features/domains/components/domain-settings
 import { DomainVerificationCard } from '@features/domains/components/domain-verification-card'
 import { Globe } from 'lucide-react'
 
+import { PLAN_CODE } from '@/shared/constants/plan-code'
+
 interface DomainPageProps {
   domain: Domain
-  chatbot: (Chatbot & { questions: ChatbotQuestion[] }) | null
+  chatbot:
+    | (Chatbot & {
+        questions: ChatbotQuestion[]
+        domain: {
+          id: string
+          hostname: string
+          isVerified: boolean
+          verificationToken: string | null
+          lastVerifiedCheckAt: Date | null
+          workspace: {
+            subscriptions: (WorkspaceSubscription & {
+              plan: { code: string }
+            })[]
+          }
+        }
+      })
+    | null
 }
 
 export function DomainPage({ domain, chatbot }: DomainPageProps): ReactElement {
+  const activeSubscription = chatbot?.domain.workspace.subscriptions[0]
+  const planCode = activeSubscription?.plan.code ?? PLAN_CODE.STANDARD
+  const showBranding = planCode === PLAN_CODE.STANDARD
+
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4">
       <div className="flex items-center gap-3">
@@ -62,6 +89,7 @@ export function DomainPage({ domain, chatbot }: DomainPageProps): ReactElement {
           chatSubtitle={chatbot.chatSubtitle}
           chatTitle={chatbot.chatTitle}
           primaryColor={chatbot.primaryColor}
+          showBranding={showBranding}
           theme={chatbot.theme}
           welcomeMessage={chatbot.welcomeMessage}
         />

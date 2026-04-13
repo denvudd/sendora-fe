@@ -1,8 +1,21 @@
 import type { Chatbot, ChatbotQuestion, Domain } from '@prisma/client'
 
 import { openai } from '@ai-sdk/openai'
+import { ChatbotBorderRadius } from '@prisma/client'
 
 export const MODEL = openai('gpt-4o-mini')
+
+export const BORDER_RADIUS_CLASS: Record<ChatbotBorderRadius, string> = {
+  [ChatbotBorderRadius.NONE]: 'rounded-none',
+  [ChatbotBorderRadius.SMALL]: 'rounded-lg',
+  [ChatbotBorderRadius.MEDIUM]: 'rounded-2xl',
+  [ChatbotBorderRadius.LARGE]: 'rounded-3xl',
+  [ChatbotBorderRadius.FULL]: 'rounded-[2rem]',
+}
+
+export const MAX_GUIDING_QUESTIONS = 10
+
+export const HANDOFF_MARKER = JSON.stringify({ handoff: true })
 
 const BASE_SYSTEM_PART = `You are an AI sales assistant embedded on a website.
 
@@ -66,7 +79,7 @@ const HANDOFF_PART = `HUMAN HANDOFF:
 When the visitor explicitly asks for a human OR clearly shows frustration:
 
 - End your response with this EXACT JSON on a new line:
-{"handoff":true}
+${HANDOFF_MARKER}
 
 Rules:
 - Do NOT include anything after the JSON

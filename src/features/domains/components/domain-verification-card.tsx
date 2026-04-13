@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from '@shared/components/ui/card'
 import { FieldError } from '@shared/components/ui/field'
+import { format } from 'date-fns'
 import { CheckCircle, Copy, Check, RefreshCw, ShieldCheck } from 'lucide-react'
 import { useActionState, useCallback, useState } from 'react'
 
@@ -91,11 +92,7 @@ export function DomainVerificationCard({
               {domain.verifiedAt && (
                 <p className="text-xs text-muted-foreground">
                   Verified on{' '}
-                  {new Date(domain.verifiedAt).toLocaleDateString(undefined, {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
+                  {format(domain.verifiedAt, 'MMMM d, yyyy hh:mm a')}
                 </p>
               )}
             </div>

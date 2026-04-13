@@ -1,26 +1,15 @@
 'use client'
 
-import type {
-  ChatbotBorderRadius,
-  ChatbotButtonStyle,
-  ChatbotTheme,
-} from '@prisma/client'
+import type { ChatbotBorderRadius } from '@prisma/client'
 import type { ReactElement } from 'react'
 
+import { ChatbotButtonStyle } from '@prisma/client'
+import { ChatbotTheme } from '@prisma/client'
 import { MessageCircle, Send, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { BORDER_RADIUS_CLASS, HANDOFF_MARKER } from '@/features/chatbot/utils'
 import { cn } from '@/shared/utils/cn'
-
-const HANDOFF_MARKER = '{"handoff":true}'
-
-const BORDER_RADIUS_CLASS: Record<ChatbotBorderRadius, string> = {
-  NONE: 'rounded-none',
-  SMALL: 'rounded-lg',
-  MEDIUM: 'rounded-2xl',
-  LARGE: 'rounded-3xl',
-  FULL: 'rounded-[2rem]',
-}
 
 interface ChatMsg {
   id: string
@@ -74,7 +63,7 @@ export function ChatbotWidget({
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isHandedOff, setIsHandedOff] = useState(false)
-  const sessionUuidRef = useRef<string>('')
+  const sessionUuidRef = useRef('')
   // Hostname of the page that embedded this iframe (from document.referrer).
   // Sent to the API so it can validate the widget is on the correct domain.
   const embedOriginRef = useRef<string | null>(null)
@@ -185,7 +174,7 @@ export function ChatbotWidget({
   }
 
   const panelBorderRadius = BORDER_RADIUS_CLASS[borderRadius]
-  const isDark = theme === 'DARK'
+  const isDark = theme === ChatbotTheme.DARK
 
   const chatProps = {
     isHandedOff,
@@ -206,7 +195,7 @@ export function ChatbotWidget({
 
   return (
     <div className={cn('w-full', isDark ? 'dark' : undefined)}>
-      {buttonStyle === 'BAR' ? (
+      {buttonStyle === ChatbotButtonStyle.BAR ? (
         <div className="fixed inset-x-0 bottom-0 w-full">
           {isOpen && <ChatPanel {...chatProps} />}
           <button

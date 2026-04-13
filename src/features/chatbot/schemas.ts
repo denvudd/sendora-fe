@@ -1,3 +1,8 @@
+import {
+  ChatbotBorderRadius,
+  ChatbotButtonStyle,
+  ChatbotTheme,
+} from '@prisma/client'
 import { z } from 'zod'
 
 import { HEX_REGEX } from '@/shared/constants/regex'
@@ -14,9 +19,17 @@ export const chatbotSettingsSchema = z.object({
     .regex(HEX_REGEX, 'Enter a valid hex color (e.g. #6366f1).')
     .optional()
     .or(z.literal('')),
-  buttonStyle: z.enum(['BUBBLE', 'BAR']),
-  borderRadius: z.enum(['NONE', 'SMALL', 'MEDIUM', 'LARGE', 'FULL']).optional(),
-  theme: z.enum(['LIGHT', 'DARK']).optional(),
+  buttonStyle: z.enum([ChatbotButtonStyle.BUBBLE, ChatbotButtonStyle.BAR]),
+  borderRadius: z
+    .enum([
+      ChatbotBorderRadius.NONE,
+      ChatbotBorderRadius.SMALL,
+      ChatbotBorderRadius.MEDIUM,
+      ChatbotBorderRadius.LARGE,
+      ChatbotBorderRadius.FULL,
+    ])
+    .optional(),
+  theme: z.enum([ChatbotTheme.LIGHT, ChatbotTheme.DARK]).optional(),
   chatTitle: z
     .string()
     .trim()

@@ -20,6 +20,8 @@ import { Plus, Trash2 } from 'lucide-react'
 import { useRef, useState, useTransition } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 
+import { MAX_GUIDING_QUESTIONS } from '../utils'
+
 interface ChatbotQuestionsEditorProps {
   chatbotId: string
   domainId: string
@@ -101,43 +103,32 @@ export function ChatbotQuestionsEditor({
             </p>
           )}
 
-          <div className="space-y-2">
-            {fields.map((field, index) => (
-              <div key={field.id} className="flex items-center gap-2">
-                <Input
-                  {...register(`questions.${index}.text`)}
-                  className="flex-1"
-                  placeholder={`Question ${index + 1}`}
-                />
-                <Button
-                  className="shrink-0 text-muted-foreground hover:text-destructive"
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                  onClick={() => remove(index)}
-                >
-                  <Trash2 className="size-4" />
-                  <span className="sr-only">Remove question</span>
-                </Button>
-              </div>
-            ))}
-          </div>
+          {fields.length > 0 && (
+            <div className="space-y-2">
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2">
+                  <Input
+                    {...register(`questions.${index}.text`)}
+                    className="flex-1"
+                    placeholder={`Question ${index + 1}`}
+                  />
+                  <Button
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                    onClick={() => remove(index)}
+                  >
+                    <Trash2 className="size-4" />
+                    <span className="sr-only">Remove question</span>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {errors.questions?.root?.message && (
             <FieldError>{errors.questions.root.message}</FieldError>
-          )}
-
-          {fields.length < 10 && (
-            <Button
-              className="gap-2"
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => append({ text: '' })}
-            >
-              <Plus className="size-4" />
-              Add question
-            </Button>
           )}
 
           {actionMessage && <FieldError>{actionMessage}</FieldError>}
@@ -148,9 +139,23 @@ export function ChatbotQuestionsEditor({
             </p>
           )}
 
-          <Button disabled={isPending} type="submit">
-            {isPending ? 'Saving…' : 'Save questions'}
-          </Button>
+          <div className="flex items-center gap-2">
+            {fields.length < MAX_GUIDING_QUESTIONS && (
+              <Button
+                className="gap-2 mb-0"
+                type="button"
+                variant="secondary"
+                onClick={() => append({ text: '' })}
+              >
+                <Plus />
+                Add question
+              </Button>
+            )}
+
+            <Button disabled={isPending} type="submit">
+              {isPending ? 'Saving…' : 'Save questions'}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

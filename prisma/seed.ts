@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 
+import { PLAN_CODE } from '@/shared/constants/plan-code'
+import { PLAN_FEATURE_CODE } from '@/shared/constants/plan-feature-code'
+
 const prisma = new PrismaClient()
 
 interface SeedFeature {
@@ -25,17 +28,17 @@ interface SeedPlan {
 
 const features: SeedFeature[] = [
   {
-    code: 'MAX_DOMAINS',
+    code: PLAN_FEATURE_CODE.MAX_DOMAINS,
     description: 'Maximum number of domains per workspace.',
     name: 'Domains',
   },
   {
-    code: 'MAX_CONTACTS',
+    code: PLAN_FEATURE_CODE.MAX_CONTACTS,
     description: 'Maximum number of contacts per workspace.',
     name: 'Contacts',
   },
   {
-    code: 'MAX_EMAILS_PER_MONTH',
+    code: PLAN_FEATURE_CODE.MAX_EMAILS_PER_MONTH,
     description: 'Maximum emails sent per month.',
     name: 'Emails per month',
   },
@@ -43,36 +46,52 @@ const features: SeedFeature[] = [
 
 const plans: SeedPlan[] = [
   {
-    code: 'STANDARD',
+    code: PLAN_CODE.STANDARD,
     description: 'Get started for free.',
     features: [
-      { code: 'MAX_DOMAINS', isEnabled: true, limitValue: 1 },
-      { code: 'MAX_CONTACTS', isEnabled: true, limitValue: 10 },
-      { code: 'MAX_EMAILS_PER_MONTH', isEnabled: true, limitValue: 10 },
+      { code: PLAN_FEATURE_CODE.MAX_DOMAINS, isEnabled: true, limitValue: 1 },
+      { code: PLAN_FEATURE_CODE.MAX_CONTACTS, isEnabled: true, limitValue: 10 },
+      {
+        code: PLAN_FEATURE_CODE.MAX_EMAILS_PER_MONTH,
+        isEnabled: true,
+        limitValue: 10,
+      },
     ],
     monthlyPriceCents: 0,
     name: 'Standard',
     yearlyPriceCents: 0,
   },
   {
-    code: 'PLUS',
+    code: PLAN_CODE.PLUS,
     description: 'For growing teams.',
     features: [
-      { code: 'MAX_DOMAINS', isEnabled: true, limitValue: 2 },
-      { code: 'MAX_CONTACTS', isEnabled: true, limitValue: 50 },
-      { code: 'MAX_EMAILS_PER_MONTH', isEnabled: true, limitValue: 50 },
+      { code: PLAN_FEATURE_CODE.MAX_DOMAINS, isEnabled: true, limitValue: 2 },
+      { code: PLAN_FEATURE_CODE.MAX_CONTACTS, isEnabled: true, limitValue: 50 },
+      {
+        code: PLAN_FEATURE_CODE.MAX_EMAILS_PER_MONTH,
+        isEnabled: true,
+        limitValue: 50,
+      },
     ],
     monthlyPriceCents: 6700,
     name: 'Plus',
     yearlyPriceCents: 67000,
   },
   {
-    code: 'ULTIMATE',
+    code: PLAN_CODE.ULTIMATE,
     description: 'Unlimited power for your business.',
     features: [
-      { code: 'MAX_DOMAINS', isEnabled: true },
-      { code: 'MAX_CONTACTS', isEnabled: true, limitValue: 500 },
-      { code: 'MAX_EMAILS_PER_MONTH', isEnabled: true, limitValue: 500 },
+      { code: PLAN_FEATURE_CODE.MAX_DOMAINS, isEnabled: true },
+      {
+        code: PLAN_FEATURE_CODE.MAX_CONTACTS,
+        isEnabled: true,
+        limitValue: 500,
+      },
+      {
+        code: PLAN_FEATURE_CODE.MAX_EMAILS_PER_MONTH,
+        isEnabled: true,
+        limitValue: 500,
+      },
     ],
     monthlyPriceCents: 9700,
     name: 'Ultimate',
