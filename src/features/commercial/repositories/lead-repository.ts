@@ -2,6 +2,8 @@ import { checkFeatureAllowed } from '@features/commercial/lib/feature-limits'
 import { type LeadStatus, type Prisma } from '@prisma/client'
 import { prisma } from '@shared/utils/prisma'
 
+import { PLAN_FEATURE_CODE } from '@/shared/constants/plan-feature-code'
+
 interface CreateLeadParams {
   workspaceId: string
   email: string
@@ -37,7 +39,7 @@ export async function createLead({
   const currentCount = await prisma.lead.count({ where: { workspaceId } })
   const check = await checkFeatureAllowed({
     workspaceId,
-    featureCode: 'MAX_CONTACTS',
+    featureCode: PLAN_FEATURE_CODE.MAX_CONTACTS,
     currentCount,
   })
 

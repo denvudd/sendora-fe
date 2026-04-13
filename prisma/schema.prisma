@@ -49,12 +49,75 @@ model Domain {
   isVerified        Boolean   @default(false)
   isPrimary         Boolean   @default(false)
   verificationToken String?   @unique
-  verifiedAt        DateTime?
-  createdAt         DateTime  @default(now())
+  verifiedAt            DateTime?
+  lastVerifiedCheckAt   DateTime?
+  createdAt             DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  chatbot           Chatbot?
   workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
+}
+
+model Chatbot {
+  id             String             @id @default(cuid())
+  domainId       String             @unique
+  welcomeMessage String             @default("Hi! How can I help you today?")
+  primaryColor   String             @default("#6366f1")
+  buttonStyle    ChatbotButtonStyle @default(BUBBLE)
+  systemPrompt   String             @default("")
+  isActive       Boolean             @default(true)
+  borderRadius   ChatbotBorderRadius @default(MEDIUM)
+  theme          ChatbotTheme        @default(LIGHT)
+  chatTitle      String              @default("Support Chat")
+  chatSubtitle   String              @default("AI Assistant • Online")
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime           @updatedAt
+  domain         Domain             @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  questions      ChatbotQuestion[]
+  sessions       ChatSession[]
+
+  @@index([domainId])
+}
+
+model ChatbotQuestion {
+  id        String   @id @default(cuid())
+  chatbotId String
+  text      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chatbot   Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  @@index([chatbotId, sortOrder])
+}
+
+model ChatSession {
+  id          String            @id @default(cuid())
+  chatbotId   String
+  sessionUuid String            @unique @default(uuid())
+  status      ChatSessionStatus @default(AI)
+  portalToken String?           @unique
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  chatbot     Chatbot           @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  messages    ChatMessage[]
+
+  @@index([chatbotId])
+  @@index([sessionUuid])
+  @@index([portalToken])
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  role      MessageRole
+  content   String
+  createdAt DateTime    @default(now())
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
 }
 
 model Plan {
@@ -211,6 +274,35 @@ model Payment {
   @@index([workspaceId, status, createdAt])
   @@index([leadId])
   @@index([bookingId])
+}
+
+enum ChatbotButtonStyle {
+  BUBBLE
+  BAR
+}
+
+enum ChatbotBorderRadius {
+  NONE
+  SMALL
+  MEDIUM
+  LARGE
+  FULL
+}
+
+enum ChatbotTheme {
+  LIGHT
+  DARK
+}
+
+enum ChatSessionStatus {
+  AI
+  HUMAN
+  CLOSED
+}
+
+enum MessageRole {
+  user
+  assistant
 }
 
 enum LeadStatus {

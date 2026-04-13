@@ -7,6 +7,11 @@ export const ROUTES = {
   emailMarketing: '/email-marketing',
 } as const
 
+export const chatbotWidget = (domainId: string) =>
+  `/chatbot/${domainId}` as const
+export const portalPage = (token: string) => `/portal/${token}` as const
+export const chatApi = (domainId: string) => `/api/chat/${domainId}` as const
+
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
 
 export interface NavItem {

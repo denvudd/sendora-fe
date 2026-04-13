@@ -13,14 +13,18 @@ import { HEX_REGEX } from '@/shared/constants/regex'
 const DEFAULT_SWATCH_COLOR = '#6366f1'
 
 interface ColorPickerFieldProps {
+  defaultValue?: string
   error?: string
 }
 
 export function ColorPickerField({
+  defaultValue,
   error,
 }: ColorPickerFieldProps): ReactElement {
-  const [swatchColor, setSwatchColor] = useState(DEFAULT_SWATCH_COLOR)
-  const [textValue, setTextValue] = useState('')
+  const [swatchColor, setSwatchColor] = useState(
+    defaultValue ?? DEFAULT_SWATCH_COLOR,
+  )
+  const [textValue, setTextValue] = useState(defaultValue ?? '')
   const [isTextValid, setIsTextValid] = useState(true)
 
   function handleNativeColorChange(e: ChangeEvent<HTMLInputElement>): void {
@@ -83,7 +87,7 @@ export function ColorPickerField({
       </div>
 
       <FieldDescription>
-        Enter a hex color (e.g. DEFAULT_SWATCH_COLOR) or leave blank.
+        Enter a hex color (e.g. {DEFAULT_SWATCH_COLOR}) or leave blank.
       </FieldDescription>
 
       {!isTextValid && (

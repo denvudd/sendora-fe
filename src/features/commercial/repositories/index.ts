@@ -1,4 +1,17 @@
 export {
+  addMessage,
+  createChatbot,
+  findChatbotByDomainId,
+  findChatbotByIdPublic,
+  findChatbotWithPlanByDomainId,
+  findOrCreateSession,
+  findSessionByPortalToken,
+  generatePortalToken,
+  getSessionMessages,
+  replaceQuestions,
+  updateChatbot,
+} from './chatbot-repository'
+export {
   createBooking,
   listBookingsByWorkspace,
   updateBookingStatus,
@@ -11,6 +24,7 @@ export {
   setPrimaryDomain,
   updateDomain,
   updateDomainVerification,
+  updateDomainVerificationCheck,
 } from './domain-repository'
 export {
   createLead,
