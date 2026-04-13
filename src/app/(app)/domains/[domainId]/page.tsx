@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
 import {
+  findChatbotByDomainId,
   findDomainById,
   findOrCreateUser,
   findWorkspaceByUserId,
@@ -42,13 +43,16 @@ const DomainDetailPage = async ({
     redirect('/onboarding')
   }
 
-  const domain = await findDomainById({ domainId, workspaceId: workspace.id })
+  const [domain, chatbot] = await Promise.all([
+    findDomainById({ domainId, workspaceId: workspace.id }),
+    findChatbotByDomainId({ domainId }),
+  ])
 
   if (!domain) {
     notFound()
   }
 
-  return <DomainPage domain={domain} />
+  return <DomainPage chatbot={chatbot} domain={domain} />
 }
 
 export default DomainDetailPage

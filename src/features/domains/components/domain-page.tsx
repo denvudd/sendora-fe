@@ -1,15 +1,20 @@
-import type { Domain } from '@prisma/client'
+import type { Chatbot, ChatbotQuestion, Domain } from '@prisma/client'
 import type { ReactElement } from 'react'
 
-import { DomainChatbotIntegration } from '@features/domains/components/domain-chatbot-integration'
+import { ChatbotPreview } from '@features/chatbot/components/chatbot-preview'
+import { ChatbotQuestionsEditor } from '@features/chatbot/components/chatbot-questions-editor'
+import { ChatbotSettingsForm } from '@features/chatbot/components/chatbot-settings-form'
+import { ChatbotSnippet } from '@features/chatbot/components/chatbot-snippet'
 import { DomainSettingsForm } from '@features/domains/components/domain-settings-form'
+import { DomainVerificationCard } from '@features/domains/components/domain-verification-card'
 import { Globe } from 'lucide-react'
 
 interface DomainPageProps {
   domain: Domain
+  chatbot: (Chatbot & { questions: ChatbotQuestion[] }) | null
 }
 
-export function DomainPage({ domain }: DomainPageProps): ReactElement {
+export function DomainPage({ domain, chatbot }: DomainPageProps): ReactElement {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4">
       <div className="flex items-center gap-3">
@@ -37,7 +42,32 @@ export function DomainPage({ domain }: DomainPageProps): ReactElement {
       </div>
 
       <DomainSettingsForm domain={domain} />
-      <DomainChatbotIntegration domain={domain} />
+
+      <DomainVerificationCard domain={domain} />
+
+      <ChatbotSettingsForm chatbot={chatbot} domainId={domain.id} />
+
+      {chatbot && (
+        <ChatbotQuestionsEditor
+          chatbotId={chatbot.id}
+          domainId={domain.id}
+          questions={chatbot.questions}
+        />
+      )}
+
+      {chatbot && (
+        <ChatbotPreview
+          borderRadius={chatbot.borderRadius}
+          buttonStyle={chatbot.buttonStyle}
+          chatSubtitle={chatbot.chatSubtitle}
+          chatTitle={chatbot.chatTitle}
+          primaryColor={chatbot.primaryColor}
+          theme={chatbot.theme}
+          welcomeMessage={chatbot.welcomeMessage}
+        />
+      )}
+
+      {chatbot && <ChatbotSnippet chatbot={chatbot} domain={domain} />}
     </div>
   )
 }

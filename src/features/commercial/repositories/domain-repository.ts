@@ -59,8 +59,10 @@ export async function createDomain({
     )
   }
 
+  const verificationToken = crypto.randomUUID()
+
   return prisma.domain.create({
-    data: { workspaceId, hostname, isPrimary },
+    data: { workspaceId, hostname, isPrimary, verificationToken },
   })
 }
 
@@ -152,5 +154,22 @@ export async function updateDomainVerification({
   return prisma.domain.update({
     where: { id: domainId, workspaceId },
     data: { isVerified, verifiedAt: verifiedAt ?? null },
+  })
+}
+
+interface UpdateDomainVerificationCheckParams {
+  domainId: string
+  isVerified: boolean
+  lastVerifiedCheckAt: Date
+}
+
+export async function updateDomainVerificationCheck({
+  domainId,
+  isVerified,
+  lastVerifiedCheckAt,
+}: UpdateDomainVerificationCheckParams) {
+  return prisma.domain.update({
+    where: { id: domainId },
+    data: { isVerified, lastVerifiedCheckAt },
   })
 }
