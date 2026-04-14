@@ -11,6 +11,8 @@ import {
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 interface UpdateChatbotQuestionsState {
   message?: string
   success?: boolean
@@ -44,7 +46,7 @@ export async function updateChatbotQuestionsAction(
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const domain = await findDomainById({ domainId, workspaceId: workspace.id })

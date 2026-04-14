@@ -6,14 +6,18 @@ export {
   findChatbotWithPlanByDomainId,
   findOrCreateSession,
   findSessionByPortalToken,
+  findSessionByUuid,
   generatePortalToken,
   getSessionMessages,
   replaceQuestions,
+  setSessionHuman,
   updateChatbot,
 } from './chatbot-repository'
 export {
   createBooking,
   listBookingsByWorkspace,
+  listBookingsForDateRange,
+  listUpcomingBookingsWithLeads,
   updateBookingStatus,
 } from './booking-repository'
 export {
@@ -30,6 +34,7 @@ export {
   createLead,
   listLeadsByWorkspace,
   updateLeadStatus,
+  upsertLead,
 } from './lead-repository'
 export {
   createPayment,
@@ -54,3 +59,7 @@ export {
   findWorkspaceByStripeCustomerId,
   updateWorkspaceStripeCustomerId,
 } from './workspace-repository'
+export {
+  findAppointmentScheduleByWorkspaceId,
+  upsertAppointmentSchedule,
+} from './appointment-schedule-repository'

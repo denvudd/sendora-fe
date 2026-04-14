@@ -14,6 +14,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { env } from '@/env'
+import { ROUTES } from '@/shared/constants/routes'
 import { stripe } from '@/shared/lib/stripe'
 
 interface ChangePlanState {
@@ -55,7 +56,7 @@ export async function changePlanAction(
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const plan = await findPlanById({ id: planId })

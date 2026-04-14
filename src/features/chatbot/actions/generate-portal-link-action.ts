@@ -9,6 +9,8 @@ import {
 import { prisma } from '@shared/utils/prisma'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 interface GeneratePortalLinkState {
   message?: string
   success?: boolean
@@ -42,7 +44,7 @@ export async function generatePortalLinkAction(
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   // Verify session belongs to this workspace

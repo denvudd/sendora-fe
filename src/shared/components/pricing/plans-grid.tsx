@@ -19,6 +19,8 @@ import {
 } from '@shared/utils/format-plan-price'
 import { Rocket, BriefcaseBusiness, Crown } from 'lucide-react'
 
+import { PLAN_CODE } from '@/shared/constants/plan-code'
+
 import { Separator } from '../ui/separator'
 
 import { PlansGridEmpty } from './plans-grid-empty'
@@ -235,6 +237,17 @@ export function PlansGrid({
                           </span>
                         </li>
                       ))}
+                    {plan.code === PLAN_CODE.STANDARD ? (
+                      <li className="flex items-center justify-between gap-2 sm:gap-3">
+                        <span className="text-muted-foreground">Branding</span>
+                        <span className="font-medium">Visible</span>
+                      </li>
+                    ) : (
+                      <li className="flex items-center justify-between gap-2 sm:gap-3">
+                        <span className="text-muted-foreground">Branding</span>
+                        <span className="font-medium">Hidden</span>
+                      </li>
+                    )}
                   </ul>
                 </div>
               </CardContent>

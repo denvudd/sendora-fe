@@ -99,6 +99,8 @@ enum ChatSessionStatus    { AI  HUMAN  CLOSED }
 enum MessageRole          { user  assistant }
 ```
 
+`HUMAN` is used in two cases: visitor explicitly requested a live operator (realtime handoff), or visitor reached the booking portal flow.
+
 ---
 
 ## Widget Embed Flow
@@ -263,28 +265,38 @@ The system prompt is built at runtime from the chatbot's config:
 2. Custom `systemPrompt` (if set)
 3. Welcome message instruction
 4. Guiding questions list (asked naturally in conversation)
-5. Handoff instruction: append `{"handoff":true}` when visitor wants a human
+5. Realtime handoff instruction: append `{"realtime":true}` when visitor explicitly asks for a human
+6. Portal instruction: append `{"portal":true}` when visitor is ready to book an appointment
 
-### Handoff Detection
+### Realtime Handoff Detection
 
-When the AI determines a visitor wants to speak to a human, it appends `{"handoff":true}` on a new line at the end of its response. The widget:
+When the AI determines a visitor explicitly wants to speak with a human, it appends `{"realtime":true}` on a new line at the end of its response. The chat API's `onFinish` callback detects this and calls `setSessionHuman({ sessionId })`, which sets `ChatSession.status = HUMAN`. This signals to the Sendora dashboard that a live operator should take over the conversation.
+
+### Portal Link Detection
+
+When the AI determines a visitor is ready to book an appointment, it appends `{"portal":true}` on a new line at the end of its response. The widget:
 
 1. Detects the marker after streaming completes
-2. Strips it before rendering (`stripHandoffMarker()`)
-3. Sets `isHandedOff = true` → hides the input, shows "Connecting you to our team..." banner
-4. `ChatSession.status` is updated to `HUMAN` when a portal token is generated
+2. Strips it before rendering (`stripPortalMarker()`)
+3. Sets `isPortalReady = true` → hides the input, fetches the portal URL, shows "Book your appointment" CTA
+4. `ChatSession.portalToken` is set and `ChatSession.status` is updated to `HUMAN` in the chat API's `onFinish` callback
 
 ---
 
 ## Portal Link Generation
 
-When handoff is triggered, `generatePortalToken({ sessionId })`:
+When booking readiness is detected, the chat API's `onFinish` callback automatically:
 
-- Sets `ChatSession.portalToken = crypto.randomUUID()`
-- Sets `ChatSession.status = HUMAN`
+- Calls `generatePortalToken({ sessionId })` which sets `ChatSession.portalToken = crypto.randomUUID()` and `ChatSession.status = HUMAN`
 - The portal URL is `/portal/{token}`
 
-The portal page (`/portal/[token]`) currently shows a stub. Full portal functionality is a future deliverable.
+The widget then calls `GET /api/portal-token/{sessionUuid}` (public endpoint) to retrieve the portal URL and renders it as a "Book your appointment" button. The endpoint retries a few times to account for the async `onFinish` write.
+
+### Portal Page (`/portal/[token]`) — Booking Flow
+
+The portal page renders a multi-step booking wizard: guiding questions (if any) → date/time selection → confirmation screen.
+
+Full documentation: [`docs/APPOINTMENTS.md`](./APPOINTMENTS.md)
 
 ---
 
@@ -292,11 +304,12 @@ The portal page (`/portal/[token]`) currently shows a stub. Full portal function
 
 The following routes bypass Clerk authentication (configured in `src/proxy.ts`):
 
-| Route            | Reason                                           |
-| ---------------- | ------------------------------------------------ |
-| `/api/chat/(.*)` | Widget visitors are not Sendora users            |
-| `/chatbot/(.*)`  | Widget page and embed script are public          |
-| `/portal/(.*)`   | Portal is accessed by non-authenticated visitors |
+| Route                    | Reason                                                       |
+| ------------------------ | ------------------------------------------------------------ |
+| `/api/chat/(.*)`         | Widget visitors are not Sendora users                        |
+| `/api/portal-token/(.*)` | Widget retrieves portal URL by session UUID (no auth needed) |
+| `/chatbot/(.*)`          | Widget page and embed script are public                      |
+| `/portal/(.*)`           | Portal is accessed by non-authenticated visitors             |
 
 ---
 
@@ -343,6 +356,7 @@ src/features/commercial/repositories/
 
 src/app/
 ├── api/chat/[domainId]/route.ts            — AI streaming API (public)
+├── api/portal-token/[sessionUuid]/route.ts — Returns portal URL for a session UUID (public)
 ├── (chatbot)/chatbot/embed/route.ts        — Embed loader JS served at /chatbot/embed (public)
 ├── (chatbot)/chatbot/[domainId]/page.tsx   — Widget server component (fetches config, re-verifies domain)
 └── (portal)/portal/[token]/page.tsx        — Portal stub page (public)

@@ -8,7 +8,7 @@ import { ChatbotTheme } from '@prisma/client'
 import { MessageCircle, Send, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import { BORDER_RADIUS_CLASS, HANDOFF_MARKER } from '@/features/chatbot/utils'
+import { BORDER_RADIUS_CLASS, PORTAL_MARKER } from '@/features/chatbot/utils'
 import { cn } from '@/shared/utils/cn'
 
 interface ChatMsg {
@@ -31,8 +31,8 @@ function getOrCreateSessionUuid(domainId: string): string {
   return uuid
 }
 
-function stripHandoffMarker(content: string): string {
-  return content.replace(/\n?\{"handoff":true\}\s*$/, '').trim()
+function stripPortalMarker(content: string): string {
+  return content.replace(/\n?\{"portal":true\}\s*$/, '').trim()
 }
 
 export interface ChatbotWidgetProps {
@@ -62,7 +62,8 @@ export function ChatbotWidget({
   const [messages, setMessages] = useState<ChatMsg[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [isHandedOff, setIsHandedOff] = useState(false)
+  const [isPortalReady, setIsPortalReady] = useState(false)
+  const [portalUrl, setPortalUrl] = useState<string | null>(null)
   const sessionUuidRef = useRef('')
   // Hostname of the page that embedded this iframe (from document.referrer).
   // Sent to the API so it can validate the widget is on the correct domain.
@@ -88,8 +89,30 @@ export function ChatbotWidget({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  async function fetchPortalUrl(sessionUuid: string): Promise<void> {
+    // Retry a few times since the portal token is written async in onFinish
+    for (let attempt = 0; attempt < 5; attempt++) {
+      if (attempt > 0) {
+        await new Promise(resolve => setTimeout(resolve, 600))
+      }
+
+      try {
+        const res = await fetch(`/api/portal-token/${sessionUuid}`)
+
+        if (res.ok) {
+          const data = (await res.json()) as { portalUrl: string }
+          setPortalUrl(data.portalUrl)
+
+          return
+        }
+      } catch {
+        // ignore, retry
+      }
+    }
+  }
+
   async function sendMessage(text: string): Promise<void> {
-    if (!text.trim() || isLoading || isHandedOff) {
+    if (!text.trim() || isLoading || isPortalReady) {
       return
     }
 
@@ -147,8 +170,9 @@ export function ChatbotWidget({
         )
       }
 
-      if (accumulated.includes(HANDOFF_MARKER)) {
-        setIsHandedOff(true)
+      if (accumulated.includes(PORTAL_MARKER)) {
+        setIsPortalReady(true)
+        void fetchPortalUrl(sessionUuidRef.current)
       }
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
@@ -177,7 +201,8 @@ export function ChatbotWidget({
   const isDark = theme === ChatbotTheme.DARK
 
   const chatProps = {
-    isHandedOff,
+    isPortalReady,
+    portalUrl,
     isLoading,
     messages,
     input,
@@ -242,7 +267,8 @@ export function ChatbotWidget({
 }
 
 interface ChatPanelProps {
-  isHandedOff: boolean
+  isPortalReady: boolean
+  portalUrl: string | null
   isLoading: boolean
   messages: ChatMsg[]
   input: string
@@ -258,7 +284,8 @@ interface ChatPanelProps {
 }
 
 function ChatPanel({
-  isHandedOff,
+  isPortalReady,
+  portalUrl,
   isLoading,
   messages,
   input,
@@ -287,7 +314,7 @@ function ChatPanel({
           <div>
             <p className="text-sm font-semibold">{chatTitle}</p>
             <p className="text-xs text-white/75">
-              {isHandedOff ? 'Connecting to team…' : chatSubtitle}
+              {isPortalReady ? 'Ready to book!' : chatSubtitle}
             </p>
           </div>
         </div>
@@ -311,7 +338,7 @@ function ChatPanel({
           const isUser = message.role === 'user'
           const content =
             message.role === 'assistant'
-              ? stripHandoffMarker(message.content)
+              ? stripPortalMarker(message.content)
               : message.content
 
           return (
@@ -343,15 +370,32 @@ function ChatPanel({
             </div>
           </div>
         )}
-        {isHandedOff && (
-          <div className="mt-2 rounded-xl bg-amber-50 px-4 py-3 text-center text-sm text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-            Connecting you to our team. They&apos;ll be with you shortly.
+        {isPortalReady && (
+          <div className="mt-2 rounded-xl border border-border bg-card px-4 py-3 text-center text-sm dark:border-border dark:bg-card">
+            <p className="mb-2 font-medium text-foreground">
+              You&apos;re ready to book!
+            </p>
+            {portalUrl ? (
+              <a
+                className="inline-block rounded-full px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                href={portalUrl}
+                rel="noopener noreferrer"
+                style={{ backgroundColor: primaryColor }}
+                target="_blank"
+              >
+                Book your appointment
+              </a>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Preparing your booking link…
+              </p>
+            )}
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {!isHandedOff && (
+      {!isPortalReady && (
         <form
           className={cn(
             'flex items-center gap-2 border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800',

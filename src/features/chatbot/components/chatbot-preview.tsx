@@ -13,8 +13,16 @@ import {
   CardTitle,
 } from '@shared/components/ui/card'
 import { MessageCircle, Send, X } from 'lucide-react'
+import Link from 'next/link'
 
 import { BORDER_RADIUS_CLASS } from '@/features/chatbot/utils'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/shared/components/ui/tooltip'
+import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/utils/cn'
 
 interface ChatbotPreviewProps {
@@ -138,17 +146,35 @@ export function ChatbotPreview({
                   </button>
                 </div>
                 {showBranding && (
-                  <div className="flex justify-center pb-1 text-[10px] text-gray-400 dark:text-gray-600 bg-white dark:border-gray-700 dark:bg-gray-800">
-                    Powered by{' '}
-                    <a
-                      className="ml-1 font-medium text-gray-500 hover:text-gray-700 dark:text-gray-500"
-                      href="https://sendora.io"
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      Sendora
-                    </a>
-                  </div>
+                  <TooltipProvider delay={400}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className="flex justify-center pb-1 text-[10px] text-gray-400 dark:text-gray-600 bg-white dark:border-gray-700 dark:bg-gray-800">
+                          Powered by{' '}
+                          <a
+                            className="ml-1 font-medium text-gray-500 hover:text-gray-700 dark:text-gray-500"
+                            href="https://sendora.io"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            Sendora
+                          </a>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p>
+                          Branding is visible only on free plans. You can{' '}
+                          <Link
+                            className="text-primary hover:underline"
+                            href={ROUTES.Billing}
+                          >
+                            upgrade your plan
+                          </Link>{' '}
+                          to remove it.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
               <button

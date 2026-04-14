@@ -13,6 +13,8 @@ import { getOptionalTrimmedString } from '@shared/utils/form-data'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 interface UpdateDomainState {
   errors?: {
     hostname?: string[]
@@ -49,7 +51,7 @@ export async function updateDomainAction(
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const domain = await findDomainById({ domainId, workspaceId: workspace.id })

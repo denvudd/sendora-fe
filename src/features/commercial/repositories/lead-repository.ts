@@ -78,6 +78,42 @@ export async function listLeadsByWorkspace({
   })
 }
 
+interface UpsertLeadParams {
+  workspaceId: string
+  email: string
+  firstName?: string
+  lastName?: string
+}
+
+export async function upsertLead({
+  workspaceId,
+  email,
+  firstName,
+  lastName,
+}: UpsertLeadParams) {
+  const existing = await prisma.lead.findUnique({
+    where: { workspaceId_email: { workspaceId, email } },
+  })
+
+  if (existing) {
+    return prisma.lead.update({
+      where: { workspaceId_email: { workspaceId, email } },
+      data: {
+        ...(firstName !== undefined && { firstName }),
+        ...(lastName !== undefined && { lastName }),
+      },
+    })
+  }
+
+  return createLead({
+    workspaceId,
+    email,
+    firstName,
+    lastName,
+    source: 'chatbot',
+  })
+}
+
 export async function updateLeadStatus({
   workspaceId,
   leadId,

@@ -6,8 +6,6 @@ import type {
 
 import { prisma } from '@shared/utils/prisma'
 
-// --- Chatbot CRUD ---
-
 interface CreateChatbotParams {
   domainId: string
   welcomeMessage?: string
@@ -226,6 +224,17 @@ export async function getSessionMessages({
   })
 }
 
+interface SetSessionHumanParams {
+  sessionId: string
+}
+
+export async function setSessionHuman({ sessionId }: SetSessionHumanParams) {
+  return prisma.chatSession.update({
+    where: { id: sessionId },
+    data: { status: 'HUMAN' },
+  })
+}
+
 interface GeneratePortalTokenParams {
   sessionId: string
 }
@@ -241,6 +250,19 @@ export async function generatePortalToken({
   })
 }
 
+interface FindSessionByUuidParams {
+  sessionUuid: string
+}
+
+export async function findSessionByUuid({
+  sessionUuid,
+}: FindSessionByUuidParams) {
+  return prisma.chatSession.findUnique({
+    where: { sessionUuid },
+    select: { id: true, portalToken: true, status: true },
+  })
+}
+
 interface FindSessionByPortalTokenParams {
   portalToken: string
 }
@@ -252,7 +274,28 @@ export async function findSessionByPortalToken({
     where: { portalToken },
     include: {
       messages: { orderBy: { createdAt: 'asc' } },
-      chatbot: { include: { domain: true } },
+      chatbot: {
+        include: {
+          questions: { orderBy: { sortOrder: 'asc' } },
+          domain: {
+            include: {
+              workspace: {
+                include: {
+                  appointmentSchedule: true,
+                  subscriptions: {
+                    where: {
+                      status: { in: ['ACTIVE', 'TRIALING', 'PAST_DUE'] },
+                    },
+                    include: { plan: { select: { code: true } } },
+                    orderBy: { createdAt: 'desc' },
+                    take: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   })
 }

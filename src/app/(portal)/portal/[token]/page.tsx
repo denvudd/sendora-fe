@@ -1,8 +1,10 @@
 import type { ReactElement } from 'react'
 
 import { findSessionByPortalToken } from '@features/commercial/repositories'
-import { format } from 'date-fns'
+import { PortalBookingFlow } from '@features/portal/components/portal-booking-flow'
 import { notFound } from 'next/navigation'
+
+import { PLAN_CODE } from '@/shared/constants/plan-code'
 
 interface PortalPageProps {
   params: Promise<{ token: string }>
@@ -19,45 +21,43 @@ const PortalPage = async ({
     notFound()
   }
 
-  const hostname = session.chatbot.domain.hostname
+  const existingAnswers =
+    session.metadata &&
+    typeof session.metadata === 'object' &&
+    !Array.isArray(session.metadata) &&
+    'answers' in (session.metadata as object)
+      ? ((session.metadata as Record<string, unknown>).answers as Record<
+          string,
+          string
+        >)
+      : {}
+
+  const activeSubscription = session?.chatbot?.domain.workspace.subscriptions[0]
+  const planCode = activeSubscription?.plan.code ?? PLAN_CODE.STANDARD
+  const showBranding = planCode === PLAN_CODE.STANDARD
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6 rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <svg
-            className="size-8 text-primary"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+    <div className="flex min-h-screen items-center flex-col gap-4 justify-center bg-background p-4">
+      <PortalBookingFlow
+        defaultAnswers={existingAnswers}
+        hostname={session.chatbot.domain.hostname}
+        portalToken={token}
+        questions={session.chatbot.questions}
+        schedule={session.chatbot.domain.workspace.appointmentSchedule ?? null}
+      />
+      {showBranding && (
+        <div className="flex justify-center pb-1 text-[10px] text-gray-400 dark:text-gray-600 dark:border-gray-700">
+          Powered by{' '}
+          <a
+            className="ml-1 font-medium text-gray-500 hover:text-gray-700 dark:text-gray-500"
+            href="https://sendora.io"
+            rel="noopener noreferrer"
+            target="_blank"
           >
-            <path
-              d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            Sendora
+          </a>
         </div>
-
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-foreground">
-            Our team will be with you shortly
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Someone from{' '}
-            <span className="font-medium text-foreground">{hostname}</span> will
-            follow up with you soon. Thank you for your patience.
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
-          <p className="text-xs text-muted-foreground">
-            Session started {format(session.createdAt, 'MMMM d, yyyy hh:mm a')}
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   )
 }
