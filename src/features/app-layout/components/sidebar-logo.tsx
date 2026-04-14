@@ -17,7 +17,7 @@ export function SidebarLogo(): ReactElement {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
-            render={<Link href={ROUTES.dashboard} />}
+            render={<Link href={ROUTES.Dashboard} />}
             size="lg"
           >
             <Image

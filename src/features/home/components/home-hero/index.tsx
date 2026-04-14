@@ -1,7 +1,11 @@
 import type { ReactElement } from 'react'
 
-import { Button } from '@shared/components/ui/button'
+import { Button, buttonVariants } from '@shared/components/ui/button'
 import { ArrowRight, Play } from 'lucide-react'
+import Link from 'next/link'
+
+import { ROUTES } from '@/shared/constants/routes'
+import { cn } from '@/shared/utils/cn'
 
 import { HomeSafariMockupPreview } from './home-safari-mockup-preview'
 
@@ -17,7 +21,7 @@ export function HomeHero(): ReactElement {
 
       <div className="container mx-auto px-4 relative">
         <div className="max-w-4xl mx-auto text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background border text-primary text-sm font-medium mb-6 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background border text-sm font-medium mb-6 animate-fade-in-up">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             AI-Powered Sales Automation
           </div>
@@ -27,7 +31,9 @@ export function HomeHero(): ReactElement {
             style={{ animationDelay: '0.1s' }}
           >
             Turn Every Conversation Into a{' '}
-            <span className="text-gradient-primary">Conversion</span>
+            <span className="bg-linear-to-r from-primary to-primary/40 bg-clip-text text-transparent">
+              Conversion
+            </span>
           </h1>
 
           <p
@@ -43,10 +49,18 @@ export function HomeHero(): ReactElement {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
             style={{ animationDelay: '0.3s' }}
           >
-            <Button className="text-base px-8 py-6" size="lg">
+            <Link
+              className={cn(
+                buttonVariants({
+                  size: 'lg',
+                }),
+                'text-base px-8 py-6',
+              )}
+              href={ROUTES.SignUp}
+            >
               Get Started Free
               <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+            </Link>
             <Button className="text-base px-8 py-6" size="lg" variant="outline">
               <Play className="w-4 h-4 mr-1" />
               Watch Demo

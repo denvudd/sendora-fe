@@ -11,6 +11,8 @@ import { getOptionalTrimmedString } from '@shared/utils/form-data'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 interface CreateDomainState {
   errors?: {
     hostname?: string[]
@@ -44,7 +46,7 @@ export async function createDomainAction(
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const validated = createDomainSchema.safeParse({

@@ -32,6 +32,7 @@ model Workspace {
   createdAt           DateTime                @default(now())
   updatedAt           DateTime                @updatedAt
   userId              String                  @unique
+  appointmentSchedule AppointmentSchedule?
   bookings            Booking[]
   domains             Domain[]
   leads               Lead[]
@@ -274,6 +275,19 @@ model Payment {
   @@index([workspaceId, status, createdAt])
   @@index([leadId])
   @@index([bookingId])
+}
+
+model AppointmentSchedule {
+  id            String    @id @default(cuid())
+  workspaceId   String    @unique
+  isEnabled     Boolean   @default(true)
+  slotDuration  Int       @default(60)
+  bufferMinutes Int       @default(0)
+  timezone      String    @default("UTC")
+  schedule      Json      @default("{}")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
 
 enum ChatbotButtonStyle {

@@ -10,6 +10,8 @@ import {
 import { DomainPage } from '@features/domains/components/domain-page'
 import { notFound, redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 interface DomainDetailPageProps {
   params: Promise<{ domainId: string }>
 }
@@ -40,7 +42,7 @@ const DomainDetailPage = async ({
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const [domain, chatbot] = await Promise.all([

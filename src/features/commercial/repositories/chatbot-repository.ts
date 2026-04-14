@@ -274,7 +274,28 @@ export async function findSessionByPortalToken({
     where: { portalToken },
     include: {
       messages: { orderBy: { createdAt: 'asc' } },
-      chatbot: { include: { domain: true } },
+      chatbot: {
+        include: {
+          questions: { orderBy: { sortOrder: 'asc' } },
+          domain: {
+            include: {
+              workspace: {
+                include: {
+                  appointmentSchedule: true,
+                  subscriptions: {
+                    where: {
+                      status: { in: ['ACTIVE', 'TRIALING', 'PAST_DUE'] },
+                    },
+                    include: { plan: { select: { code: true } } },
+                    orderBy: { createdAt: 'desc' },
+                    take: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   })
 }

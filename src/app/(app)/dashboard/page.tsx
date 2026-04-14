@@ -8,6 +8,8 @@ import {
 import { DashboardPage } from '@features/dashboard/components/dashboard-page'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 const Dashboard = async (): Promise<ReactElement> => {
   const { userId: clerkId } = await auth()
 
@@ -31,7 +33,7 @@ const Dashboard = async (): Promise<ReactElement> => {
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   return <DashboardPage workspace={workspace} />

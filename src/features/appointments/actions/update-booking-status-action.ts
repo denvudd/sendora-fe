@@ -1,27 +1,37 @@
 'use server'
 
+import type { BookingStatus } from '@prisma/client'
+
 import { auth, currentUser } from '@clerk/nextjs/server'
 import {
-  deleteDomain,
   findOrCreateUser,
   findWorkspaceByUserId,
+  updateBookingStatus,
 } from '@features/commercial/repositories'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { ROUTES } from '@/shared/constants/routes'
 
-export async function deleteDomainAction(domainId: string): Promise<void> {
+interface UpdateBookingStatusResult {
+  success: boolean
+  message?: string
+}
+
+export async function updateBookingStatusAction(
+  bookingId: string,
+  status: BookingStatus,
+): Promise<UpdateBookingStatusResult> {
   const { userId: clerkId } = await auth()
 
   if (!clerkId) {
-    redirect('/sign-in')
+    redirect(ROUTES.SignIn)
   }
 
   const clerkUser = await currentUser()
 
   if (!clerkUser) {
-    redirect('/sign-in')
+    redirect(ROUTES.SignIn)
   }
 
   const dbUser = await findOrCreateUser({
@@ -34,11 +44,23 @@ export async function deleteDomainAction(domainId: string): Promise<void> {
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect(ROUTES.Onboarding)
+    return { success: false, message: 'Workspace not found.' }
   }
 
-  await deleteDomain({ domainId, workspaceId: workspace.id })
+  try {
+    await updateBookingStatus({
+      workspaceId: workspace.id,
+      bookingId,
+      status,
+    })
+  } catch {
+    return {
+      success: false,
+      message: 'Something went wrong. Please try again.',
+    }
+  }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  revalidatePath('/appointments')
+
+  return { success: true }
 }

@@ -31,7 +31,9 @@ Avoid reverse imports.
 - **Styling**: Tailwind CSS, Shadcn UI
 - **Database**: PostgreSQL (via Prisma, hosted on Neon)
 - **Auth**: Clerk
-- **State**: React Server Components (RSC) + Server Actions
+- **State**: React Server Components (RSC) + Server Actions for server-side, Zustand for client-side
+- **AI**: OpenAI
+- **Payments**: Stripe
 
 ## Next.js Guidance
 
@@ -39,6 +41,8 @@ Avoid reverse imports.
 - Add `'use client'` only when needed.
 - Keep `src/app` files thin and move business logic to features.
 - Add `loading.tsx` and `error.tsx` for new routes to handle UX if needed.
+- Use ROUTES constant from `@/shares/constants/routes.ts` for pages pathnames in links, redirects, etc. Try to avoid hardcoded pathnames
+- Don't forget to update ROUTES constant when making changes for pages routes (e.g. create/edit pages)
 
 ## How to Assist
 
@@ -48,12 +52,14 @@ Avoid reverse imports.
 - Don't forget to handle errors and potential edge cases
 - Update the documentation files in the ./docs folder if you make changes to the feature/s that already have documentation
 - Read and follow eslint and prettier configs and rules
+- Try to avoid hardcoded values when Enum is available (e.g. for statuses, codes, etc.)
+- If Prisma ORM request/action starting to have long structure - split it on the different parts so it's easy to read
 
 ## Package manager
 
-Use Bun as a default package manager
+- Use Bun as a default package manager
 
 ## Styling, UI components, components
 
-- Use ShadCN primitives as primary buidling bricks for the interface. Try to avoid hardcoded "plain" color values (HEX, rgba, etc.) and use Shadcn theme variables instead. Always add values and styling for the dark theme if it doesn't set by default.
+- Use ShadCN primitives as primary buidling bricks for the interface. Try to avoid hardcoded "plain" color values (HEX, rgba, default tailwind palette etc.) and use Shadcn theme variables instead. Always add values and styling for the dark theme if it doesn't set by default.
 - Don't forget to handle responsive layout

@@ -292,7 +292,11 @@ When booking readiness is detected, the chat API's `onFinish` callback automatic
 
 The widget then calls `GET /api/portal-token/{sessionUuid}` (public endpoint) to retrieve the portal URL and renders it as a "Book your appointment" button. The endpoint retries a few times to account for the async `onFinish` write.
 
-The portal page (`/portal/[token]`) currently shows a stub. Full portal functionality (guiding questions + booking flow) is a future deliverable.
+### Portal Page (`/portal/[token]`) — Booking Flow
+
+The portal page renders a multi-step booking wizard: guiding questions (if any) → date/time selection → confirmation screen.
+
+Full documentation: [`docs/APPOINTMENTS.md`](./APPOINTMENTS.md)
 
 ---
 

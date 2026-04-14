@@ -11,6 +11,7 @@ import { findPlanById } from '@features/home/repositories/plan-repository'
 import { redirect } from 'next/navigation'
 
 import { env } from '@/env'
+import { ROUTES } from '@/shared/constants/routes'
 import { stripe } from '@/shared/lib/stripe'
 
 interface SelectPlanState {
@@ -102,8 +103,8 @@ export async function selectPlanAction(
     customer: stripeCustomerId,
     mode: 'subscription',
     line_items: [{ price: stripePriceId, quantity: 1 }],
-    success_url: `${env.NEXT_PUBLIC_APP_URL}/dashboard?subscription=success`,
-    cancel_url: `${env.NEXT_PUBLIC_APP_URL}/onboarding`,
+    success_url: `${env.NEXT_PUBLIC_APP_URL}${ROUTES.Dashboard}?subscription=success`,
+    cancel_url: `${env.NEXT_PUBLIC_APP_URL}${ROUTES.Onboarding}`,
     metadata: {
       workspaceId,
       planId,

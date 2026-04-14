@@ -18,6 +18,8 @@ import { getOptionalTrimmedString } from '@shared/utils/form-data'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 interface UpdateChatbotSettingsState {
   errors?: {
     welcomeMessage?: string[]
@@ -61,7 +63,7 @@ export async function updateChatbotSettingsAction(
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const domain = await findDomainById({ domainId, workspaceId: workspace.id })
