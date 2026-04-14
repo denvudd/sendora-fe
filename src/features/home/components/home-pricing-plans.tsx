@@ -11,12 +11,16 @@ import { buttonVariants } from '@shared/components/ui/button'
 import Link from 'next/link'
 import { useState, type ReactElement } from 'react'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 interface HomePricingPlansProps {
   plans: PlanWithFeatures[]
+  isSignedIn: boolean
 }
 
 export function HomePricingPlans({
   plans,
+  isSignedIn,
 }: HomePricingPlansProps): ReactElement {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>(
     BillingInterval.MONTHLY,
@@ -65,7 +69,7 @@ export function HomePricingPlans({
                   className: 'mt-auto w-full',
                   size: 'lg',
                 })}
-                href="/sign-up"
+                href={isSignedIn ? ROUTES.Billing : ROUTES.SignUp}
               >
                 Get started
               </Link>

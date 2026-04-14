@@ -3,6 +3,7 @@ export const ROUTES = {
   Conversations: '/conversations',
   Integrations: '/integrations',
   Settings: '/settings',
+  Billing: '/settings/billing',
   Appointments: '/appointments',
   EmailMarketing: '/email-marketing',
 

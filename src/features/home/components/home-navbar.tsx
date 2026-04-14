@@ -2,12 +2,13 @@
 
 import type { ReactElement } from 'react'
 
-import { Button } from '@shared/components/ui/button'
+import { Button, buttonVariants } from '@shared/components/ui/button'
 import { MessageSquare, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
 import { Image } from '@/shared/components/ui/image'
+import { ROUTES } from '@/shared/constants/routes'
 
 const NAVBAR_LINKS = [
   {
@@ -24,7 +25,11 @@ const NAVBAR_LINKS = [
   },
 ]
 
-export function HomeNavbar(): ReactElement {
+export function HomeNavbar({
+  isSignedIn,
+}: {
+  isSignedIn: boolean
+}): ReactElement {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
@@ -55,10 +60,18 @@ export function HomeNavbar(): ReactElement {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button size="sm" variant="ghost">
+          <Link
+            className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+            href={isSignedIn ? ROUTES.Dashboard : ROUTES.SignUp}
+          >
             Log in
-          </Button>
-          <Button size="sm">Get Started Free</Button>
+          </Link>
+          <Link
+            className={buttonVariants({ size: 'sm' })}
+            href={isSignedIn ? ROUTES.Billing : ROUTES.SignUp}
+          >
+            Get Started Free
+          </Link>
         </div>
 
         <button

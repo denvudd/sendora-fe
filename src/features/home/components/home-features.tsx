@@ -86,8 +86,8 @@ export function HomeFeatures(): ReactElement {
               className="group p-6 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-glow hover:border-primary/20 transition-all duration-300"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-gradient-primary group-hover:text-primary-foreground transition-all duration-300">
-                <feature.Icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-background group-hover:text-primary transition-all duration-300">
+                <feature.Icon className="w-5 h-5 text-primary group-hover:text-primary transition-colors" />
               </div>
               <h3 className="text-base font-semibold text-foreground mb-2">
                 {feature.title}

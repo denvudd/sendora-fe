@@ -169,7 +169,6 @@ export function AppointmentScheduleForm({
 
       <CardContent>
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          {/* Enable toggle */}
           <div className="flex items-center gap-3">
             <Controller
               control={control}
@@ -185,8 +184,7 @@ export function AppointmentScheduleForm({
             <Label htmlFor="isEnabled">Enable appointment booking</Label>
           </div>
 
-          {/* Settings row */}
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex md:items-center flex-col md:flex-row gap-2 md:gap-4 w-full">
             <div className="space-y-1.5">
               <Label htmlFor="slotDuration">Slot duration</Label>
               <NativeSelect
@@ -204,6 +202,7 @@ export function AppointmentScheduleForm({
             <div className="space-y-1.5">
               <Label htmlFor="bufferMinutes">Buffer between slots</Label>
               <NativeSelect
+                className="w-full"
                 id="bufferMinutes"
                 {...register('bufferMinutes', { valueAsNumber: true })}
               >

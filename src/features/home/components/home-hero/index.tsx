@@ -9,13 +9,17 @@ import { cn } from '@/shared/utils/cn'
 
 import { HomeSafariMockupPreview } from './home-safari-mockup-preview'
 
-export function HomeHero(): ReactElement {
+export function HomeHero({
+  isSignedIn,
+}: {
+  isSignedIn: boolean
+}): ReactElement {
   return (
     <section className="relative pt-32 pb-20 lg:pt-40 bg-background overflow-hidden">
       <div
         className="
             absolute inset-0
-            bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.08),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.09),transparent_42%)]
+            bg-[radial-gradient(circle_at_top_left,var(--color-secondary),transparent_70%),radial-gradient(circle_at_bottom_right,var(--color-muted),transparent_40%)]
           "
       />
 
@@ -56,7 +60,7 @@ export function HomeHero(): ReactElement {
                 }),
                 'text-base px-8 py-6',
               )}
-              href={ROUTES.SignUp}
+              href={isSignedIn ? ROUTES.Dashboard : ROUTES.SignUp}
             >
               Get Started Free
               <ArrowRight className="w-4 h-4 ml-1" />
