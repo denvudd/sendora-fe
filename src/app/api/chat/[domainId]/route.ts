@@ -4,12 +4,19 @@ import {
   addMessage,
   findChatbotByDomainId,
   findOrCreateSession,
+  generatePortalToken,
   getSessionMessages,
+  setSessionHuman,
 } from '@features/commercial/repositories'
 import { streamText } from 'ai'
 
 import { env } from '@/env'
-import { buildSystemPrompt, MODEL } from '@/features/chatbot/utils'
+import {
+  buildSystemPrompt,
+  MODEL,
+  PORTAL_MARKER,
+  REALTIME_MARKER,
+} from '@/features/chatbot/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -105,6 +112,7 @@ export async function POST(
   const history = await getSessionMessages({ sessionId: session.id })
 
   const systemPrompt = buildSystemPrompt(chatbot)
+  console.log('🚀 ~ POST ~ systemPrompt:', systemPrompt)
 
   const result = streamText({
     model: MODEL,
@@ -119,6 +127,12 @@ export async function POST(
         role: 'assistant',
         content: text,
       })
+
+      if (text.includes(REALTIME_MARKER)) {
+        await setSessionHuman({ sessionId: session.id })
+      } else if (text.includes(PORTAL_MARKER)) {
+        await generatePortalToken({ sessionId: session.id })
+      }
     },
   })
 

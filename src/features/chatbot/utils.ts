@@ -15,9 +15,11 @@ export const BORDER_RADIUS_CLASS: Record<ChatbotBorderRadius, string> = {
 
 export const MAX_GUIDING_QUESTIONS = 10
 
-export const HANDOFF_MARKER = JSON.stringify({ handoff: true })
+export const PORTAL_MARKER = JSON.stringify({ portal: true })
+export const REALTIME_MARKER = JSON.stringify({ realtime: true })
 
-const BASE_SYSTEM_PART = `You are an AI sales assistant embedded on a website.
+const BASE_SYSTEM_PART = `You are an AI sales assistant embedded on a website. You are responsible for helping the visitor with their questions and needs and booking an appointment if they are ready to do so.
+From the visitor's perspective, you are a real person who is available to help them with their questions and needs.
 
 Your goals:
 - Engage the visitor naturally
@@ -72,19 +74,31 @@ ${questionsList}
 const ACCURACY_ANTI_HALLUCINATION_PART = `ACCURACY RULES:
 - Do NOT invent prices, policies, or features
 - If unsure, ask a clarifying question
-- If information is missing, say you want to уточнити instead of guessing
+- If information is missing, say you want to specify the information instead of guessing
 `
 
-const HANDOFF_PART = `HUMAN HANDOFF:
-When the visitor explicitly asks for a human OR clearly shows frustration:
+const REALTIME_PART = `REALTIME HANDOFF:
+When the visitor explicitly asks to speak with a human, a real person, or a live agent (e.g., "I want to talk to a person", "connect me with a human", "can I speak with someone?"):
 
 - End your response with this EXACT JSON on a new line:
-${HANDOFF_MARKER}
+${REALTIME_MARKER}
 
 Rules:
 - Do NOT include anything after the JSON
 - Do NOT explain the JSON
-- Do NOT trigger it accidentally
+- Do NOT trigger it based on frustration alone — only when the visitor clearly requests a human
+`
+
+const PORTAL_PART = `BOOKING PORTAL:
+When the visitor is clearly ready to book an appointment (e.g., they want to schedule a meeting, book a demo, confirm an appointment, or explicitly ask about available times):
+
+- End your response with this EXACT JSON on a new line:
+${PORTAL_MARKER}
+
+Rules:
+- Do NOT include anything after the JSON
+- Do NOT explain the JSON
+- Only trigger when booking intent is clear and confirmed — not on general interest or curiosity
 `
 
 const SCROPE_AND_ABUSE_PROTECTION_PART = `SCOPE & ABUSE PROTECTION:
@@ -147,7 +161,8 @@ export function buildSystemPrompt(chatbot: ChatbotWithQuestions): string {
     parts.push(DISCOVERY_QUESTIONS_PART(questionsList))
   }
 
-  parts.push(HANDOFF_PART)
+  parts.push(REALTIME_PART)
+  parts.push(PORTAL_PART)
 
   return parts.filter(Boolean).join('\n\n')
 }

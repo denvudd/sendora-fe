@@ -115,7 +115,7 @@ export function UploadcareUploader({
           successEntries?: Array<{ cdnUrl?: string | null }>
           allEntries?: Array<{ cdnUrl?: string | null; status?: string }>
         }
-        console.log('🚀 ~ UploadcareUploader ~ state:', state)
+
         const fromSuccess = state.successEntries?.[0]?.cdnUrl
 
         if (fromSuccess) {
@@ -169,7 +169,7 @@ export function UploadcareUploader({
         <Label className={cn(error && 'text-destructive')}>
           {label}
           {description && (
-            <span className="ml-1 font-normal text-muted-foreground">
+            <span className="font-normal text-muted-foreground">
               {description}
             </span>
           )}
@@ -202,18 +202,16 @@ export function UploadcareUploader({
           {...uploaderRestProps}
           accept={accept}
           apiRef={apiRef}
-          className="w-full"
+          classNameUploader="uploadcare-theme dark:uploadcare-theme-dark"
           cloudImageEditorAutoOpen={cloudImageEditorAutoOpen}
           ctxName={ctxName}
           maxLocalFileSizeBytes={maxLocalFileSizeBytes}
           pubkey={env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY}
           useCloudImageEditor={useCloudImageEditor}
           onCommonUploadSuccess={detail => {
-            console.log('🚀 ~ UploadcareUploader ~ detail:', detail?.allEntries)
             userOnCommonUploadSuccess?.(detail)
           }}
           onDoneClick={detail => {
-            console.log('🚀 ~ UploadcareUploader ~ detail:', detail?.allEntries)
             userOnDoneClick?.(detail)
 
             if (deferPreviewUntilFlowDone) {
@@ -230,7 +228,6 @@ export function UploadcareUploader({
             userOnFileUploadSuccess?.(detail)
 
             if (!deferPreviewUntilFlowDone) {
-              console.log('🚀 ~ UploadcareUploader ~ detail:', detail)
               const url = detail.cdnUrl
 
               if (url) {

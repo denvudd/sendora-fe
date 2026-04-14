@@ -6,8 +6,6 @@ import type {
 
 import { prisma } from '@shared/utils/prisma'
 
-// --- Chatbot CRUD ---
-
 interface CreateChatbotParams {
   domainId: string
   welcomeMessage?: string
@@ -226,6 +224,17 @@ export async function getSessionMessages({
   })
 }
 
+interface SetSessionHumanParams {
+  sessionId: string
+}
+
+export async function setSessionHuman({ sessionId }: SetSessionHumanParams) {
+  return prisma.chatSession.update({
+    where: { id: sessionId },
+    data: { status: 'HUMAN' },
+  })
+}
+
 interface GeneratePortalTokenParams {
   sessionId: string
 }
@@ -238,6 +247,19 @@ export async function generatePortalToken({
   return prisma.chatSession.update({
     where: { id: sessionId },
     data: { portalToken: token, status: 'HUMAN' },
+  })
+}
+
+interface FindSessionByUuidParams {
+  sessionUuid: string
+}
+
+export async function findSessionByUuid({
+  sessionUuid,
+}: FindSessionByUuidParams) {
+  return prisma.chatSession.findUnique({
+    where: { sessionUuid },
+    select: { id: true, portalToken: true, status: true },
   })
 }
 

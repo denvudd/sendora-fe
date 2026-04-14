@@ -6,9 +6,11 @@ export {
   findChatbotWithPlanByDomainId,
   findOrCreateSession,
   findSessionByPortalToken,
+  findSessionByUuid,
   generatePortalToken,
   getSessionMessages,
   replaceQuestions,
+  setSessionHuman,
   updateChatbot,
 } from './chatbot-repository'
 export {
