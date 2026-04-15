@@ -74,12 +74,18 @@ Guiding questions asked by the AI during conversations.
 
 Represents one visitor's conversation session.
 
-| Field         | Type                | Description                           |
-| ------------- | ------------------- | ------------------------------------- |
-| `chatbotId`   | `String`            | FK → Chatbot (cascade delete)         |
-| `sessionUuid` | `String (unique)`   | UUID stored in visitor's localStorage |
-| `status`      | `ChatSessionStatus` | `AI`, `HUMAN`, or `CLOSED`            |
-| `portalToken` | `String? (unique)`  | Generated when handoff is triggered   |
+| Field         | Type                | Description                                                                                 |
+| ------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| `chatbotId`   | `String`            | FK → Chatbot (cascade delete)                                                               |
+| `sessionUuid` | `String (unique)`   | UUID stored in visitor's localStorage                                                       |
+| `status`      | `ChatSessionStatus` | `AI`, `HUMAN`, or `CLOSED`                                                                  |
+| `portalToken` | `String? (unique)`  | Generated when handoff is triggered                                                         |
+| `metadata`    | `Json?`             | Stores `{ answers: { [questionId]: string } }` — visitor's chat answers for portal pre-fill |
+| `leadId`      | `String?`           | FK → Lead (set null on delete); linked on booking                                           |
+
+`leadId` is populated by `bookAppointmentAction` after the lead is upserted: `linkSessionToLead({ sessionId, leadId })`. This enables the Lead Detail page to surface a "View conversation" link for every session that resulted in a booking.
+
+`metadata.answers` is populated by the chat API's `onFinish` callback when the AI triggers the portal marker — the AI outputs the collected answers as inline JSON, which is parsed and saved to `ChatSession.metadata` via `setSessionAnswers`. The portal page reads this value to pre-fill the guiding questions form.
 
 ### `ChatMessage`
 
@@ -261,14 +267,28 @@ Border radius is applied to the chat panel via Tailwind class mapping:
 
 ### System Prompt Composition
 
-The system prompt is built at runtime from the chatbot's config:
+The system prompt is built at runtime by `buildSystemPrompt(chatbot)` in `src/features/chatbot/utils.ts`. It selects one of two conversation flows based on whether guiding questions are configured:
 
-1. Base role: "You are a helpful AI sales assistant..."
-2. Custom `systemPrompt` (if set)
-3. Welcome message instruction
-4. Guiding questions list (asked naturally in conversation)
-5. Realtime handoff instruction: append `{"realtime":true}` when visitor explicitly asks for a human
-6. Portal instruction: append `{"portal":true}` when visitor is ready to book an appointment
+**With guiding questions (`withQuestionsFlow`):**
+
+1. Role & persona (custom `systemPrompt` or default based on domain hostname)
+2. Goal: ask all guiding questions one at a time, then trigger booking portal
+3. Numbered question list with each question's database ID (e.g. `1. [id: "abc123"] What is your budget?`)
+4. Portal trigger instruction: output `{"answers":{...}}` then `{"portal":true}` on separate lines once all questions are answered
+
+**Without guiding questions (`noQuestionsFlow`):**
+
+1. Role & persona
+2. Goal: briefly introduce the business, then immediately propose booking
+3. Portal trigger instruction: output `{"portal":true}` when visitor shows interest
+
+**Shared sections (appended to both flows):**
+
+- Communication style (concise, one question at a time, no contact details)
+- Accuracy (do not invent information)
+- Scope (only business-related topics)
+- Realtime handoff: append `{"realtime":true}` when visitor explicitly requests a human
+- Portal trigger rules (do not add anything after the JSON lines)
 
 ### Realtime Handoff Detection
 
@@ -283,12 +303,26 @@ After the status change, the widget input remains enabled but messages go throug
 
 ### Portal Link Detection
 
-When the AI determines a visitor is ready to book an appointment, it appends `{"portal":true}` on a new line at the end of its response. The widget:
+When the AI determines a visitor is ready to book an appointment, it outputs two JSON lines at the end of its response:
 
-1. Detects the marker after streaming completes
-2. Strips it before rendering (`stripPortalMarker()`)
+```
+{"answers":{"<questionId>":"<answer>", ...}}
+{"portal":true}
+```
+
+The `{"answers":{...}}` line is only present when guiding questions were configured. The widget:
+
+1. Detects `{"portal":true}` in the accumulated stream
+2. Strips both JSON lines before rendering via `stripMarkers()` (also strips `{"realtime":true}`)
 3. Sets `isPortalReady = true` → hides the input, fetches the portal URL, shows "Book your appointment" CTA
-4. `ChatSession.portalToken` is set and `ChatSession.status` is updated to `HUMAN` in the chat API's `onFinish` callback
+
+Simultaneously, the chat API's `onFinish` callback:
+
+1. Calls `parseAnswersFromText(text)` — a synchronous parser that extracts the inline `{"answers":{...}}` JSON by brace-depth counting (no extra AI call)
+2. Saves the answers to `ChatSession.metadata` via `setSessionAnswers()` if any were found
+3. Calls `generatePortalToken()` — sets `ChatSession.portalToken = crypto.randomUUID()` and `ChatSession.status = HUMAN`
+
+The portal page then reads `session.metadata.answers` and passes it to the booking form as `defaultAnswers` for pre-fill.
 
 ---
 

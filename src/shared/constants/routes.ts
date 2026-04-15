@@ -1,6 +1,7 @@
 export const ROUTES = {
   Dashboard: '/dashboard',
   Conversations: '/conversations',
+  Leads: '/leads',
   Integrations: '/integrations',
   Settings: '/settings',
   Billing: '/settings/billing',
@@ -26,6 +27,7 @@ export interface NavItem {
   icon:
     | 'LayoutGrid'
     | 'MessageSquare'
+    | 'Users2'
     | 'Puzzle'
     | 'Settings'
     | 'Calendar'
@@ -35,8 +37,9 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: ROUTES.Dashboard, icon: 'LayoutGrid' },
   { label: 'Conversations', href: ROUTES.Conversations, icon: 'MessageSquare' },
+  { label: 'Leads', href: ROUTES.Leads, icon: 'Users2' },
+  { label: 'Appointments', href: ROUTES.Appointments, icon: 'Calendar' },
   { label: 'Integrations', href: ROUTES.Integrations, icon: 'Puzzle' },
   { label: 'Settings', href: ROUTES.Settings, icon: 'Settings' },
-  { label: 'Appointments', href: ROUTES.Appointments, icon: 'Calendar' },
   { label: 'Email Marketing', href: ROUTES.EmailMarketing, icon: 'Mail' },
 ]

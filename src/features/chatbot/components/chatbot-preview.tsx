@@ -84,9 +84,7 @@ export function ChatbotPreview({
               <div className="flex items-center gap-2">
                 <MessageCircle className="size-4 text-white" />
                 <span className="text-sm font-medium text-white">
-                  {welcomeMessage.length > 30
-                    ? `${welcomeMessage.slice(0, 30)}…`
-                    : welcomeMessage}
+                  {welcomeMessage}
                 </span>
               </div>
               <span className="text-xs text-white/80">Chat with us</span>
@@ -118,13 +116,19 @@ export function ChatbotPreview({
                   </button>
                 </div>
                 {/* Message bubble */}
+                <div className="px-2 py-1.5 w-full flex flex-col">
+                  <div
+                    className={`max-w-[80%] rounded-2xl inline-block text-white self-end rounded-bl-sm px-3 py-2 text-sm ${isDark ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-800'}`}
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    Hi!
+                  </div>
+                </div>
                 <div className="px-2 py-1.5">
                   <div
                     className={`max-w-[80%] rounded-2xl rounded-bl-sm px-3 py-2 text-sm inline-block ${isDark ? 'bg-gray-700 text-gray-100' : 'bg-gray-100 text-gray-800'}`}
                   >
-                    {welcomeMessage.length > 35
-                      ? `${welcomeMessage.slice(0, 35)}…`
-                      : welcomeMessage}
+                    {welcomeMessage}
                   </div>
                 </div>
                 <div
