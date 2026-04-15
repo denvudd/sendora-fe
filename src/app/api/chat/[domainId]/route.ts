@@ -6,6 +6,7 @@ import {
   findOrCreateSession,
   generatePortalToken,
   getSessionMessages,
+  setSessionAnswers,
   setSessionHuman,
 } from '@features/commercial/repositories'
 import {
@@ -19,6 +20,7 @@ import { env } from '@/env'
 import {
   buildSystemPrompt,
   MODEL,
+  parseAnswersFromText,
   PORTAL_MARKER,
   REALTIME_MARKER,
 } from '@/features/chatbot/utils'
@@ -185,6 +187,15 @@ export async function POST(
           },
         )
       } else if (text.includes(PORTAL_MARKER)) {
+        // Parse answers that the AI embedded inline in the same response
+        if (chatbot.questions.length > 0) {
+          const answers = parseAnswersFromText(text)
+
+          if (Object.keys(answers).length > 0) {
+            await setSessionAnswers({ sessionId: session.id, answers })
+          }
+        }
+
         await generatePortalToken({ sessionId: session.id })
       }
     },

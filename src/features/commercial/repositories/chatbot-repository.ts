@@ -383,6 +383,54 @@ export async function setSessionHumanBySessionId({
   })
 }
 
+interface SetSessionAnswersParams {
+  sessionId: string
+  answers: Record<string, string>
+}
+
+/**
+ * Saves extracted question answers to ChatSession.metadata.answers.
+ * Merges with existing metadata — does not overwrite other keys.
+ */
+export async function setSessionAnswers({
+  sessionId,
+  answers,
+}: SetSessionAnswersParams) {
+  const session = await prisma.chatSession.findUnique({
+    where: { id: sessionId },
+    select: { metadata: true },
+  })
+
+  const existing =
+    session?.metadata &&
+    typeof session.metadata === 'object' &&
+    !Array.isArray(session.metadata)
+      ? (session.metadata as Record<string, unknown>)
+      : {}
+
+  return prisma.chatSession.update({
+    where: { id: sessionId },
+    data: { metadata: { ...existing, answers } },
+    select: { id: true },
+  })
+}
+
+interface LinkSessionToLeadParams {
+  sessionId: string
+  leadId: string
+}
+
+export async function linkSessionToLead({
+  sessionId,
+  leadId,
+}: LinkSessionToLeadParams) {
+  return prisma.chatSession.update({
+    where: { id: sessionId },
+    data: { leadId },
+    select: { id: true },
+  })
+}
+
 interface CloseSessionParams {
   sessionId: string
 }

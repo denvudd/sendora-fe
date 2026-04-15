@@ -12,7 +12,9 @@ export {
   findSessionWithMessages,
   generatePortalToken,
   getSessionMessages,
+  linkSessionToLead,
   replaceQuestions,
+  setSessionAnswers,
   setSessionHuman,
   setSessionHumanBySessionId,
   updateChatbot,
@@ -36,7 +38,10 @@ export {
 } from './domain-repository'
 export {
   createLead,
+  findLeadById,
   listLeadsByWorkspace,
+  listLeadsWithFilters,
+  updateLeadNotes,
   updateLeadStatus,
   upsertLead,
 } from './lead-repository'

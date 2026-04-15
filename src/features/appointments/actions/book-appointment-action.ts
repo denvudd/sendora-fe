@@ -4,6 +4,7 @@ import { bookingSchema } from '@features/appointments/schemas'
 import {
   createBooking,
   findSessionByPortalToken,
+  linkSessionToLead,
   listBookingsForDateRange,
   upsertLead,
 } from '@features/commercial/repositories'
@@ -67,11 +68,45 @@ export async function bookAppointmentAction(data: {
   }
 
   try {
+    // Extract questionnaire answers from session metadata and map to readable format
+    const sessionMeta =
+      session.metadata &&
+      typeof session.metadata === 'object' &&
+      !Array.isArray(session.metadata)
+        ? (session.metadata as Record<string, unknown>)
+        : {}
+
+    const rawAnswers =
+      sessionMeta.answers &&
+      typeof sessionMeta.answers === 'object' &&
+      !Array.isArray(sessionMeta.answers)
+        ? (sessionMeta.answers as Record<string, string>)
+        : null
+
+    const questionMap = Object.fromEntries(
+      session.chatbot.questions.map(q => [q.id, q.text]),
+    )
+
+    const questionnaireAnswers = rawAnswers
+      ? Object.entries(rawAnswers)
+          .filter(([, answer]) => answer.trim().length > 0)
+          .map(([questionId, answer]) => ({
+            question: questionMap[questionId] ?? questionId,
+            answer,
+          }))
+      : undefined
+
     const lead = await upsertLead({
       workspaceId,
       email: validated.data.email,
       firstName: validated.data.name,
+      ...(questionnaireAnswers !== undefined && questionnaireAnswers.length > 0
+        ? { metadata: { questionnaireAnswers } }
+        : {}),
     })
+
+    // Link the ChatSession to the Lead so operators can trace conversation → lead
+    await linkSessionToLead({ sessionId: session.id, leadId: lead.id })
 
     const booking = await createBooking({
       workspaceId,

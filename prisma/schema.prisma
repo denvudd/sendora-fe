@@ -100,14 +100,17 @@ model ChatSession {
   status      ChatSessionStatus @default(AI)
   portalToken String?           @unique
   metadata    Json?
+  leadId      String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   chatbot     Chatbot           @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  lead        Lead?             @relation(fields: [leadId], references: [id], onDelete: SetNull)
   messages    ChatMessage[]
 
   @@index([chatbotId])
   @@index([sessionUuid])
   @@index([portalToken])
+  @@index([leadId])
 }
 
 model ChatMessage {
@@ -220,6 +223,7 @@ model Lead {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   bookings    Booking[]
+  sessions    ChatSession[]
   workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   payments    Payment[]
 
