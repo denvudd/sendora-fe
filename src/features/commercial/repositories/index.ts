@@ -1,5 +1,6 @@
 export {
   addMessage,
+  closeSession,
   createChatbot,
   findChatbotByDomainId,
   findChatbotByIdPublic,
@@ -7,10 +8,13 @@ export {
   findOrCreateSession,
   findSessionByPortalToken,
   findSessionByUuid,
+  findSessionsByWorkspaceId,
+  findSessionWithMessages,
   generatePortalToken,
   getSessionMessages,
   replaceQuestions,
   setSessionHuman,
+  setSessionHumanBySessionId,
   updateChatbot,
 } from './chatbot-repository'
 export {

@@ -18,6 +18,24 @@ export const MAX_GUIDING_QUESTIONS = 10
 export const PORTAL_MARKER = JSON.stringify({ portal: true })
 export const REALTIME_MARKER = JSON.stringify({ realtime: true })
 
+/** Strips all AI-appended JSON markers from message content. */
+export function stripMarkers(content: string): string {
+  return content
+    .replace(/\n?\{"realtime":true\}\s*$/, '')
+    .replace(/\n?\{"portal":true\}\s*$/, '')
+    .trim()
+}
+
+/** Returns true when a message contained the realtime handoff marker. */
+export function containsRealtimeMarker(content: string): boolean {
+  return content.includes(REALTIME_MARKER)
+}
+
+/** Returns true when a message contained the portal marker. */
+export function containsPortalMarker(content: string): boolean {
+  return content.includes(PORTAL_MARKER)
+}
+
 const BASE_SYSTEM_PART = `You are an AI sales assistant embedded on a website. You are responsible for helping the visitor with their questions and needs and booking an appointment if they are ready to do so.
 From the visitor's perspective, you are a real person who is available to help them with their questions and needs.
 
@@ -35,10 +53,10 @@ const COMMUNICATION_GUIDELINES_PART = `COMMUNICATION STYLE:
 - Always move the conversation forward`
 
 const BEHAVIOR_GUIDELINES_PART = `SALES BEHAVIOR:
-- First understand the user's intent before recommending anything
+- First understand the user's intent before recommending anything, use Discovery Questions to do so
 - Focus on benefits, not just features
 - Personalize responses based on what the user says
-- Gently guide toward a next step (CTA)
+- Gently guide toward a next step (booking portal)
 - Handle hesitation calmly (no pressure)`
 
 const CUSTOM_PERSONALITY_PART = (
@@ -90,7 +108,7 @@ Rules:
 `
 
 const PORTAL_PART = `BOOKING PORTAL:
-When the visitor is clearly ready to book an appointment (e.g., they want to schedule a meeting, book a demo, confirm an appointment, or explicitly ask about available times):
+When the visitor is clearly ready to book an appointment (e.g., they want to schedule a meeting, book a demo, confirm an appointment, answered Discovery Questions, or explicitly ask about available times):
 
 - End your response with this EXACT JSON on a new line:
 ${PORTAL_MARKER}
@@ -98,7 +116,7 @@ ${PORTAL_MARKER}
 Rules:
 - Do NOT include anything after the JSON
 - Do NOT explain the JSON
-- Only trigger when booking intent is clear and confirmed — not on general interest or curiosity
+- Only trigger when booking intent is clear and confirmed (for example when the user answered Discovery Questions) — not on general interest or curiosity
 `
 
 const SCROPE_AND_ABUSE_PROTECTION_PART = `SCOPE & ABUSE PROTECTION:
@@ -116,6 +134,7 @@ Examples of allowed topics:
 - Pricing (if provided)
 - Recommendations
 - Use cases
+- Booking and appointment scheduling
 
 Examples of disallowed topics:
 - Programming help

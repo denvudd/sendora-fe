@@ -94,6 +94,7 @@ export default defineConfig([
       curly: ['error', 'all'],
       eqeqeq: ['error', 'always'],
       'func-style': 'off',
+      'react-hooks/set-state-in-effect': 'off',
       'import/order': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-lonely-if': 'error',

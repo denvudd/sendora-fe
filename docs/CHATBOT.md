@@ -17,7 +17,9 @@ Sendora app
   ├── /chatbot/embed               — Public embed loader script (JS)
   ├── /chatbot/[domainId]          — Public widget page (inside iframe, server-rendered config)
   ├── /api/chat/[domainId]         — AI streaming API (public, CORS-enabled)
+  ├── /api/pusher/auth             — Pusher private channel auth endpoint (authenticated)
   ├── /portal/[token]              — Portal stub page (public)
+  ├── /(app)/conversations         — Conversations dashboard (authenticated)
   └── /(app)/domains/[domainId]    — Chatbot configuration (authenticated)
 ```
 
@@ -137,7 +139,7 @@ The previous approach embedded an `<iframe>` with style params in the URL (`?col
 - The widget also reads `document.referrer` (set by the browser to the embedding page URL when inside an iframe) and extracts the hostname as `embedOrigin`.
 - `POST /api/chat/{domainId}` receives `{ message, sessionUuid, embedOrigin }` in the request body.
 - The API calls `findOrCreateSession({ chatbotId, sessionUuid })` which `upsert`s on `sessionUuid`.
-- All messages are persisted in `ChatMessage` for the Conversations feature (future).
+- All messages are persisted in `ChatMessage` and visible in the Conversations dashboard.
 
 ---
 
@@ -270,7 +272,14 @@ The system prompt is built at runtime from the chatbot's config:
 
 ### Realtime Handoff Detection
 
-When the AI determines a visitor explicitly wants to speak with a human, it appends `{"realtime":true}` on a new line at the end of its response. The chat API's `onFinish` callback detects this and calls `setSessionHuman({ sessionId })`, which sets `ChatSession.status = HUMAN`. This signals to the Sendora dashboard that a live operator should take over the conversation.
+When the AI determines a visitor explicitly wants to speak with a human, it appends `{"realtime":true}` on a new line at the end of its response. The chat API's `onFinish` callback:
+
+1. Strips the marker from the stored message
+2. Calls `setSessionHuman({ sessionId })` → sets `ChatSession.status = HUMAN`
+3. Triggers Pusher event `status-changed` on `chat-{sessionUuid}` (public channel) → widget shows "Connected to a live agent" banner
+4. Triggers Pusher event `session-escalated` on `private-workspace-{workspaceId}` → dashboard updates the session badge to "Live"
+
+After the status change, the widget input remains enabled but messages go through the chat API without AI processing — they are forwarded to the dashboard via Pusher in real-time. The operator can then reply from the Conversations dashboard.
 
 ### Portal Link Detection
 
@@ -330,17 +339,24 @@ The widget page also sets `background: transparent` on `html, body` so the ifram
 ```
 src/features/chatbot/
 ├── actions/
-│   ├── create-chatbot-action.ts            — Create chatbot for a domain
-│   ├── update-chatbot-settings-action.ts   — Update config (color, style, borderRadius, theme, etc.)
-│   ├── update-chatbot-questions-action.ts  — Replace guiding questions
-│   └── generate-portal-link-action.ts      — Generate portal token + URL
+│   ├── create-chatbot-action.ts              — Create chatbot for a domain
+│   ├── update-chatbot-settings-action.ts     — Update config (color, style, borderRadius, theme, etc.)
+│   ├── update-chatbot-questions-action.ts    — Replace guiding questions
+│   ├── generate-portal-link-action.ts        — Generate portal token + URL (legacy, used in portal flow)
+│   ├── get-session-messages-action.ts        — Fetch session with full message history (for dashboard)
+│   ├── set-session-human-action.ts           — Manually escalate session to HUMAN + Pusher events
+│   ├── send-operator-message-action.ts       — Operator sends message in HUMAN session + Pusher events
+│   └── send-portal-link-message-action.ts    — Generate + send portal link as message to customer
 ├── components/
-│   ├── chatbot-settings-form.tsx           — Create/edit chatbot config form (all customization fields)
-│   ├── chatbot-questions-editor.tsx        — Add/remove/reorder guiding questions
-│   ├── chatbot-preview.tsx                 — Visual mockup reflecting all customization options
-│   ├── chatbot-snippet.tsx                 — Script embed snippet card with copy button
-│   └── chatbot-widget.tsx                  — Client component rendering the interactive chat widget
-└── schemas.ts                              — Zod schemas for settings and questions
+│   ├── chatbot-settings-form.tsx             — Create/edit chatbot config form (all customization fields)
+│   ├── chatbot-questions-editor.tsx          — Add/remove/reorder guiding questions
+│   ├── chatbot-preview.tsx                   — Visual mockup reflecting all customization options
+│   ├── chatbot-snippet.tsx                   — Script embed snippet card with copy button
+│   ├── chatbot-widget.tsx                    — Client component rendering the interactive chat widget
+│   ├── conversations-view.tsx                — Conversations dashboard client wrapper (Pusher workspace sub)
+│   ├── session-list.tsx                      — Filterable list of chat sessions with status badges
+│   └── conversation-detail.tsx               — Full dialog view with operator controls (HUMAN mode)
+└── schemas.ts                                — Zod schemas for settings and questions
 
 src/features/domains/
 ├── actions/
@@ -385,27 +401,97 @@ The domain detail page (`/domains/{domainId}`) includes:
 
 ---
 
+## Realtime Architecture (Pusher)
+
+Real-time messaging uses [Pusher Channels](https://pusher.com/channels/).
+
+### Channel Structure
+
+| Channel                           | Type    | Used by   | Description                                              |
+| --------------------------------- | ------- | --------- | -------------------------------------------------------- |
+| `chat-{sessionUuid}`              | Public  | Widget    | Per-session channel embedded in iframe; no auth required |
+| `private-workspace-{workspaceId}` | Private | Dashboard | Workspace-level alerts; requires Clerk auth              |
+| `private-session-{sessionId}`     | Private | Dashboard | Per-session messages for opened conversation view        |
+
+### Events
+
+| Channel                           | Event                  | Payload                                      | Trigger                                                   |
+| --------------------------------- | ---------------------- | -------------------------------------------- | --------------------------------------------------------- |
+| `chat-{sessionUuid}`              | `status-changed`       | `{ status: 'HUMAN' }`                        | AI detects REALTIME_MARKER or operator manually escalates |
+| `chat-{sessionUuid}`              | `operator-message`     | `{ id, content, createdAt }`                 | Operator sends message in dashboard                       |
+| `private-workspace-{workspaceId}` | `session-escalated`    | `{ sessionId, sessionUuid, domainHostname }` | Session becomes HUMAN                                     |
+| `private-workspace-{workspaceId}` | `session-updated`      | `{ sessionId, lastMessage, status }`         | Any new message in any session                            |
+| `private-session-{sessionId}`     | `new-customer-message` | `{ id, role, content, createdAt }`           | Customer sends message in HUMAN session                   |
+
+### Auth Endpoint
+
+`POST /api/pusher/auth` — authenticates private channels. Uses Clerk `auth()` to verify the requesting user owns the workspace in the channel name. For `private-session-*` channels, additionally verifies the session belongs to that workspace.
+
+### Lib Location
+
+- `src/shared/lib/pusher.ts` — server-side `pusherServer` instance, client-side `getPusherClient()` singleton, channel/event name constants
+
+---
+
+## Conversations Dashboard
+
+Route: `/conversations`
+
+A two-panel layout for monitoring and managing all chatbot sessions across all domains:
+
+- **Left panel** — Session list filterable by All / Live (HUMAN) / AI. Each item shows domain hostname, last message preview, relative timestamp, and status badge. Sessions in `HUMAN` status show a red alert icon.
+- **Right panel** — Full conversation dialog. Selecting a session loads all messages via `getSessionMessagesAction`.
+
+### Operator Controls (HUMAN sessions only)
+
+When a session is in `HUMAN` mode, the conversation detail view shows:
+
+- **Message input** — Textarea (Enter to send, Shift+Enter for newline). Sends via `sendOperatorMessageAction`, which saves to DB and pushes via Pusher to the widget.
+- **Send Portal Link button** — Calls `sendPortalLinkMessageAction`, generates a portal token and sends the booking URL as a message to the customer.
+
+### Manual Escalation
+
+For `AI` sessions, an operator can click "Transfer to Human" to manually escalate via `setSessionHumanAction`. This updates `ChatSession.status = HUMAN` and triggers Pusher events to notify both the widget and the dashboard.
+
+### Real-time Updates
+
+- The Conversations view subscribes to `private-workspace-{workspaceId}` via Pusher to update session badges and last-message previews without page refresh.
+- The ConversationDetail view subscribes to `private-session-{sessionId}` to append incoming customer messages in real-time.
+
+---
+
 ## Environment Variables
 
-| Variable              | Scope  | Required | Description                                                                      |
-| --------------------- | ------ | -------- | -------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`      | Server | Yes      | OpenAI API key                                                                   |
-| `NEXT_PUBLIC_APP_URL` | Client | Yes      | App base URL (e.g. `https://app.sendora.io`) — used in embed script and snippets |
+| Variable                     | Scope  | Required | Description                                                                      |
+| ---------------------------- | ------ | -------- | -------------------------------------------------------------------------------- |
+| `OPENAI_API_KEY`             | Server | Yes      | OpenAI API key                                                                   |
+| `NEXT_PUBLIC_APP_URL`        | Client | Yes      | App base URL (e.g. `https://app.sendora.io`) — used in embed script and snippets |
+| `PUSHER_APP_ID`              | Server | Yes      | Pusher application ID                                                            |
+| `PUSHER_KEY`                 | Server | Yes      | Pusher key (server-side)                                                         |
+| `PUSHER_SECRET`              | Server | Yes      | Pusher secret                                                                    |
+| `PUSHER_CLUSTER`             | Server | Yes      | Pusher cluster (e.g. `eu`)                                                       |
+| `NEXT_PUBLIC_PUSHER_KEY`     | Client | Yes      | Pusher key exposed to client                                                     |
+| `NEXT_PUBLIC_PUSHER_CLUSTER` | Client | Yes      | Pusher cluster exposed to client                                                 |
 
 ---
 
 ## Breaking Changes
 
-| #   | Change                                                                             | Impact                                                                                                                            |
-| --- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Embed snippet changed from `<iframe>` to `<script>`                                | Existing users with the old iframe snippet must replace it. Old snippets will continue to work but won't auto-sync style changes. |
-| 2   | Widget page is now a Server Component                                              | Config is fetched from DB on each load; URL params `?color` and `?style` are no longer read                                       |
-| 3   | `ChatbotWidget` extracted to `chatbot-widget.tsx`                                  | `chatbot/[domainId]/page.tsx` no longer contains the interactive code                                                             |
-| 4   | `Chatbot` model: 4 new fields added                                                | Requires `prisma db push` — existing rows get defaults (`MEDIUM`, `LIGHT`, `"Support Chat"`, `"AI Assistant • Online"`)           |
-| 5   | `Domain` model: `lastVerifiedCheckAt` added                                        | Requires `prisma db push` — starts as `null`, re-check triggers on next widget load                                               |
-| 6   | `updateDomainVerificationCheck` added to domain-repository                         | New export in `repositories/index.ts`                                                                                             |
-| 7   | `findChatbotWithPlanByDomainId` added to chatbot-repository                        | New export in `repositories/index.ts` — used by widget page for branding check                                                    |
-| 8   | `fetchDomainHtml` / `checkMetaTag` moved to `domains/lib/check-domain-meta-tag.ts` | `verify-domain-action.ts` now imports from shared lib                                                                             |
-| 9   | Periodic domain re-verification on widget load                                     | If meta tag is removed post-verification, widget blocks within ≤1 hour                                                            |
-| 10  | `ChatbotPreview` requires 4 new props                                              | `DomainPage` call site updated accordingly                                                                                        |
-| 11  | `next.config.ts` adds CORS header for `/chatbot/embed`                             | Required for cross-origin `<script>` loading                                                                                      |
+| #   | Change                                                                              | Impact                                                                                                                            |
+| --- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Embed snippet changed from `<iframe>` to `<script>`                                 | Existing users with the old iframe snippet must replace it. Old snippets will continue to work but won't auto-sync style changes. |
+| 2   | Widget page is now a Server Component                                               | Config is fetched from DB on each load; URL params `?color` and `?style` are no longer read                                       |
+| 3   | `ChatbotWidget` extracted to `chatbot-widget.tsx`                                   | `chatbot/[domainId]/page.tsx` no longer contains the interactive code                                                             |
+| 4   | `Chatbot` model: 4 new fields added                                                 | Requires `prisma db push` — existing rows get defaults (`MEDIUM`, `LIGHT`, `"Support Chat"`, `"AI Assistant • Online"`)           |
+| 5   | `Domain` model: `lastVerifiedCheckAt` added                                         | Requires `prisma db push` — starts as `null`, re-check triggers on next widget load                                               |
+| 6   | `updateDomainVerificationCheck` added to domain-repository                          | New export in `repositories/index.ts`                                                                                             |
+| 7   | `findChatbotWithPlanByDomainId` added to chatbot-repository                         | New export in `repositories/index.ts` — used by widget page for branding check                                                    |
+| 8   | `fetchDomainHtml` / `checkMetaTag` moved to `domains/lib/check-domain-meta-tag.ts`  | `verify-domain-action.ts` now imports from shared lib                                                                             |
+| 9   | Periodic domain re-verification on widget load                                      | If meta tag is removed post-verification, widget blocks within ≤1 hour                                                            |
+| 10  | `ChatbotPreview` requires 4 new props                                               | `DomainPage` call site updated accordingly                                                                                        |
+| 11  | `next.config.ts` adds CORS header for `/chatbot/embed`                              | Required for cross-origin `<script>` loading                                                                                      |
+| 12  | Pusher added (`pusher` + `pusher-js`); new env vars required                        | Requires 6 new env vars; chat API updated to bypass AI for HUMAN sessions                                                         |
+| 13  | `findChatbotByDomainId` now includes `domain.workspaceId`                           | Chat API uses it to trigger workspace-level Pusher events                                                                         |
+| 14  | Chat API (`/api/chat/[domainId]`) short-circuits when `session.status === 'HUMAN'`  | Customer messages in HUMAN sessions are forwarded via Pusher instead of going to OpenAI                                           |
+| 15  | Conversations page (`/conversations`) implemented                                   | Replaces placeholder; requires `findSessionsByWorkspaceId` from updated chatbot-repository                                        |
+| 16  | Widget subscribes to Pusher on mount; handles `status-changed` + `operator-message` | Widget now renders "Connected to live agent" banner and displays operator messages in real-time                                   |
