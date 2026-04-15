@@ -1,20 +1,32 @@
 'use client'
 
 import type { ChatbotBorderRadius } from '@prisma/client'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 
 import { ChatbotButtonStyle } from '@prisma/client'
 import { ChatbotTheme } from '@prisma/client'
-import { MessageCircle, Send, X } from 'lucide-react'
+import { MessageCircle, PhoneOff, Send, UserCheck, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import { BORDER_RADIUS_CLASS, PORTAL_MARKER } from '@/features/chatbot/utils'
+import {
+  BORDER_RADIUS_CLASS,
+  PORTAL_MARKER,
+  REALTIME_MARKER,
+  stripMarkers,
+} from '@/features/chatbot/utils'
+import {
+  getPusherClient,
+  PUSHER_CHANNELS,
+  PUSHER_EVENTS,
+} from '@/shared/lib/pusher'
 import { cn } from '@/shared/utils/cn'
 
 interface ChatMsg {
   id: string
   role: 'user' | 'assistant'
   content: string
+  isStatus?: boolean
+  isClosedStatus?: boolean
 }
 
 function getOrCreateSessionUuid(domainId: string): string {
@@ -31,8 +43,44 @@ function getOrCreateSessionUuid(domainId: string): string {
   return uuid
 }
 
-function stripPortalMarker(content: string): string {
-  return content.replace(/\n?\{"portal":true\}\s*$/, '').trim()
+// Renders message text with clickable URLs
+function MessageWithLinks({
+  content,
+  className,
+}: {
+  content: string
+  className?: string
+}): ReactElement {
+  const parts: ReactNode[] = []
+  const regex = /https?:\/\/[^\s<>"']+/g
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  while ((match = regex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(content.slice(lastIndex, match.index))
+    }
+
+    const url = match[0]
+    parts.push(
+      <a
+        key={match.index}
+        className="break-all underline underline-offset-2 hover:opacity-80"
+        href={url}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {url}
+      </a>,
+    )
+    lastIndex = match.index + url.length
+  }
+
+  if (lastIndex < content.length) {
+    parts.push(content.slice(lastIndex))
+  }
+
+  return <span className={className}>{parts}</span>
 }
 
 export interface ChatbotWidgetProps {
@@ -64,24 +112,70 @@ export function ChatbotWidget({
   const [isLoading, setIsLoading] = useState(false)
   const [isPortalReady, setIsPortalReady] = useState(false)
   const [portalUrl, setPortalUrl] = useState<string | null>(null)
+  const [isHuman, setIsHuman] = useState(false)
+  const [isClosed, setIsClosed] = useState(false)
   const sessionUuidRef = useRef('')
-  // Hostname of the page that embedded this iframe (from document.referrer).
-  // Sent to the API so it can validate the widget is on the correct domain.
   const embedOriginRef = useRef<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    sessionUuidRef.current = getOrCreateSessionUuid(domainId)
+    const uuid = getOrCreateSessionUuid(domainId)
+    sessionUuidRef.current = uuid
 
-    // document.referrer inside an iframe is the URL of the embedding page.
-    // Empty when accessed directly (e.g. for preview/testing).
     if (document.referrer) {
       try {
         embedOriginRef.current = new URL(document.referrer).hostname
       } catch {
         embedOriginRef.current = null
       }
+    }
+
+    const pusher = getPusherClient()
+    const channel = pusher.subscribe(PUSHER_CHANNELS.chatSession(uuid))
+
+    channel.bind(PUSHER_EVENTS.STATUS_CHANGED, (data: { status: string }) => {
+      if (data.status === 'HUMAN') {
+        setIsHuman(true)
+        setMessages(prev => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: 'You are now connected with a live agent.',
+            isStatus: true,
+          },
+        ])
+      }
+    })
+
+    channel.bind(
+      PUSHER_EVENTS.OPERATOR_MESSAGE,
+      (data: { id: string; content: string; createdAt: string }) => {
+        setMessages(prev => [
+          ...prev,
+          { id: data.id, role: 'assistant', content: data.content },
+        ])
+        setIsLoading(false)
+      },
+    )
+
+    channel.bind(PUSHER_EVENTS.SESSION_CLOSED, () => {
+      setIsClosed(true)
+      setIsLoading(false)
+      setMessages(prev => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: 'This conversation has been closed.',
+          isClosedStatus: true,
+        },
+      ])
+    })
+
+    return () => {
+      pusher.unsubscribe(PUSHER_CHANNELS.chatSession(uuid))
     }
   }, [domainId])
 
@@ -90,7 +184,6 @@ export function ChatbotWidget({
   }, [messages])
 
   async function fetchPortalUrl(sessionUuid: string): Promise<void> {
-    // Retry a few times since the portal token is written async in onFinish
     for (let attempt = 0; attempt < 5; attempt++) {
       if (attempt > 0) {
         await new Promise(resolve => setTimeout(resolve, 600))
@@ -112,7 +205,7 @@ export function ChatbotWidget({
   }
 
   async function sendMessage(text: string): Promise<void> {
-    if (!text.trim() || isLoading || isPortalReady) {
+    if (!text.trim() || isPortalReady || isClosed) {
       return
     }
 
@@ -124,6 +217,26 @@ export function ChatbotWidget({
     setMessages(prev => [...prev, userMsg])
     setInput('')
     setIsLoading(true)
+
+    // In HUMAN mode messages go to the same API but AI is bypassed.
+    // Loading stays true until the operator replies via Pusher.
+    if (isHuman) {
+      try {
+        await fetch(`/api/chat/${domainId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text.trim(),
+            sessionUuid: sessionUuidRef.current,
+            embedOrigin: embedOriginRef.current,
+          }),
+        })
+      } catch {
+        // Network errors — loading indicator stays until operator replies
+      }
+
+      return
+    }
 
     const assistantId = crypto.randomUUID()
     setMessages(prev => [
@@ -174,6 +287,17 @@ export function ChatbotWidget({
         setIsPortalReady(true)
         void fetchPortalUrl(sessionUuidRef.current)
       }
+
+      // REALTIME_MARKER: strip from display (Pusher will deliver the status-changed event)
+      if (accumulated.includes(REALTIME_MARKER)) {
+        setMessages(prev =>
+          prev.map(m =>
+            m.id === assistantId
+              ? { ...m, content: stripMarkers(accumulated) }
+              : m,
+          ),
+        )
+      }
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
         setMessages(prev =>
@@ -204,6 +328,8 @@ export function ChatbotWidget({
     isPortalReady,
     portalUrl,
     isLoading,
+    isHuman,
+    isClosed,
     messages,
     input,
     messagesEndRef,
@@ -270,6 +396,8 @@ interface ChatPanelProps {
   isPortalReady: boolean
   portalUrl: string | null
   isLoading: boolean
+  isHuman: boolean
+  isClosed: boolean
   messages: ChatMsg[]
   input: string
   messagesEndRef: React.RefObject<HTMLDivElement | null>
@@ -287,6 +415,8 @@ function ChatPanel({
   isPortalReady,
   portalUrl,
   isLoading,
+  isHuman,
+  isClosed,
   messages,
   input,
   messagesEndRef,
@@ -299,23 +429,38 @@ function ChatPanel({
   onInputChange,
   onSubmit,
 }: ChatPanelProps): ReactElement {
+  const subtitle = isClosed
+    ? 'Conversation ended'
+    : isHuman
+      ? 'Live Agent • Connected'
+      : isPortalReady
+        ? 'Ready to book!'
+        : chatSubtitle
+
+  const headerIcon = isClosed ? (
+    <PhoneOff className="size-4" />
+  ) : isHuman ? (
+    <UserCheck className="size-4" />
+  ) : (
+    <MessageCircle className="size-4" />
+  )
+
   return (
     <div
       className={`flex h-[480px] w-[360px] flex-col overflow-hidden bg-gray-50 shadow-2xl dark:bg-gray-900 ${panelBorderRadius}`}
     >
+      {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 text-white"
         style={{ backgroundColor: primaryColor }}
       >
         <div className="flex items-center gap-2">
           <div className="flex size-8 items-center justify-center rounded-full bg-white/20">
-            <MessageCircle className="size-4" />
+            {headerIcon}
           </div>
           <div>
             <p className="text-sm font-semibold">{chatTitle}</p>
-            <p className="text-xs text-white/75">
-              {isPortalReady ? 'Ready to book!' : chatSubtitle}
-            </p>
+            <p className="text-xs text-white/75">{subtitle}</p>
           </div>
         </div>
         <button
@@ -328,18 +473,45 @@ function ChatPanel({
         </button>
       </div>
 
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 && (
           <p className="text-center text-sm text-gray-400">
             Start a conversation…
           </p>
         )}
+
         {messages.map(message => {
+          // "Connected to live agent" status pill
+          if (message.isStatus) {
+            return (
+              <div key={message.id} className="my-3 flex items-center gap-2">
+                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                <span className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  <UserCheck className="size-3" />
+                  {message.content}
+                </span>
+                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              </div>
+            )
+          }
+
+          // "Conversation closed" status pill
+          if (message.isClosedStatus) {
+            return (
+              <div key={message.id} className="my-3 flex items-center gap-2">
+                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                <span className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                  <PhoneOff className="size-3" />
+                  {message.content}
+                </span>
+                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              </div>
+            )
+          }
+
           const isUser = message.role === 'user'
-          const content =
-            message.role === 'assistant'
-              ? stripPortalMarker(message.content)
-              : message.content
+          const content = stripMarkers(message.content)
 
           return (
             <div
@@ -354,11 +526,18 @@ function ChatPanel({
                 }`}
                 style={isUser ? { backgroundColor: primaryColor } : undefined}
               >
-                {content || (isLoading && !isUser ? '…' : '')}
+                {content ? (
+                  <MessageWithLinks content={content} />
+                ) : isLoading && !isUser ? (
+                  '…'
+                ) : (
+                  ''
+                )}
               </div>
             </div>
           )
         })}
+
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
           <div className="mb-3 flex justify-start">
             <div className="rounded-2xl rounded-bl-sm bg-white/90 px-4 py-3 dark:bg-gray-800">
@@ -370,6 +549,7 @@ function ChatPanel({
             </div>
           </div>
         )}
+
         {isPortalReady && (
           <div className="mt-2 rounded-xl border border-border bg-card px-4 py-3 text-center text-sm dark:border-border dark:bg-card">
             <p className="mb-2 font-medium text-foreground">
@@ -392,10 +572,12 @@ function ChatPanel({
             )}
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
-      {!isPortalReady && (
+      {/* Input — hidden when portal is ready or session is closed */}
+      {!isPortalReady && !isClosed && (
         <form
           className={cn(
             'flex items-center gap-2 border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800',
@@ -405,14 +587,14 @@ function ChatPanel({
         >
           <input
             className="flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm outline-none focus:border-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-gray-400"
-            disabled={isLoading}
-            placeholder="Type a message…"
+            disabled={isLoading && !isHuman}
+            placeholder={isHuman ? 'Message the agent…' : 'Type a message…'}
             value={input}
             onChange={onInputChange}
           />
           <button
             className="flex size-9 shrink-0 items-center justify-center rounded-full text-white disabled:opacity-50"
-            disabled={isLoading || !input.trim()}
+            disabled={(isLoading && !isHuman) || !input.trim()}
             style={{ backgroundColor: primaryColor }}
             type="submit"
           >
@@ -420,6 +602,18 @@ function ChatPanel({
             <span className="sr-only">Send</span>
           </button>
         </form>
+      )}
+
+      {/* Closed state footer in widget */}
+      {isClosed && (
+        <div
+          className={cn(
+            'border-t border-gray-200 bg-gray-50 px-4 py-3 text-center text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400',
+            showBranding ? 'pb-1' : '',
+          )}
+        >
+          This conversation has ended.
+        </div>
       )}
 
       {showBranding && (

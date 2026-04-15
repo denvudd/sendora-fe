@@ -8,6 +8,11 @@ import {
   getSessionMessages,
   setSessionHuman,
 } from '@features/commercial/repositories'
+import {
+  pusherServer,
+  PUSHER_CHANNELS,
+  PUSHER_EVENTS,
+} from '@shared/lib/pusher'
 import { streamText } from 'ai'
 
 import { env } from '@/env'
@@ -109,10 +114,41 @@ export async function POST(
     content: message.trim(),
   })
 
+  // When session is in HUMAN mode, skip AI — forward message to dashboard operator via Pusher
+  if (session.status === 'HUMAN') {
+    const workspaceId = chatbot.domain.workspaceId
+
+    await Promise.all([
+      pusherServer.trigger(
+        PUSHER_CHANNELS.session(session.id),
+        PUSHER_EVENTS.NEW_CUSTOMER_MESSAGE,
+        {
+          id: crypto.randomUUID(),
+          role: 'user',
+          content: message.trim(),
+          createdAt: new Date().toISOString(),
+        },
+      ),
+      pusherServer.trigger(
+        PUSHER_CHANNELS.workspace(workspaceId),
+        PUSHER_EVENTS.SESSION_UPDATED,
+        {
+          sessionId: session.id,
+          lastMessage: message.trim(),
+          status: 'HUMAN',
+        },
+      ),
+    ])
+
+    return Response.json({ ok: true }, { headers: CORS_HEADERS })
+  }
+
   const history = await getSessionMessages({ sessionId: session.id })
 
   const systemPrompt = buildSystemPrompt(chatbot)
   console.log('🚀 ~ POST ~ systemPrompt:', systemPrompt)
+
+  const workspaceId = chatbot.domain.workspaceId
 
   const result = streamText({
     model: MODEL,
@@ -130,6 +166,24 @@ export async function POST(
 
       if (text.includes(REALTIME_MARKER)) {
         await setSessionHuman({ sessionId: session.id })
+
+        // Notify widget that session switched to HUMAN
+        await pusherServer.trigger(
+          PUSHER_CHANNELS.chatSession(sessionUuid),
+          PUSHER_EVENTS.STATUS_CHANGED,
+          { status: 'HUMAN' },
+        )
+
+        // Notify dashboard of escalation
+        await pusherServer.trigger(
+          PUSHER_CHANNELS.workspace(workspaceId),
+          PUSHER_EVENTS.SESSION_ESCALATED,
+          {
+            sessionId: session.id,
+            sessionUuid,
+            domainHostname: chatbot.domain.hostname,
+          },
+        )
       } else if (text.includes(PORTAL_MARKER)) {
         await generatePortalToken({ sessionId: session.id })
       }

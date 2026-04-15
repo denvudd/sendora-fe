@@ -58,7 +58,13 @@ export async function findChatbotByDomainId({
     where: { domainId },
     include: {
       questions: { orderBy: { sortOrder: 'asc' } },
-      domain: { select: { hostname: true, isVerified: true } },
+      domain: {
+        select: {
+          hostname: true,
+          isVerified: true,
+          workspaceId: true,
+        },
+      },
     },
   })
 }
@@ -294,6 +300,105 @@ export async function findSessionByPortalToken({
               },
             },
           },
+        },
+      },
+    },
+  })
+}
+
+// --- Dashboard / Conversations ---
+
+interface FindSessionsByWorkspaceIdParams {
+  workspaceId: string
+}
+
+export async function findSessionsByWorkspaceId({
+  workspaceId,
+}: FindSessionsByWorkspaceIdParams) {
+  return prisma.chatSession.findMany({
+    where: {
+      chatbot: { domain: { workspaceId } },
+    },
+    include: {
+      chatbot: {
+        select: {
+          domain: { select: { hostname: true } },
+        },
+      },
+      messages: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+}
+
+interface FindSessionWithMessagesParams {
+  sessionId: string
+  workspaceId: string
+}
+
+export async function findSessionWithMessages({
+  sessionId,
+  workspaceId,
+}: FindSessionWithMessagesParams) {
+  return prisma.chatSession.findFirst({
+    where: {
+      id: sessionId,
+      chatbot: { domain: { workspaceId } },
+    },
+    include: {
+      messages: { orderBy: { createdAt: 'asc' } },
+      chatbot: {
+        select: {
+          domain: { select: { hostname: true } },
+        },
+      },
+    },
+  })
+}
+
+interface SetSessionHumanBySessionIdParams {
+  sessionId: string
+}
+
+/** Sets session status to HUMAN and returns sessionUuid + workspaceId for Pusher events. */
+export async function setSessionHumanBySessionId({
+  sessionId,
+}: SetSessionHumanBySessionIdParams) {
+  return prisma.chatSession.update({
+    where: { id: sessionId },
+    data: { status: 'HUMAN' },
+    select: {
+      id: true,
+      sessionUuid: true,
+      status: true,
+      chatbot: {
+        select: {
+          domain: { select: { workspaceId: true, hostname: true } },
+        },
+      },
+    },
+  })
+}
+
+interface CloseSessionParams {
+  sessionId: string
+}
+
+/** Sets session status to CLOSED and returns sessionUuid + workspaceId for Pusher events. */
+export async function closeSession({ sessionId }: CloseSessionParams) {
+  return prisma.chatSession.update({
+    where: { id: sessionId },
+    data: { status: 'CLOSED' },
+    select: {
+      id: true,
+      sessionUuid: true,
+      status: true,
+      chatbot: {
+        select: {
+          domain: { select: { workspaceId: true, hostname: true } },
         },
       },
     },
