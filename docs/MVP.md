@@ -76,6 +76,11 @@ A single embeddable platform that deploys an AI sales representative on any webs
 - Granular feature toggles managed via **Bun** settings
 - Restrict or unlock capabilities based on user tier
 
+### Domains
+
+- Plug-in domains for embedded AI chatbot integration
+- Restrict based on user tier
+
 ## 🛠️ Tech Stack
 
 | Layer                  | Technology                                    |
