@@ -2,16 +2,35 @@
 
 import type { ReactElement } from 'react'
 
-import { Button } from '@shared/components/ui/button'
+import { Button, buttonVariants } from '@shared/components/ui/button'
 import { MessageSquare, Menu, X } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import { Image } from '@/shared/components/ui/image'
+import { ROUTES } from '@/shared/constants/routes'
 
-export function HomeNavbar(): ReactElement {
+const NAVBAR_LINKS = [
+  {
+    label: 'Features',
+    href: '#features',
+  },
+  {
+    label: 'How It Works',
+    href: '#how-it-works',
+  },
+  {
+    label: 'Pricing',
+    href: '#pricing',
+  },
+]
+
+export function HomeNavbar({
+  isSignedIn,
+}: {
+  isSignedIn: boolean
+}): ReactElement {
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  const links = ['Features', 'How It Works', 'Pricing']
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
@@ -29,22 +48,30 @@ export function HomeNavbar(): ReactElement {
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          {links.map(link => (
-            <a
-              key={link}
+          {NAVBAR_LINKS.map(link => (
+            <Link
+              key={link.href}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
+              href={link.href}
             >
-              {link}
-            </a>
+              {link.label}
+            </Link>
           ))}
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button size="sm" variant="ghost">
+          <Link
+            className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+            href={isSignedIn ? ROUTES.Dashboard : ROUTES.SignUp}
+          >
             Log in
-          </Button>
-          <Button size="sm">Get Started Free</Button>
+          </Link>
+          <Link
+            className={buttonVariants({ size: 'sm' })}
+            href={isSignedIn ? ROUTES.Billing : ROUTES.SignUp}
+          >
+            Get Started Free
+          </Link>
         </div>
 
         <button
@@ -62,14 +89,14 @@ export function HomeNavbar(): ReactElement {
 
       {mobileOpen && (
         <div className="md:hidden bg-background border-b border-border px-4 pb-4 space-y-3">
-          {links.map(link => (
+          {NAVBAR_LINKS.map(link => (
             <a
-              key={link}
+              key={link.href}
               className="block text-sm font-medium text-muted-foreground hover:text-foreground"
-              href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
+              href={link.href}
               onClick={() => setMobileOpen(false)}
             >
-              {link}
+              {link.label}
             </a>
           ))}
           <div className="flex flex-col gap-2 pt-2">

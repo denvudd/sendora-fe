@@ -1,13 +1,21 @@
 import type { ReactElement } from 'react'
 
-import { Button } from '@shared/components/ui/button'
+import { buttonVariants } from '@shared/components/ui/button'
 import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
-export function HomeCTA(): ReactElement {
+import { ROUTES } from '@/shared/constants/routes'
+import { cn } from '@/shared/utils/cn'
+
+export async function HomeCTA({
+  isSignedIn,
+}: {
+  isSignedIn: boolean
+}): Promise<ReactElement> {
   return (
-    <section className="py-20 lg:py-28 bg-gradient-hero relative overflow-hidden">
+    <section className="py-20 lg:py-28 relative overflow-hidden border-t border-t-border">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-secondary/70 blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 text-center relative">
@@ -18,10 +26,19 @@ export function HomeCTA(): ReactElement {
           Join hundreds of businesses using Sendora to turn conversations into
           customers. Start your free trial today.
         </p>
-        <Button className="text-base px-10 py-6" size="lg">
+
+        <Link
+          className={cn(
+            buttonVariants({
+              size: 'lg',
+            }),
+            'text-base px-8 py-6',
+          )}
+          href={isSignedIn ? ROUTES.Billing : ROUTES.SignUp}
+        >
           Start Free Trial
           <ArrowRight className="w-4 h-4 ml-1" />
-        </Button>
+        </Link>
       </div>
     </section>
   )

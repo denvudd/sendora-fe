@@ -27,8 +27,9 @@ A single embeddable platform that deploys an AI sales representative on any webs
 
 ### 💻 Universal Website Integration
 
-- Embed on any website with a single `<iframe>` snippet
+- Embed on any website with a single `<script>` snippet
 - No complex setup — copy, paste, and go live instantly
+- Style and behavior changes are reflected automatically — the snippet **never needs to be updated**
 
 ### 📅 Booking & Payments
 
@@ -55,9 +56,9 @@ A single embeddable platform that deploys an AI sales representative on any webs
 
 ### 🎨 Customization & White-Labeling
 
-- Fully customizable chat interface (colors, branding, copy)
+- Fully customizable chat interface: primary color, button style, border radius, light/dark theme, header title & subtitle
 - **White-label** options for agencies and resellers
-- Light / dark mode toggle for end users
+- "Powered by Sendora" branding shown on free plan; automatically hidden on paid plans (PLUS / ULTIMATE)
 
 ### 🔐 Authentication & Security
 
@@ -119,14 +120,14 @@ A single embeddable platform that deploys an AI sales representative on any webs
 
 ### ✅ In Scope
 
-- AI chatbot with smart flows and real-time fallback
-- iframe embed for any website
+- AI chatbot with smart flows and real-time fallback ✅ **Implemented**
+- Script-based embed for any website (auto-sync style changes) ✅ **Implemented**
 - Stripe payments + calendar booking
 - Basic email campaign management
 - Lead capture and dashboard
 - White-label and custom branding
 - OTP authentication + file uploads
-- Plan-based feature restrictions
+- Plan-based feature restrictions ✅ **Implemented (domains)**
 
 ### 🚫 Out of Scope (Post-MVP)
 
@@ -148,10 +149,10 @@ A single embeddable platform that deploys an AI sales representative on any webs
 
 Subscription-based SaaS with tiered plans:
 
-| Plan        | Target User               | Key Limits                                    |
-| ----------- | ------------------------- | --------------------------------------------- |
-| **Starter** | Freelancers / Small sites | 1 chatbot, 500 leads/mo, basic email          |
-| **Growth**  | Growing SMBs              | 5 chatbots, 5,000 leads/mo, campaigns         |
-| **Pro**     | Agencies / Power users    | Unlimited bots, white-label, priority support |
+| Plan         | Price             | Target User               | Key Limits / Perks                                           |
+| ------------ | ----------------- | ------------------------- | ------------------------------------------------------------ |
+| **Standard** | Free              | Freelancers / Small sites | 1 domain, 10 contacts/mo, "Powered by Sendora" branding      |
+| **Plus**     | $67/mo or $670/yr | Growing SMBs              | 2 domains, 50 contacts/mo, no branding                       |
+| **Ultimate** | $97/mo or $970/yr | Agencies / Power users    | Unlimited domains, 500 contacts/mo, white-label, no branding |
 
 _Built to turn every conversation into a conversion._

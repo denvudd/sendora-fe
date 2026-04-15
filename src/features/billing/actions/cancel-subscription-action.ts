@@ -10,6 +10,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
 import { stripe } from '@/shared/lib/stripe'
 
 interface CancelSubscriptionState {
@@ -42,7 +43,7 @@ export async function cancelSubscriptionAction(
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const subscription = await findActiveSubscriptionByWorkspaceId({

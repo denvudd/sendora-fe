@@ -2,12 +2,15 @@ import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
 import {
+  findChatbotWithPlanByDomainId,
   findDomainById,
   findOrCreateUser,
   findWorkspaceByUserId,
 } from '@features/commercial/repositories'
 import { DomainPage } from '@features/domains/components/domain-page'
 import { notFound, redirect } from 'next/navigation'
+
+import { ROUTES } from '@/shared/constants/routes'
 
 interface DomainDetailPageProps {
   params: Promise<{ domainId: string }>
@@ -39,16 +42,19 @@ const DomainDetailPage = async ({
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
-  const domain = await findDomainById({ domainId, workspaceId: workspace.id })
+  const [domain, chatbot] = await Promise.all([
+    findDomainById({ domainId, workspaceId: workspace.id }),
+    findChatbotWithPlanByDomainId({ domainId }),
+  ])
 
   if (!domain) {
     notFound()
   }
 
-  return <DomainPage domain={domain} />
+  return <DomainPage chatbot={chatbot} domain={domain} />
 }
 
 export default DomainDetailPage

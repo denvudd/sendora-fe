@@ -2,6 +2,8 @@ import { checkFeatureAllowed } from '@features/commercial/lib/feature-limits'
 import { type LeadStatus, type Prisma } from '@prisma/client'
 import { prisma } from '@shared/utils/prisma'
 
+import { PLAN_FEATURE_CODE } from '@/shared/constants/plan-feature-code'
+
 interface CreateLeadParams {
   workspaceId: string
   email: string
@@ -37,7 +39,7 @@ export async function createLead({
   const currentCount = await prisma.lead.count({ where: { workspaceId } })
   const check = await checkFeatureAllowed({
     workspaceId,
-    featureCode: 'MAX_CONTACTS',
+    featureCode: PLAN_FEATURE_CODE.MAX_CONTACTS,
     currentCount,
   })
 
@@ -73,6 +75,42 @@ export async function listLeadsByWorkspace({
     where: {
       workspaceId,
     },
+  })
+}
+
+interface UpsertLeadParams {
+  workspaceId: string
+  email: string
+  firstName?: string
+  lastName?: string
+}
+
+export async function upsertLead({
+  workspaceId,
+  email,
+  firstName,
+  lastName,
+}: UpsertLeadParams) {
+  const existing = await prisma.lead.findUnique({
+    where: { workspaceId_email: { workspaceId, email } },
+  })
+
+  if (existing) {
+    return prisma.lead.update({
+      where: { workspaceId_email: { workspaceId, email } },
+      data: {
+        ...(firstName !== undefined && { firstName }),
+        ...(lastName !== undefined && { lastName }),
+      },
+    })
+  }
+
+  return createLead({
+    workspaceId,
+    email,
+    firstName,
+    lastName,
+    source: 'chatbot',
   })
 }
 

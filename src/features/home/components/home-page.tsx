@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 
+import { currentUser } from '@clerk/nextjs/server'
 import { HomePricingPlans } from '@features/home/components/home-pricing-plans'
 import { listActivePlans } from '@features/home/repositories/plan-repository'
 
@@ -14,17 +15,19 @@ import { HomeTestimonials } from './home-testimonials'
 
 export async function HomePage(): Promise<ReactElement> {
   const plans = await listActivePlans()
+  const user = await currentUser()
+  const isSignedIn = !!user
 
   return (
     <div className="min-h-screen bg-background">
-      <HomeNavbar />
-      <HomeHero />
+      <HomeNavbar isSignedIn={isSignedIn} />
+      <HomeHero isSignedIn={isSignedIn} />
       <HomeFeatures />
       <HomeHowItWorks />
       <HomeTestimonials />
-      <HomePricingPlans plans={plans} />
+      <HomePricingPlans isSignedIn={isSignedIn} plans={plans} />
       <HomeFAQ />
-      <HomeCTA />
+      <HomeCTA isSignedIn={isSignedIn} />
       <HomeFooter />
     </div>
   )

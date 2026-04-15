@@ -8,6 +8,7 @@ import { findPlanById } from '@features/home/repositories/plan-repository'
 import { type NextRequest } from 'next/server'
 
 import { env } from '@/env'
+import { ROUTES } from '@/shared/constants/routes'
 import { stripe } from '@/shared/lib/stripe'
 
 interface CheckoutRequestBody {
@@ -81,8 +82,8 @@ export async function POST(request: NextRequest) {
     customer: stripeCustomerId,
     mode: 'subscription',
     line_items: [{ price: stripePriceId, quantity: 1 }],
-    success_url: `${appUrl}/dashboard?subscription=success`,
-    cancel_url: `${appUrl}/onboarding`,
+    success_url: `${appUrl}${ROUTES.Dashboard}?subscription=success`,
+    cancel_url: `${appUrl}${ROUTES.Onboarding}`,
     metadata: {
       workspaceId,
       planId,

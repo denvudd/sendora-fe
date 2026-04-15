@@ -2,12 +2,13 @@ import { findActiveSubscriptionByWorkspaceId } from '@features/commercial/reposi
 import { findPlanByCode } from '@features/home/repositories/plan-repository'
 import { prisma } from '@shared/utils/prisma'
 
-export type FeatureCode =
-  | 'MAX_DOMAINS'
-  | 'MAX_CONTACTS'
-  | 'MAX_EMAILS_PER_MONTH'
+import { PLAN_CODE } from '@/shared/constants/plan-code'
+import {
+  PLAN_FEATURE_CODE,
+  type PlanFeatureCode,
+} from '@/shared/constants/plan-feature-code'
 
-export type EffectiveLimits = Record<FeatureCode, number | null>
+export type EffectiveLimits = Record<PlanFeatureCode, number | null>
 
 /**
  * Returns effective feature limits for a workspace.
@@ -42,7 +43,7 @@ export async function getEffectiveLimits(
       isEnabled: pf.isEnabled,
     }))
   } else {
-    const standardPlan = await findPlanByCode({ code: 'STANDARD' })
+    const standardPlan = await findPlanByCode({ code: PLAN_CODE.STANDARD })
     planFeatures = (standardPlan?.features ?? []).map(pf => ({
       code: pf.feature.code,
       limitValue: pf.limitValue ?? null,
@@ -52,7 +53,7 @@ export async function getEffectiveLimits(
 
   const overrideMap = new Map(overrides.map(o => [o.feature.code, o]))
 
-  function resolveLimit(code: FeatureCode): number | null {
+  function resolveLimit(code: PlanFeatureCode): number | null {
     const override = overrideMap.get(code)
 
     if (override) {
@@ -73,15 +74,21 @@ export async function getEffectiveLimits(
   }
 
   return {
-    MAX_DOMAINS: resolveLimit('MAX_DOMAINS'),
-    MAX_CONTACTS: resolveLimit('MAX_CONTACTS'),
-    MAX_EMAILS_PER_MONTH: resolveLimit('MAX_EMAILS_PER_MONTH'),
+    [PLAN_FEATURE_CODE.MAX_DOMAINS]: resolveLimit(
+      PLAN_FEATURE_CODE.MAX_DOMAINS,
+    ),
+    [PLAN_FEATURE_CODE.MAX_CONTACTS]: resolveLimit(
+      PLAN_FEATURE_CODE.MAX_CONTACTS,
+    ),
+    [PLAN_FEATURE_CODE.MAX_EMAILS_PER_MONTH]: resolveLimit(
+      PLAN_FEATURE_CODE.MAX_EMAILS_PER_MONTH,
+    ),
   }
 }
 
 interface CheckFeatureAllowedParams {
   workspaceId: string
-  featureCode: FeatureCode
+  featureCode: PlanFeatureCode
   currentCount: number
 }
 

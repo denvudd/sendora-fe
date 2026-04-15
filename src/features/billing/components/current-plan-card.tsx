@@ -9,7 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@shared/components/ui/card'
+import { format } from 'date-fns'
 import { ArrowRight, Clock } from 'lucide-react'
+
+import { PLAN_CODE } from '@/shared/constants/plan-code'
 
 type SubscriptionWithPlans = WorkspaceSubscription & {
   plan: Plan
@@ -25,11 +28,7 @@ function formatDate(date: Date | null | undefined): string {
     return '—'
   }
 
-  return new Intl.DateTimeFormat('en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(date))
+  return format(date, 'MMMM d, yyyy')
 }
 
 function statusBadgeVariant(
@@ -86,7 +85,9 @@ export function CurrentPlanCard({
         <div className="flex justify-between">
           <span className="text-muted-foreground">Billing</span>
           <span className="capitalize">
-            {subscription.billingInterval.toLowerCase()}
+            {subscription.plan.code === PLAN_CODE.STANDARD
+              ? '-'
+              : subscription.billingInterval.toLowerCase()}
           </span>
         </div>
         {subscription.currentPeriodEndAt && (

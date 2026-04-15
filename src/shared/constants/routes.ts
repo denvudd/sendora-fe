@@ -1,11 +1,22 @@
 export const ROUTES = {
-  dashboard: '/dashboard',
-  conversations: '/conversations',
-  integrations: '/integrations',
-  settings: '/settings',
-  appointments: '/appointments',
-  emailMarketing: '/email-marketing',
+  Dashboard: '/dashboard',
+  Conversations: '/conversations',
+  Integrations: '/integrations',
+  Settings: '/settings',
+  Billing: '/settings/billing',
+  Appointments: '/appointments',
+  EmailMarketing: '/email-marketing',
+
+  // Auth routes
+  SignUp: '/sign-up',
+  SignIn: '/sign-in',
+  Onboarding: '/onboarding',
 } as const
+
+export const chatbotWidget = (domainId: string) =>
+  `/chatbot/${domainId}` as const
+export const portalPage = (token: string) => `/portal/${token}` as const
+export const chatApi = (domainId: string) => `/api/chat/${domainId}` as const
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
 
@@ -22,10 +33,10 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', href: ROUTES.dashboard, icon: 'LayoutGrid' },
-  { label: 'Conversations', href: ROUTES.conversations, icon: 'MessageSquare' },
-  { label: 'Integrations', href: ROUTES.integrations, icon: 'Puzzle' },
-  { label: 'Settings', href: ROUTES.settings, icon: 'Settings' },
-  { label: 'Appointments', href: ROUTES.appointments, icon: 'Calendar' },
-  { label: 'Email Marketing', href: ROUTES.emailMarketing, icon: 'Mail' },
+  { label: 'Dashboard', href: ROUTES.Dashboard, icon: 'LayoutGrid' },
+  { label: 'Conversations', href: ROUTES.Conversations, icon: 'MessageSquare' },
+  { label: 'Integrations', href: ROUTES.Integrations, icon: 'Puzzle' },
+  { label: 'Settings', href: ROUTES.Settings, icon: 'Settings' },
+  { label: 'Appointments', href: ROUTES.Appointments, icon: 'Calendar' },
+  { label: 'Email Marketing', href: ROUTES.EmailMarketing, icon: 'Mail' },
 ]

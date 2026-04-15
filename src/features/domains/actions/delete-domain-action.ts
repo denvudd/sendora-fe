@@ -9,6 +9,8 @@ import {
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 export async function deleteDomainAction(domainId: string): Promise<void> {
   const { userId: clerkId } = await auth()
 
@@ -32,7 +34,7 @@ export async function deleteDomainAction(domainId: string): Promise<void> {
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   await deleteDomain({ domainId, workspaceId: workspace.id })

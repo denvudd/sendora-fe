@@ -38,11 +38,13 @@ export function DeleteDomainButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger
-        render={<Button disabled={isPending} size="sm" variant="destructive" />}
-      >
-        <Trash2 className="size-4" />
-        {isPending ? 'Deleting…' : 'Delete domain'}
-      </AlertDialogTrigger>
+        render={
+          <Button disabled={isPending} size="sm" variant="destructive">
+            <Trash2 className="size-4" />
+            {isPending ? 'Deleting…' : 'Delete domain'}
+          </Button>
+        }
+      />
 
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -55,10 +57,7 @@ export function DeleteDomainButton({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={handleDelete}
-          >
+          <AlertDialogAction variant="destructive" onClick={handleDelete}>
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

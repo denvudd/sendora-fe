@@ -15,6 +15,8 @@ import {
 } from '@shared/components/ui/sidebar'
 import { redirect } from 'next/navigation'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 const AppLayout = async ({
   children,
 }: {
@@ -44,7 +46,7 @@ const AppLayout = async ({
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
   const [domains, limits] = await Promise.all([

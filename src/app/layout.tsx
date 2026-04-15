@@ -32,12 +32,16 @@ const RootLayout = ({ children }: { children: ReactNode }): ReactElement => (
     }}
   >
     <html
-      className={[fontSans.variable, fontMono.variable, 'h-full antialiased']
+      className={[
+        fontSans.variable,
+        fontMono.variable,
+        'h-full antialiased w-full',
+      ]
         .filter(Boolean)
         .join(' ')}
       lang="en"
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col w-full">{children}</body>
     </html>
   </ClerkProvider>
 )
