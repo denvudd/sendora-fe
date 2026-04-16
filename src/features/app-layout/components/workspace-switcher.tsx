@@ -18,11 +18,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@shared/components/ui/sidebar'
-import { ChevronsUpDown } from 'lucide-react'
 
 const DEFAULT_WORKSPACE_LOGO = '/images/logo.png'
 
-interface WorkflowSwitcherProps {
+interface WorkspaceSwitcherProps {
   workspaceName: string
   logoUrl?: string | null
 }
@@ -45,12 +44,11 @@ function WorkspaceLogo({
   )
 }
 
-export function WorkflowSwitcher({
+export function WorkspaceSwitcher({
   workspaceName,
   logoUrl,
-}: WorkflowSwitcherProps): ReactElement {
+}: WorkspaceSwitcherProps): ReactElement {
   const resolvedLogoSrc = logoUrl?.trim() || DEFAULT_WORKSPACE_LOGO
-  console.log('🚀 ~ WorkflowSwitcher ~ resolvedLogoSrc:', resolvedLogoSrc)
 
   return (
     <SidebarGroup>
@@ -70,7 +68,6 @@ export function WorkflowSwitcher({
                 </span>
                 <span className="truncate font-medium">{workspaceName}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-50" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52" side="bottom">
               <DropdownMenuGroup>

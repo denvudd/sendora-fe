@@ -4,6 +4,7 @@ import type { PlanWithFeatures } from '@shared/types/plan'
 import type { ReactElement } from 'react'
 
 import { selectPlanAction } from '@features/onboarding/actions/select-plan-action'
+import { BillingInterval } from '@prisma/client'
 import {
   PlanBillingIntervalToggle,
   PlansGrid,
@@ -25,8 +26,8 @@ export function OnboardingStepPlan({
   workspaceId,
   plans,
 }: OnboardingStepPlanProps): ReactElement {
-  const [billingInterval, setBillingInterval] = useState<'MONTHLY' | 'YEARLY'>(
-    'MONTHLY',
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>(
+    BillingInterval.MONTHLY,
   )
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [state, action, isPending] = useActionState<SelectPlanState, FormData>(
@@ -35,7 +36,7 @@ export function OnboardingStepPlan({
   )
 
   return (
-    <div className="flex flex-col gap-6 px-6 pb-6">
+    <div className="flex flex-col gap-6 pl-0 pr-4">
       <div className="flex items-center justify-center gap-2">
         <PlanBillingIntervalToggle
           value={billingInterval}
@@ -67,7 +68,7 @@ export function OnboardingStepPlan({
         <input name="planId" type="hidden" value={selectedPlanId ?? ''} />
         <input name="billingInterval" type="hidden" value={billingInterval} />
         <Button
-          className="w-full"
+          className="w-full md:w-auto"
           disabled={isPending || !selectedPlanId}
           size="lg"
           type="submit"

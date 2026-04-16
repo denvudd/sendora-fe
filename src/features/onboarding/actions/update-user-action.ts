@@ -1,7 +1,6 @@
 'use server'
 
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { findOrCreateUser, updateUser } from '@features/commercial/repositories'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { updateUserSchema } from '@features/onboarding/schemas'
 import { redirect } from 'next/navigation'
 
@@ -24,35 +23,21 @@ export async function updateUserAction(
     redirect('/sign-in')
   }
 
-  const clerkUser = await currentUser()
-
-  if (!clerkUser) {
-    redirect('/sign-in')
-  }
-
-  const dbUser = await findOrCreateUser({
-    clerkId,
-    email: clerkUser.emailAddresses[0].emailAddress,
-    firstName: clerkUser.firstName,
-    lastName: clerkUser.lastName,
-  })
-
   const validated = updateUserSchema.safeParse({
     firstName: String(formData.get('firstName') ?? '').trim(),
     lastName: String(formData.get('lastName') ?? '').trim(),
   })
 
   if (!validated.success) {
-    return {
-      errors: validated.error.flatten().fieldErrors,
-    }
+    return { errors: validated.error.flatten().fieldErrors }
   }
 
   try {
-    await updateUser({
-      id: dbUser.id,
-      firstName: validated.data.firstName ?? null,
-      lastName: validated.data.lastName ?? null,
+    const client = await clerkClient()
+
+    await client.users.updateUser(clerkId, {
+      firstName: validated.data.firstName,
+      lastName: validated.data.lastName,
     })
   } catch {
     return { message: 'Something went wrong. Please try again.' }

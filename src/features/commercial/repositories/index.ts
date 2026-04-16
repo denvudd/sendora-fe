@@ -57,11 +57,7 @@ export {
   updateSubscription,
   cancelSubscription,
 } from './subscription-repository'
-export {
-  findOrCreateUser,
-  findUserByClerkId,
-  updateUser,
-} from './user-repository'
+export { findOrCreateUser, findUserByClerkId } from './user-repository'
 export {
   createWorkspace,
   findWorkspaceByUserId,

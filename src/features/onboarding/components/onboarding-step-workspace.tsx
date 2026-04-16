@@ -70,7 +70,7 @@ export function OnboardingStepWorkspace({
 
   return (
     <form action={action}>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pl-0 pr-4">
         <Field data-invalid={!!state.errors?.name}>
           <Label htmlFor="name">Workspace name</Label>
           <Input
@@ -127,19 +127,24 @@ export function OnboardingStepWorkspace({
         {state.message && <FieldError>{state.message}</FieldError>}
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-2 mt-4">
-        <Button className="w-full" disabled={isPending} size="lg" type="submit">
-          {isPending ? 'Creating…' : 'Create workspace'}
-        </Button>
+      <CardFooter className="flex flex-col md:flex-row gap-2 md:justify-between mt-4 bg-transparent border-t-0 pl-0 pr-4">
         <Button
-          className="w-full"
+          className="w-full md:w-auto"
           disabled={isPending}
           size="lg"
           type="button"
-          variant="ghost"
+          variant="outline"
           onClick={onBack}
         >
           Back
+        </Button>
+        <Button
+          className="w-full md:w-auto"
+          disabled={isPending}
+          size="lg"
+          type="submit"
+        >
+          {isPending ? 'Creating…' : 'Create workspace'}
         </Button>
       </CardFooter>
     </form>
