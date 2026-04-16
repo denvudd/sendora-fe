@@ -4,6 +4,7 @@ export const ROUTES = {
   Leads: '/leads',
   Settings: '/settings',
   Billing: '/settings/billing',
+  WorkspaceSettings: '/settings/workspace',
   Appointments: '/appointments',
   EmailMarketing: '/email-marketing',
 

@@ -4,7 +4,6 @@ import type { ReactElement } from 'react'
 
 import { createWorkspaceAction } from '@features/onboarding/actions/create-workspace-action'
 import { Button } from '@shared/components/ui/button'
-import { ColorPickerField } from '@shared/components/ui/color-picker-field'
 import { Field, FieldError } from '@shared/components/ui/field'
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
@@ -29,7 +28,6 @@ interface OnboardingFormState {
     name?: string[]
     slug?: string[]
     logoUrl?: string[]
-    primaryColor?: string[]
   }
   message?: string
   workspaceId?: string
@@ -125,8 +123,6 @@ export function OnboardingStepWorkspace({
           cloudImageEditorAutoOpen
           onCdnUrlChange={onLogoUrlChange}
         />
-
-        <ColorPickerField error={state.errors?.primaryColor?.[0]} />
 
         {state.message && <FieldError>{state.message}</FieldError>}
       </CardContent>

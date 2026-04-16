@@ -66,6 +66,7 @@ export {
   createWorkspace,
   findWorkspaceByUserId,
   findWorkspaceByStripeCustomerId,
+  updateWorkspace,
   updateWorkspaceStripeCustomerId,
 } from './workspace-repository'
 export {

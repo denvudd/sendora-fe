@@ -9,6 +9,8 @@ import {
 } from '@shared/components/ui/card'
 import Link from 'next/link'
 
+import { ROUTES } from '@/shared/constants/routes'
+
 const SettingsPage = (): ReactElement => (
   <div className="mx-auto w-full max-w-3xl space-y-6 p-4">
     <div>
@@ -19,7 +21,24 @@ const SettingsPage = (): ReactElement => (
     </div>
 
     <div className="grid gap-4 sm:grid-cols-2">
-      <Card>
+      <Card className="justify-between">
+        <CardHeader>
+          <CardTitle className="text-base">Workspace settings</CardTitle>
+          <CardDescription>
+            Update your workspace name, slug, and logo.
+          </CardDescription>
+        </CardHeader>
+        <div className="px-4 pt-4">
+          <Link
+            className={buttonVariants({ size: 'sm' })}
+            href={ROUTES.WorkspaceSettings}
+          >
+            Edit workspace
+          </Link>
+        </div>
+      </Card>
+
+      <Card className="justify-between">
         <CardHeader>
           <CardTitle className="text-base">
             Billing &amp; subscription
@@ -29,21 +48,14 @@ const SettingsPage = (): ReactElement => (
             subscription.
           </CardDescription>
         </CardHeader>
-        <div className="px-6 pb-6">
+        <div className="px-4 pt-4">
           <Link
             className={buttonVariants({ size: 'sm' })}
-            href="/settings/billing"
+            href={ROUTES.Billing}
           >
             Manage billing
           </Link>
         </div>
-      </Card>
-
-      <Card className="opacity-60">
-        <CardHeader>
-          <CardTitle className="text-base">Workspace settings</CardTitle>
-          <CardDescription>Coming soon.</CardDescription>
-        </CardHeader>
       </Card>
     </div>
   </div>
