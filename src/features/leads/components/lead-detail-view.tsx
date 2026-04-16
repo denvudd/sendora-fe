@@ -3,11 +3,10 @@ import type { ReactElement } from 'react'
 
 import { TZDate } from '@date-fns/tz'
 import { LeadNotesForm } from '@features/leads/components/lead-notes-form'
-import { LeadStatusBadge } from '@features/leads/components/lead-status-badge'
 import { LeadStatusSelect } from '@features/leads/components/lead-status-select'
 import { BookingStatus } from '@prisma/client'
 import { Badge } from '@shared/components/ui/badge'
-import { Button } from '@shared/components/ui/button'
+import { Button, buttonVariants } from '@shared/components/ui/button'
 import {
   Card,
   CardContent,
@@ -28,6 +27,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+import { cn } from '@/shared/utils/cn'
+
 import { leadDisplayName } from '../utils'
 
 interface Booking {
@@ -37,6 +38,7 @@ interface Booking {
   endsAt: Date
   timezone: string
   status: BookingStatus
+  meetingLink: string | null
 }
 
 interface Session {
@@ -142,7 +144,6 @@ export function LeadDetailView({ lead }: LeadDetailViewProps): ReactElement {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <LeadStatusBadge status={lead.status} />
           <LeadStatusSelect leadId={lead.id} status={lead.status} />
         </div>
       </div>
@@ -294,22 +295,38 @@ export function LeadDetailView({ lead }: LeadDetailViewProps): ReactElement {
                             {BOOKING_STATUS_LABELS[booking.status]}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {format(
-                            new TZDate(booking.startsAt, booking.timezone),
-                            'MMM d, yyyy',
-                          )}{' '}
-                          ·{' '}
-                          {format(
-                            new TZDate(booking.startsAt, booking.timezone),
-                            'h:mm a',
-                          )}{' '}
-                          –{' '}
-                          {format(
-                            new TZDate(booking.endsAt, booking.timezone),
-                            'h:mm a',
+                        <div className="flex items-center gap-2 justify-between">
+                          <p className="text-xs text-muted-foreground">
+                            {format(
+                              new TZDate(booking.startsAt, booking.timezone),
+                              'MMM d, yyyy',
+                            )}{' '}
+                            ·{' '}
+                            {format(
+                              new TZDate(booking.startsAt, booking.timezone),
+                              'h:mm a',
+                            )}{' '}
+                            –{' '}
+                            {format(
+                              new TZDate(booking.endsAt, booking.timezone),
+                              'h:mm a',
+                            )}
+                          </p>
+                          {booking.meetingLink && (
+                            <Link
+                              className={cn(
+                                buttonVariants({
+                                  variant: 'link',
+                                }),
+                                'p-0 text-xs text-muted-foreground',
+                              )}
+                              href={booking.meetingLink}
+                              target="_blank"
+                            >
+                              {booking.meetingLink}
+                            </Link>
                           )}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   ))}

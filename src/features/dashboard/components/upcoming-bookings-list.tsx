@@ -65,7 +65,10 @@ export function UpcomingBookingsList({
                     <p className="text-xs tabular-nums text-muted-foreground">
                       {format(tzStart, 'MMM d, yyyy h:mm a')}
                     </p>
-                    <AppointmentStatus booking={booking} />
+                    <AppointmentStatus
+                      booking={booking}
+                      googleCalendarEnabled={false}
+                    />
                   </div>
                 </li>
               )

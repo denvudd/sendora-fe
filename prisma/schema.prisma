@@ -20,23 +20,25 @@ model User {
 }
 
 model Workspace {
-  id                  String                  @id @default(cuid())
-  name                String
-  slug                String                  @unique
-  logoUrl             String?
-  isWhiteLabelEnabled Boolean                 @default(false)
-  stripeCustomerId    String?                 @unique
-  createdAt           DateTime                @default(now())
-  updatedAt           DateTime                @updatedAt
-  userId              String                  @unique
-  appointmentSchedule AppointmentSchedule?
-  bookings            Booking[]
-  domains             Domain[]
-  leads               Lead[]
-  payments            Payment[]
-  user                User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  featureOverrides    WorkspaceFeature[]
-  subscriptions       WorkspaceSubscription[]
+  id                     String                  @id @default(cuid())
+  name                   String
+  slug                   String                  @unique
+  logoUrl                String?
+  isWhiteLabelEnabled    Boolean                 @default(false)
+  stripeCustomerId       String?                 @unique
+  googleRefreshToken     String?
+  googleCalendarEnabled  Boolean                 @default(false)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  userId                 String                  @unique
+  appointmentSchedule    AppointmentSchedule?
+  bookings               Booking[]
+  domains                Domain[]
+  leads                  Lead[]
+  payments               Payment[]
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  featureOverrides       WorkspaceFeature[]
+  subscriptions          WorkspaceSubscription[]
 }
 
 model Domain {
@@ -238,6 +240,7 @@ model Booking {
   endsAt              DateTime
   timezone            String
   status              BookingStatus @default(PENDING)
+  meetingLink         String?
   externalCalendarRef String?
   expectedValueCents  Int?
   note                String?

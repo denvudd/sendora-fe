@@ -76,3 +76,23 @@ export async function findWorkspaceByStripeCustomerId({
 }: FindWorkspaceByStripeCustomerIdParams) {
   return prisma.workspace.findUnique({ where: { stripeCustomerId } })
 }
+
+interface UpdateWorkspaceGoogleTokensParams {
+  workspaceId: string
+  refreshToken: string | null
+  enabled: boolean
+}
+
+export async function updateWorkspaceGoogleTokens({
+  workspaceId,
+  refreshToken,
+  enabled,
+}: UpdateWorkspaceGoogleTokensParams) {
+  return prisma.workspace.update({
+    where: { id: workspaceId },
+    data: {
+      googleRefreshToken: refreshToken,
+      googleCalendarEnabled: enabled,
+    },
+  })
+}

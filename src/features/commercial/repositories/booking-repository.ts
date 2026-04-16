@@ -82,7 +82,14 @@ export async function listUpcomingBookingsWithLeads({
   return prisma.booking.findMany({
     where: { workspaceId, startsAt: { gte: from } },
     orderBy: { startsAt: 'asc' },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      endsAt: true,
+      timezone: true,
+      status: true,
+      meetingLink: true,
       lead: { select: { email: true, firstName: true, lastName: true } },
     },
     take: 50,
@@ -141,5 +148,22 @@ export async function findBookingWithLeadById({
     include: {
       lead: { select: { email: true, firstName: true, lastName: true } },
     },
+  })
+}
+
+interface UpdateBookingMeetingLinkParams {
+  bookingId: string
+  workspaceId: string
+  meetingLink: string
+}
+
+export async function updateBookingMeetingLink({
+  bookingId,
+  workspaceId,
+  meetingLink,
+}: UpdateBookingMeetingLinkParams) {
+  return prisma.booking.update({
+    where: { id: bookingId, workspaceId },
+    data: { meetingLink },
   })
 }

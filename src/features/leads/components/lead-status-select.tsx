@@ -7,7 +7,9 @@ import { LeadStatus } from '@prisma/client'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@shared/components/ui/select'
@@ -67,11 +69,14 @@ export function LeadStatusSelect({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {LEAD_STATUSES.map(s => (
-          <SelectItem key={s.value} value={s.value}>
-            {s.label}
-          </SelectItem>
-        ))}
+        <SelectGroup>
+          <SelectLabel>Status</SelectLabel>
+          {LEAD_STATUSES.map(s => (
+            <SelectItem key={s.value} value={s.value}>
+              {s.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
       </SelectContent>
     </Select>
   )

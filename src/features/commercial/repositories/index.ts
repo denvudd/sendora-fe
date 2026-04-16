@@ -25,6 +25,7 @@ export {
   listBookingsByWorkspace,
   listBookingsForDateRange,
   listUpcomingBookingsWithLeads,
+  updateBookingMeetingLink,
   updateBookingStatus,
 } from './booking-repository'
 export {
@@ -65,6 +66,7 @@ export {
   findWorkspaceByStripeCustomerId,
   updateWorkspace,
   updateWorkspaceStripeCustomerId,
+  updateWorkspaceGoogleTokens,
 } from './workspace-repository'
 export {
   findAppointmentScheduleByWorkspaceId,
