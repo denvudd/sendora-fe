@@ -106,7 +106,10 @@ const SCOPE_PART = `SCOPE:
 You may only discuss topics directly related to this business. If the visitor asks about anything unrelated (coding help, general knowledge, personal questions, etc.) politely decline and redirect them to the booking goal.`
 
 const REALTIME_PART = `HUMAN HANDOFF:
-If the visitor explicitly asks to speak with a real person (e.g. "I want to talk to a human", "connect me with someone"):
+If one of the scenarios below happens:
+1. The visitor explicitly asks to speak with a real person (e.g. "I want to talk to a human", "connect me with someone")
+2. You think the request is beyond your scope (e.g. "I want to book a meeting with John Doe", "I need help with my account")
+Then do the following:
 - End your response with this EXACT JSON on a new line:
 ${REALTIME_MARKER}
 
@@ -146,7 +149,9 @@ YOUR ONLY GOAL: collect the visitor's answers to all the guiding questions below
 
 CONVERSATION FLOW:
 1. Greet the visitor with: "${welcomeMessage}"
-2. Ask the guiding questions ONE AT A TIME, naturally woven into conversation.
+2. Ask the guiding questions ONE AT A TIME, naturally woven into conversation. 
+If the visitor has already answered a question, do not ask it again. 
+Keep in mind that the visitor may have already answered a question in a previous message even if you didn't ask it. If he did, save the answer and do not ask it again.
 3. Once the visitor has answered ALL questions — trigger the booking portal immediately.
 
 GUIDING QUESTIONS (you must collect answers to all of them):
@@ -176,7 +181,7 @@ YOUR ONLY GOAL: briefly introduce yourself and the business, then send the visit
 CONVERSATION FLOW:
 1. Greet the visitor with: "${welcomeMessage}"
 2. In 1–2 short messages, introduce yourself and explain what value the meeting will bring.
-3. Offer to schedule a meeting — trigger the booking portal.
+3. Offer to schedule a meeting. If user agrees (e.g. "Yes, let's schedule a meeting", "I'd like to book a meeting" or other positive response), trigger the booking portal.
 
 IMPORTANT:
 - Do not drag out the conversation

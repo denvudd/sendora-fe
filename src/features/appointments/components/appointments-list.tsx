@@ -26,17 +26,19 @@ import {
   ToggleGroupItem,
 } from '@shared/components/ui/toggle-group'
 import { format } from 'date-fns'
-import { CalendarClock, CalendarDays, List } from 'lucide-react'
+import { CalendarClock, CalendarDays, List, Video } from 'lucide-react'
 import { useState } from 'react'
 
 import { leadName, type BookingWithLead } from '../utils'
 
 interface AppointmentsListProps {
   bookings: BookingWithLead[]
+  googleCalendarEnabled: boolean
 }
 
 export function AppointmentsList({
   bookings,
+  googleCalendarEnabled,
 }: AppointmentsListProps): ReactElement {
   const [view, setView] = useState<'table' | 'calendar'>('table')
 
@@ -72,7 +74,10 @@ export function AppointmentsList({
 
       <CardContent>
         {view === 'calendar' ? (
-          <AppointmentsCalendarView bookings={bookings} />
+          <AppointmentsCalendarView
+            bookings={bookings}
+            googleCalendarEnabled={googleCalendarEnabled}
+          />
         ) : bookings.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-12 text-center">
             <div className="flex size-12 items-center justify-center rounded-full bg-muted">
@@ -91,6 +96,7 @@ export function AppointmentsList({
                 <TableHead>Date</TableHead>
                 <TableHead>Time</TableHead>
                 <TableHead>Duration</TableHead>
+                <TableHead>Meeting</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -132,7 +138,25 @@ export function AppointmentsList({
                     </TableCell>
                     <TableCell>{durationMin} min</TableCell>
                     <TableCell>
-                      <AppointmentStatus booking={booking} />
+                      {booking.meetingLink ? (
+                        <a
+                          className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                          href={booking.meetingLink}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          <Video className="size-3.5 shrink-0" />
+                          Join
+                        </a>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <AppointmentStatus
+                        booking={booking}
+                        googleCalendarEnabled={googleCalendarEnabled}
+                      />
                     </TableCell>
                   </TableRow>
                 )

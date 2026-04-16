@@ -8,6 +8,7 @@ import {
   AppointmentStatus,
   TRANSITIONS,
 } from '@features/appointments/components/appointment-status'
+import { ConfirmBookingDialog } from '@features/appointments/components/confirm-booking-dialog'
 import { leadName, type BookingWithLead } from '@features/appointments/utils'
 import { BookingStatus } from '@prisma/client'
 import { Button } from '@shared/components/ui/button'
@@ -37,7 +38,7 @@ import {
   startOfWeek,
   subMonths,
 } from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Video } from 'lucide-react'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
@@ -54,12 +55,15 @@ const MAX_CHIPS_PER_CELL = 3
 
 interface CalendarBookingChipProps {
   booking: BookingWithLead
+  googleCalendarEnabled: boolean
 }
 
 function CalendarBookingChip({
   booking,
+  googleCalendarEnabled,
 }: CalendarBookingChipProps): ReactElement {
   const [isPending, startTransition] = useTransition()
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
 
   const timeLabel = format(
     new TZDate(booking.startsAt, booking.timezone),
@@ -79,6 +83,12 @@ function CalendarBookingChip({
   const transitions = TRANSITIONS[booking.status] ?? []
 
   function handleTransition(status: BookingStatus): void {
+    if (status === BookingStatus.CONFIRMED) {
+      setConfirmDialogOpen(true)
+
+      return
+    }
+
     startTransition(async () => {
       const result = await updateBookingStatusAction(booking.id, status)
 
@@ -101,7 +111,22 @@ function CalendarBookingChip({
       <p className="text-primary">
         {timeLabel} – {endTimeLabel} · {durationMin} min
       </p>
-      <AppointmentStatus booking={booking} />
+      {booking.meetingLink && (
+        <a
+          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          href={booking.meetingLink}
+          rel="noopener noreferrer"
+          target="_blank"
+          onClick={e => e.stopPropagation()}
+        >
+          <Video className="size-3 shrink-0" />
+          Join meeting
+        </a>
+      )}
+      <AppointmentStatus
+        booking={booking}
+        googleCalendarEnabled={googleCalendarEnabled}
+      />
     </div>
   )
 
@@ -112,57 +137,71 @@ function CalendarBookingChip({
   )
 
   return (
-    <TooltipProvider delay={400}>
-      <Tooltip>
-        {transitions.length > 0 ? (
-          <DropdownMenu>
-            <TooltipTrigger>
-              <DropdownMenuTrigger
-                className={cn(baseChipClass, 'cursor-pointer hover:opacity-80')}
-                disabled={isPending}
-              >
-                {chipContent}
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <DropdownMenuContent align="start">
-              {transitions.map((t, i) => (
-                <>
-                  {i > 0 && t.status === BookingStatus.CANCELLED && (
-                    <DropdownMenuSeparator key={`sep-${t.status}`} />
+    <>
+      <TooltipProvider delay={400}>
+        <Tooltip>
+          {transitions.length > 0 ? (
+            <DropdownMenu>
+              <TooltipTrigger>
+                <DropdownMenuTrigger
+                  className={cn(
+                    baseChipClass,
+                    'cursor-pointer hover:opacity-80',
                   )}
-                  <DropdownMenuItem
-                    key={t.status}
-                    className="gap-2"
-                    onClick={() => handleTransition(t.status)}
-                  >
-                    {t.icon}
-                    {t.label}
-                  </DropdownMenuItem>
-                </>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <TooltipTrigger
-            render={<div className={cn(baseChipClass, 'cursor-default')} />}
-          >
-            {chipContent}
-          </TooltipTrigger>
-        )}
-        <TooltipContent className="max-w-[220px]" side="top">
-          {tooltipBody}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+                  disabled={isPending}
+                >
+                  {chipContent}
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <DropdownMenuContent align="start">
+                {transitions.map((t, i) => (
+                  <>
+                    {i > 0 && t.status === BookingStatus.CANCELLED && (
+                      <DropdownMenuSeparator key={`sep-${t.status}`} />
+                    )}
+                    <DropdownMenuItem
+                      key={t.status}
+                      className="gap-2"
+                      onClick={() => handleTransition(t.status)}
+                    >
+                      {t.icon}
+                      {t.label}
+                    </DropdownMenuItem>
+                  </>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <TooltipTrigger
+              render={<div className={cn(baseChipClass, 'cursor-default')} />}
+            >
+              {chipContent}
+            </TooltipTrigger>
+          )}
+          <TooltipContent className="max-w-[220px]" side="top">
+            {tooltipBody}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <ConfirmBookingDialog
+        bookingId={booking.id}
+        googleCalendarEnabled={googleCalendarEnabled}
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+      />
+    </>
   )
 }
 
 interface AppointmentsCalendarViewProps {
   bookings: BookingWithLead[]
+  googleCalendarEnabled: boolean
 }
 
 export function AppointmentsCalendarView({
   bookings,
+  googleCalendarEnabled,
 }: AppointmentsCalendarViewProps): ReactElement {
   const [currentMonth, setCurrentMonth] = useState(() =>
     startOfMonth(new Date()),
@@ -267,7 +306,11 @@ export function AppointmentsCalendarView({
                   {/* Booking chips */}
                   <div className="flex flex-col gap-0.5">
                     {visibleBookings.map(booking => (
-                      <CalendarBookingChip key={booking.id} booking={booking} />
+                      <CalendarBookingChip
+                        key={booking.id}
+                        booking={booking}
+                        googleCalendarEnabled={googleCalendarEnabled}
+                      />
                     ))}
 
                     {overflowCount > 0 && (

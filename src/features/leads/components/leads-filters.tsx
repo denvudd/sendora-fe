@@ -136,7 +136,7 @@ export function LeadsFilters({ domains }: LeadsFiltersProps): ReactElement {
           <PopoverTrigger
             render={
               <Button
-                className="justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                className="justify-start text-left font-normal data-[empty=true]:text-muted-foreground bg-transparent border-input"
                 data-empty={!currentDateFrom}
                 variant="outline"
               />
@@ -168,7 +168,7 @@ export function LeadsFilters({ domains }: LeadsFiltersProps): ReactElement {
           <PopoverTrigger
             render={
               <Button
-                className="justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
+                className="justify-start text-left font-normal data-[empty=true]:text-muted-foreground bg-transparent border-input"
                 data-empty={!currentDateTo}
                 variant="outline"
               />

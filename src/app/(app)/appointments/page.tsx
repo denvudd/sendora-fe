@@ -3,6 +3,7 @@ import type { ReactElement } from 'react'
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { AppointmentScheduleForm } from '@features/appointments/components/appointment-schedule-form'
 import { AppointmentsList } from '@features/appointments/components/appointments-list'
+import { GoogleMeetConnect } from '@features/appointments/components/google-meet-connect'
 import {
   findAppointmentScheduleByWorkspaceId,
   findOrCreateUser,
@@ -17,13 +18,13 @@ const AppointmentsPage = async (): Promise<ReactElement> => {
   const { userId: clerkId } = await auth()
 
   if (!clerkId) {
-    redirect('/sign-in')
+    redirect(ROUTES.SignIn)
   }
 
   const clerkUser = await currentUser()
 
   if (!clerkUser) {
-    redirect('/sign-in')
+    redirect(ROUTES.SignIn)
   }
 
   const dbUser = await findOrCreateUser({
@@ -56,7 +57,11 @@ const AppointmentsPage = async (): Promise<ReactElement> => {
       </div>
 
       <AppointmentScheduleForm schedule={schedule} />
-      <AppointmentsList bookings={bookings} />
+      <GoogleMeetConnect isConnected={workspace.googleCalendarEnabled} />
+      <AppointmentsList
+        bookings={bookings}
+        googleCalendarEnabled={workspace.googleCalendarEnabled}
+      />
     </div>
   )
 }

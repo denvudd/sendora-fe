@@ -231,6 +231,75 @@ src/app/
 
 ---
 
+## Google Meet Integration
+
+Operators can attach a video call link to any booking at confirmation time. Two options are available:
+
+### Option A — Manual link
+
+The operator pastes any URL (Zoom, Teams, Google Meet, etc.) into the confirmation dialog.
+
+### Option B — Auto-generate via Google Meet (free)
+
+Uses the Google Calendar API (free tier) to create a Calendar event with conference data. The generated `meet.google.com` link is saved to the booking and included in the confirmation email.
+
+**Setup:**
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → Create OAuth 2.0 Web Application credentials.
+2. Enable **Google Calendar API** for the project.
+3. Add Authorized redirect URI: `{BASE_URL}/api/google/callback`
+4. Set the following env vars:
+
+```
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=https://yourdomain.com/api/google/callback
+```
+
+**OAuth flow:**
+
+- Operator clicks "Connect Google" in the Appointments page → redirected to `/api/google/auth`.
+- After consent, Google redirects to `/api/google/callback` which stores the refresh token in `Workspace.googleRefreshToken`.
+- To revoke: operator clicks "Disconnect" → token is cleared from the database.
+
+**Database fields added:**
+
+| Model       | Field                   | Type      | Description                       |
+| ----------- | ----------------------- | --------- | --------------------------------- |
+| `Workspace` | `googleRefreshToken`    | `String?` | OAuth refresh token               |
+| `Workspace` | `googleCalendarEnabled` | `Boolean` | Integration active flag           |
+| `Booking`   | `meetingLink`           | `String?` | Meeting URL (manual or generated) |
+
+**Confirm booking flow:**
+
+When an operator changes a booking status to `CONFIRMED`, a dialog appears with three choices:
+
+1. No meeting link — confirm without a link.
+2. Enter link manually — paste any URL.
+3. Generate via Google Meet — calls Calendar API to create the event + conference.
+
+The resolved link (if any) is saved to `Booking.meetingLink` and included in the confirmation email sent to the guest.
+
+**Module additions:**
+
+```
+src/features/appointments/
+├── lib/
+│   └── google-meet.ts                    — createGoogleMeetEvent, buildGoogleOAuthUrl, exchangeCodeForTokens
+├── actions/
+│   ├── confirm-booking-action.ts         — Replaces direct CONFIRMED transition; handles link + email
+│   └── disconnect-google-calendar-action.ts
+└── components/
+    ├── google-meet-connect.tsx           — Connect / Disconnect UI card
+    └── confirm-booking-dialog.tsx        — Modal with link mode selection
+
+src/app/api/google/
+├── auth/route.ts                         — Redirect to Google OAuth consent
+└── callback/route.ts                     — Handle code exchange, store token
+```
+
+---
+
 ## Email Notifications
 
 When an operator changes a booking status to `CONFIRMED`, a confirmation email is automatically sent to the lead.

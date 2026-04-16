@@ -7,6 +7,7 @@ interface BookingConfirmationEmailParams {
   endsAt: Date
   timezone: string
   workspaceName: string
+  meetingLink?: string
 }
 
 interface BookingConfirmationEmailResult {
@@ -20,6 +21,7 @@ export function buildBookingConfirmationEmail({
   endsAt,
   timezone,
   workspaceName,
+  meetingLink,
 }: BookingConfirmationEmailParams): BookingConfirmationEmailResult {
   const tzStart = new TZDate(startsAt, timezone)
   const tzEnd = new TZDate(endsAt, timezone)
@@ -140,6 +142,20 @@ export function buildBookingConfirmationEmail({
                     <p style="margin:0;color:#ffffff;font-size:15px;font-weight:500;">${escapeHtml(workspaceName)}</p>
                   </td>
                 </tr>
+
+                ${
+                  meetingLink
+                    ? `
+                <!-- Meeting link -->
+                <tr>
+                  <td style="padding-top:24px;">
+                    <a href="${escapeHtml(meetingLink)}" target="_blank" style="display:inline-block;background-color:#1d6f42;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:12px 28px;border-radius:8px;border:1px solid #16a34a;">
+                      🎥 Join Google Meet
+                    </a>
+                  </td>
+                </tr>`
+                    : ''
+                }
 
               </table>
             </td>

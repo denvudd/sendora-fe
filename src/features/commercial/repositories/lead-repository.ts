@@ -234,6 +234,7 @@ export async function findLeadById({
           endsAt: true,
           timezone: true,
           status: true,
+          meetingLink: true,
         },
       },
     },

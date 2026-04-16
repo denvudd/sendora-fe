@@ -7,6 +7,7 @@ export interface BookingWithLead {
   endsAt: Date
   timezone: string
   status: BookingStatus
+  meetingLink: string | null
   lead: {
     email: string
     firstName: string | null
