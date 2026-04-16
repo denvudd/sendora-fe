@@ -5,7 +5,13 @@ interface CreateWorkspaceParams {
   name: string
   slug: string
   logoUrl?: string | null
-  primaryColor?: string | null
+}
+
+interface UpdateWorkspaceParams {
+  workspaceId: string
+  name: string
+  slug: string
+  logoUrl?: string | null
 }
 
 interface FindWorkspaceByUserIdParams {
@@ -26,7 +32,6 @@ export async function createWorkspace({
   name,
   slug,
   logoUrl,
-  primaryColor,
 }: CreateWorkspaceParams) {
   return prisma.workspace.create({
     data: {
@@ -34,8 +39,19 @@ export async function createWorkspace({
       name,
       slug,
       logoUrl: logoUrl ?? null,
-      primaryColor: primaryColor ?? null,
     },
+  })
+}
+
+export async function updateWorkspace({
+  workspaceId,
+  name,
+  slug,
+  logoUrl,
+}: UpdateWorkspaceParams) {
+  return prisma.workspace.update({
+    where: { id: workspaceId },
+    data: { name, slug, logoUrl: logoUrl ?? null },
   })
 }
 

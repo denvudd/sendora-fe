@@ -26,7 +26,6 @@ model Workspace {
   name                String
   slug                String                  @unique
   logoUrl             String?
-  primaryColor        String?
   isWhiteLabelEnabled Boolean                 @default(false)
   stripeCustomerId    String?                 @unique
   createdAt           DateTime                @default(now())
