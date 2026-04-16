@@ -2,7 +2,6 @@ export const ROUTES = {
   Dashboard: '/dashboard',
   Conversations: '/conversations',
   Leads: '/leads',
-  Integrations: '/integrations',
   Settings: '/settings',
   Billing: '/settings/billing',
   Appointments: '/appointments',
@@ -39,7 +38,6 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Conversations', href: ROUTES.Conversations, icon: 'MessageSquare' },
   { label: 'Leads', href: ROUTES.Leads, icon: 'Users2' },
   { label: 'Appointments', href: ROUTES.Appointments, icon: 'Calendar' },
-  { label: 'Integrations', href: ROUTES.Integrations, icon: 'Puzzle' },
   { label: 'Settings', href: ROUTES.Settings, icon: 'Settings' },
   { label: 'Email Marketing', href: ROUTES.EmailMarketing, icon: 'Mail' },
 ]

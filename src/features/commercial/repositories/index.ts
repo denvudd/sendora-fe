@@ -72,3 +72,13 @@ export {
   findAppointmentScheduleByWorkspaceId,
   upsertAppointmentSchedule,
 } from './appointment-schedule-repository'
+export {
+  getDashboardKpis,
+  getLeadStatusCounts,
+  getLeadsTrendLast30Days,
+} from './dashboard-repository'
+export type {
+  DashboardKpis,
+  LeadDailyCount,
+  LeadStatusCount,
+} from './dashboard-repository'

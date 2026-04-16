@@ -26,9 +26,13 @@ import {
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@shared/components/ui/native-select'
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/components/ui/select'
 import { Switch } from '@shared/components/ui/switch'
 import { Textarea } from '@shared/components/ui/textarea'
 import { Bot } from 'lucide-react'
@@ -126,11 +130,13 @@ function EditChatbotCard({
     {},
   )
   const [isActive, setIsActive] = useState(chatbot.isActive)
+  const [buttonStyle, setButtonStyle] = useState(chatbot.buttonStyle)
+  const [theme, setTheme] = useState(chatbot.theme)
+  const [borderRadius, setBorderRadius] = useState(chatbot.borderRadius)
   const [successVisible, setSuccessVisible] = useState(false)
 
   useEffect(() => {
     if (state.success) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuccessVisible(true)
       const timer = setTimeout(() => setSuccessVisible(false), 3000)
 
@@ -190,18 +196,35 @@ function EditChatbotCard({
 
           <Field data-invalid={!!state.errors?.buttonStyle}>
             <Label htmlFor="buttonStyle">Button style</Label>
-            <NativeSelect
-              defaultValue={chatbot.buttonStyle}
-              id="buttonStyle"
-              name="buttonStyle"
+            <input name="buttonStyle" type="hidden" value={buttonStyle} />
+            <Select
+              value={buttonStyle}
+              onValueChange={value => {
+                if (value === null || value === undefined) {
+                  return
+                }
+
+                setButtonStyle(value)
+              }}
             >
-              <NativeSelectOption value={ChatbotButtonStyle.BUBBLE}>
-                Bubble (floating circle)
-              </NativeSelectOption>
-              <NativeSelectOption value={ChatbotButtonStyle.BAR}>
-                Bar (bottom strip)
-              </NativeSelectOption>
-            </NativeSelect>
+              <SelectTrigger
+                aria-invalid={!!state.errors?.buttonStyle}
+                className="w-full"
+                id="buttonStyle"
+              >
+                <SelectValue placeholder="Select button style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value={ChatbotButtonStyle.BUBBLE}>
+                    Bubble (floating circle)
+                  </SelectItem>
+                  <SelectItem value={ChatbotButtonStyle.BAR}>
+                    Bar (bottom strip)
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             {state.errors?.buttonStyle && (
               <FieldError>{state.errors.buttonStyle[0]}</FieldError>
             )}
@@ -209,10 +232,31 @@ function EditChatbotCard({
 
           <Field data-invalid={!!state.errors?.theme}>
             <Label htmlFor="theme">Color theme</Label>
-            <NativeSelect defaultValue={chatbot.theme} id="theme" name="theme">
-              <NativeSelectOption value="LIGHT">Light</NativeSelectOption>
-              <NativeSelectOption value="DARK">Dark</NativeSelectOption>
-            </NativeSelect>
+            <input name="theme" type="hidden" value={theme} />
+            <Select
+              value={theme}
+              onValueChange={value => {
+                if (value === null || value === undefined) {
+                  return
+                }
+
+                setTheme(value)
+              }}
+            >
+              <SelectTrigger
+                aria-invalid={!!state.errors?.theme}
+                className="w-full"
+                id="theme"
+              >
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="LIGHT">Light</SelectItem>
+                  <SelectItem value="DARK">Dark</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             {state.errors?.theme && (
               <FieldError>{state.errors.theme[0]}</FieldError>
             )}
@@ -220,21 +264,34 @@ function EditChatbotCard({
 
           <Field data-invalid={!!state.errors?.borderRadius}>
             <Label htmlFor="borderRadius">Border radius</Label>
-            <NativeSelect
-              defaultValue={chatbot.borderRadius}
-              id="borderRadius"
-              name="borderRadius"
+            <input name="borderRadius" type="hidden" value={borderRadius} />
+            <Select
+              value={borderRadius}
+              onValueChange={value => {
+                if (value === null || value === undefined) {
+                  return
+                }
+
+                setBorderRadius(value)
+              }}
             >
-              <NativeSelectOption value="NONE">
-                None (sharp corners)
-              </NativeSelectOption>
-              <NativeSelectOption value="SMALL">Small</NativeSelectOption>
-              <NativeSelectOption value="MEDIUM">
-                Medium (default)
-              </NativeSelectOption>
-              <NativeSelectOption value="LARGE">Large</NativeSelectOption>
-              <NativeSelectOption value="FULL">Full (pill)</NativeSelectOption>
-            </NativeSelect>
+              <SelectTrigger
+                aria-invalid={!!state.errors?.borderRadius}
+                className="w-full"
+                id="borderRadius"
+              >
+                <SelectValue placeholder="Select border radius" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="NONE">None (sharp corners)</SelectItem>
+                  <SelectItem value="SMALL">Small</SelectItem>
+                  <SelectItem value="MEDIUM">Medium (default)</SelectItem>
+                  <SelectItem value="LARGE">Large</SelectItem>
+                  <SelectItem value="FULL">Full (pill)</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             {state.errors?.borderRadius && (
               <FieldError>{state.errors.borderRadius[0]}</FieldError>
             )}

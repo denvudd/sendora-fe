@@ -20,15 +20,21 @@ import {
 import { Checkbox } from '@shared/components/ui/checkbox'
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@shared/components/ui/native-select'
 import { Switch } from '@shared/components/ui/switch'
 import { cn } from '@shared/utils/cn'
 import { useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/ui/select'
 
 const WEEKDAYS = [
   { key: '1', label: 'Monday' },
@@ -111,7 +117,7 @@ export function AppointmentScheduleForm({
     defaultEndTimes[key] = e
   }
 
-  const { control, handleSubmit, watch, register } =
+  const { control, handleSubmit, watch, setValue, register } =
     useForm<ScheduleFormValues>({
       resolver: zodResolver(scheduleFormSchema),
       defaultValues: {
@@ -187,42 +193,74 @@ export function AppointmentScheduleForm({
           <div className="flex md:items-center flex-col md:flex-row gap-2 md:gap-4 w-full">
             <div className="space-y-1.5">
               <Label htmlFor="slotDuration">Slot duration</Label>
-              <NativeSelect
-                id="slotDuration"
-                {...register('slotDuration', { valueAsNumber: true })}
+              <Select
+                value={watch('slotDuration')}
+                onValueChange={value => setValue('slotDuration', Number(value))}
               >
-                {SLOT_DURATIONS.map(d => (
-                  <NativeSelectOption key={d} value={d}>
-                    {d} min
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a slot duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Slot durations</SelectLabel>
+                    {SLOT_DURATIONS.map(d => (
+                      <SelectItem key={d} value={d}>
+                        {d} min
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="bufferMinutes">Buffer between slots</Label>
-              <NativeSelect
-                className="w-full"
-                id="bufferMinutes"
-                {...register('bufferMinutes', { valueAsNumber: true })}
+              <Select
+                value={
+                  watch('bufferMinutes') === 0
+                    ? 'No buffer'
+                    : `${watch('bufferMinutes')} min`
+                }
+                onValueChange={value =>
+                  setValue('bufferMinutes', Number(value))
+                }
               >
-                {BUFFER_OPTIONS.map(b => (
-                  <NativeSelectOption key={b} value={b}>
-                    {b === 0 ? 'No buffer' : `${b} min`}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a buffer duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Buffer durations</SelectLabel>
+                    {BUFFER_OPTIONS.map(b => (
+                      <SelectItem key={b} value={b}>
+                        {b === 0 ? 'No buffer' : `${b} min`}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="timezone">Timezone</Label>
-              <NativeSelect id="timezone" {...register('timezone')}>
-                {TIMEZONES.map(tz => (
-                  <NativeSelectOption key={tz.value} value={tz.value}>
-                    {tz.label}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              <Select
+                value={watch('timezone')}
+                onValueChange={value => setValue('timezone', value ?? 'UTC')}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Timezones</SelectLabel>
+                    {TIMEZONES.map(tz => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
