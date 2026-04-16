@@ -126,3 +126,20 @@ export async function updateBookingStatus({
     },
   })
 }
+
+interface FindBookingWithLeadByIdParams {
+  bookingId: string
+  workspaceId: string
+}
+
+export async function findBookingWithLeadById({
+  bookingId,
+  workspaceId,
+}: FindBookingWithLeadByIdParams) {
+  return prisma.booking.findUnique({
+    where: { id: bookingId, workspaceId },
+    include: {
+      lead: { select: { email: true, firstName: true, lastName: true } },
+    },
+  })
+}

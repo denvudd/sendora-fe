@@ -29,20 +29,6 @@ interface ChatMsg {
   isClosedStatus?: boolean
 }
 
-function getOrCreateSessionUuid(domainId: string): string {
-  const key = `sendora-session-${domainId}`
-  const existing = localStorage.getItem(key)
-
-  if (existing) {
-    return existing
-  }
-
-  const uuid = crypto.randomUUID()
-  localStorage.setItem(key, uuid)
-
-  return uuid
-}
-
 // Renders message text with clickable URLs
 function MessageWithLinks({
   content,
@@ -120,7 +106,7 @@ export function ChatbotWidget({
   const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    const uuid = getOrCreateSessionUuid(domainId)
+    const uuid = crypto.randomUUID()
     sessionUuidRef.current = uuid
 
     if (document.referrer) {
@@ -375,7 +361,7 @@ export function ChatbotWidget({
           {isOpen && <ChatPanel {...chatProps} />}
           <button
             aria-label={isOpen ? 'Close chat' : 'Open chat'}
-            className="flex size-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105"
+            className="flex size-14 items-center justify-center rounded-full shadow-lg transition-transform"
             style={{ backgroundColor: primaryColor }}
             type="button"
             onClick={() => setIsOpen(prev => !prev)}

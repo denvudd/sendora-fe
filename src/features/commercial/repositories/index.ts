@@ -21,6 +21,7 @@ export {
 } from './chatbot-repository'
 export {
   createBooking,
+  findBookingWithLeadById,
   listBookingsByWorkspace,
   listBookingsForDateRange,
   listUpcomingBookingsWithLeads,
