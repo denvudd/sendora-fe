@@ -46,13 +46,13 @@ export function OnboardingPage({
 
   return (
     <div className="flex min-h-screen items-center justify-center w-full">
-      <Stepper.Root className="w-full max-w-2xl px-4">
+      <Stepper.Root className="w-full max-w-4xl px-4" orientation="vertical">
         {({ stepper }): ReactElement => {
           const currentId = stepper.state.current.data.id
 
           return (
-            <Card className="w-full border-0 shadow-none sm:border sm:shadow-sm">
-              <CardHeader className="space-y-4">
+            <Card className="w-full border-0 flex flex-row gap-2 shadow-none sm:border sm:shadow-sm">
+              <CardHeader className="space-y-4 flex-1">
                 <StepperList
                   isStepDisabled={stepId => {
                     if (
@@ -69,12 +69,15 @@ export function OnboardingPage({
 
                     return false
                   }}
+                  orientation="vertical"
                   // Safe cast: Item is the only step-ID-specific primitive;
                   // StepperList only reads step.id as string at runtime.
                   primitives={Stepper as unknown as StepperListPrimitives}
                   stepper={stepper}
                 />
+              </CardHeader>
 
+              <div className="flex flex-col gap-4 min-w-lg">
                 <div className="space-y-1.5">
                   <CardTitle className="text-2xl font-semibold tracking-tight">
                     {stepper.state.current.data.title}
@@ -83,43 +86,46 @@ export function OnboardingPage({
                     {stepper.state.current.data.description}
                   </CardDescription>
                 </div>
-              </CardHeader>
 
-              <Stepper.Content step="profile">
-                <OnboardingStepProfile
-                  firstName={firstName}
-                  lastName={lastName}
-                  onContinueSuccess={() => {
-                    stepper.navigation.goTo('workspace')
-                  }}
-                  onFirstNameChange={setFirstName}
-                  onLastNameChange={setLastName}
-                />
-              </Stepper.Content>
+                <Stepper.Content step="profile">
+                  <OnboardingStepProfile
+                    firstName={firstName}
+                    lastName={lastName}
+                    onContinueSuccess={() => {
+                      stepper.navigation.goTo('workspace')
+                    }}
+                    onFirstNameChange={setFirstName}
+                    onLastNameChange={setLastName}
+                  />
+                </Stepper.Content>
 
-              <Stepper.Content step="workspace">
-                <OnboardingStepWorkspace
-                  logoUrl={logoUrl}
-                  name={workspaceName}
-                  slug={workspaceSlug}
-                  onBack={() => {
-                    stepper.navigation.goTo('profile')
-                  }}
-                  onLogoUrlChange={setLogoUrl}
-                  onNameChange={setWorkspaceName}
-                  onSlugChange={setWorkspaceSlug}
-                  onSuccess={id => {
-                    setWorkspaceId(id)
-                    stepper.navigation.goTo('plan')
-                  }}
-                />
-              </Stepper.Content>
+                <Stepper.Content step="workspace">
+                  <OnboardingStepWorkspace
+                    logoUrl={logoUrl}
+                    name={workspaceName}
+                    slug={workspaceSlug}
+                    onBack={() => {
+                      stepper.navigation.goTo('profile')
+                    }}
+                    onLogoUrlChange={setLogoUrl}
+                    onNameChange={setWorkspaceName}
+                    onSlugChange={setWorkspaceSlug}
+                    onSuccess={id => {
+                      setWorkspaceId(id)
+                      stepper.navigation.goTo('plan')
+                    }}
+                  />
+                </Stepper.Content>
 
-              <Stepper.Content step="plan">
-                {workspaceId && (
-                  <OnboardingStepPlan plans={plans} workspaceId={workspaceId} />
-                )}
-              </Stepper.Content>
+                <Stepper.Content step="plan">
+                  {workspaceId && (
+                    <OnboardingStepPlan
+                      plans={plans}
+                      workspaceId={workspaceId}
+                    />
+                  )}
+                </Stepper.Content>
+              </div>
             </Card>
           )
         }}

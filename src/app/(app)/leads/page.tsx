@@ -49,8 +49,6 @@ const LeadsPage = async ({
   const dbUser = await findOrCreateUser({
     clerkId,
     email: clerkUser.emailAddresses[0].emailAddress,
-    firstName: clerkUser.firstName,
-    lastName: clerkUser.lastName,
   })
 
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })

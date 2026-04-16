@@ -4,7 +4,7 @@ export const { Stepper, useStepper } = defineStepper(
   {
     id: 'profile',
     title: 'Your profile',
-    description: 'Add your name and optional profile photo.',
+    description: 'Enter your name to get started.',
   },
   {
     id: 'workspace',
