@@ -1,17 +1,19 @@
 'use server'
 
-import type { BookingStatus } from '@prisma/client'
-
 import { auth, currentUser } from '@clerk/nextjs/server'
+import { buildBookingConfirmationEmail } from '@features/appointments/emails/booking-confirmation-email'
 import {
+  findBookingWithLeadById,
   findOrCreateUser,
   findWorkspaceByUserId,
   updateBookingStatus,
 } from '@features/commercial/repositories'
+import { BookingStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { ROUTES } from '@/shared/constants/routes'
+import { resend } from '@/shared/lib/resend'
 
 interface UpdateBookingStatusResult {
   success: boolean
@@ -55,6 +57,37 @@ export async function updateBookingStatusAction(
     return {
       success: false,
       message: 'Something went wrong. Please try again.',
+    }
+  }
+
+  if (status === BookingStatus.CONFIRMED) {
+    try {
+      const booking = await findBookingWithLeadById({
+        bookingId,
+        workspaceId: workspace.id,
+      })
+
+      if (booking?.lead?.email) {
+        const { subject, html } = buildBookingConfirmationEmail({
+          guestName: booking.lead.firstName ?? 'Guest',
+          startsAt: booking.startsAt,
+          endsAt: booking.endsAt,
+          timezone: booking.timezone,
+          workspaceName: workspace.name,
+        })
+
+        await resend.emails.send({
+          from: 'Sendora <notifications@sendora.forum>',
+          to: booking.lead.email,
+          subject,
+          html,
+        })
+      }
+    } catch (err) {
+      console.error(
+        '[updateBookingStatusAction] Failed to send confirmation email:',
+        err,
+      )
     }
   }
 

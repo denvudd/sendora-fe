@@ -231,6 +231,40 @@ src/app/
 
 ---
 
+## Email Notifications
+
+When an operator changes a booking status to `CONFIRMED`, a confirmation email is automatically sent to the lead.
+
+### Trigger
+
+`updateBookingStatusAction` — after `updateBookingStatus()` succeeds and `status === BookingStatus.CONFIRMED`, the action fetches the booking with its linked lead and sends the email via **Resend**.
+
+Email delivery is fire-and-forget: a send failure is logged but does not affect the status update response.
+
+### Template
+
+Located at `src/features/appointments/emails/booking-confirmation-email.ts`.
+
+`buildBookingConfirmationEmail({ guestName, startsAt, endsAt, timezone, workspaceName })` returns `{ subject, html }`.
+
+Template includes:
+
+- Date, time range, duration, timezone — all formatted in the booking's stored timezone using `TZDate` from `@date-fns/tz`.
+- Workspace name as the "Organized by" field.
+- Dark-themed inline CSS styled to match the app.
+
+### Environment
+
+```
+RESEND_API_KEY=re_xxx   # Required — obtain from resend.com
+```
+
+### Sender address
+
+`notifications@sendora.forum` — must be a verified domain in your Resend account.
+
+---
+
 ## Timezone Handling
 
 All timezone-aware operations use `TZDate` from `@date-fns/tz` (the `date-fns` v4 companion). Standard `@date-fns/tz` does **not** export `formatInTimeZone` — use `new TZDate(date, timezone)` and then pass to `format()` from `date-fns`:
