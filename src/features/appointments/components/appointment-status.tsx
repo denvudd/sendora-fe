@@ -1,3 +1,5 @@
+'use client'
+
 import type { BookingWithLead } from '../utils'
 
 import { BookingStatus } from '@prisma/client'
