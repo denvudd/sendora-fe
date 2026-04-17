@@ -8,6 +8,7 @@ import {
   findWorkspaceByUserId,
   updateLeadStatus,
 } from '@features/commercial/repositories'
+import { syncLeadToHubSpot } from '@features/workspace-settings/lib/sync-lead-to-hubspot'
 import { redirect } from 'next/navigation'
 
 import { ROUTES } from '@/shared/constants/routes'
@@ -45,7 +46,23 @@ export async function updateLeadStatusAction(
   }
 
   try {
-    await updateLeadStatus({ workspaceId: workspace.id, leadId, status })
+    const lead = await updateLeadStatus({
+      workspaceId: workspace.id,
+      leadId,
+      status,
+    })
+
+    void syncLeadToHubSpot({
+      workspaceId: workspace.id,
+      leadId: lead.id,
+      email: lead.email,
+      firstName: lead.firstName,
+      lastName: lead.lastName,
+      phone: lead.phone,
+      hubspotContactId: lead.hubspotContactId,
+      leadStatus: status,
+      isStatusOnlyUpdate: !!lead.hubspotContactId,
+    })
 
     return { success: true }
   } catch {

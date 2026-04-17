@@ -44,6 +44,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
+    HUBSPOT_CLIENT_ID: process.env.HUBSPOT_CLIENT_ID,
+    HUBSPOT_CLIENT_SECRET: process.env.HUBSPOT_CLIENT_SECRET,
+    HUBSPOT_REDIRECT_URI: process.env.HUBSPOT_REDIRECT_URI,
   },
   server: {
     CLERK_SECRET_KEY: z.string().min(1),
@@ -60,6 +63,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     GOOGLE_REDIRECT_URI: z.url(),
+    HUBSPOT_CLIENT_ID: z.string().min(1),
+    HUBSPOT_CLIENT_SECRET: z.string().min(1),
+    HUBSPOT_REDIRECT_URI: z.url(),
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 })

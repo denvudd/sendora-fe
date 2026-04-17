@@ -267,3 +267,66 @@ export async function updateLeadNotes({
     where: { id: leadId, workspaceId },
   })
 }
+
+interface FindLeadByHubSpotContactIdParams {
+  hubspotContactId: string
+}
+
+export async function findLeadByHubSpotContactId({
+  hubspotContactId,
+}: FindLeadByHubSpotContactIdParams) {
+  return prisma.lead.findFirst({ where: { hubspotContactId } })
+}
+
+interface UpdateLeadHubSpotSyncParams {
+  workspaceId: string
+  leadId: string
+  hubspotContactId?: string
+  syncedAt: Date
+}
+
+export async function updateLeadHubSpotSync({
+  workspaceId,
+  leadId,
+  hubspotContactId,
+  syncedAt,
+}: UpdateLeadHubSpotSyncParams) {
+  return prisma.lead.update({
+    where: { id: leadId, workspaceId },
+    data: {
+      hubspotSyncedAt: syncedAt,
+      ...(hubspotContactId !== undefined && { hubspotContactId }),
+    },
+  })
+}
+
+interface UpdateLeadContactFieldsParams {
+  workspaceId: string
+  leadId: string
+  firstName?: string
+  lastName?: string
+  phone?: string
+}
+
+export async function updateLeadContactFields({
+  workspaceId,
+  leadId,
+  firstName,
+  lastName,
+  phone,
+}: UpdateLeadContactFieldsParams) {
+  const data = {
+    ...(firstName !== undefined && { firstName }),
+    ...(lastName !== undefined && { lastName }),
+    ...(phone !== undefined && { phone }),
+  }
+
+  if (Object.keys(data).length === 0) {
+    return null
+  }
+
+  return prisma.lead.update({
+    where: { id: leadId, workspaceId },
+    data,
+  })
+}

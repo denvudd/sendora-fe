@@ -96,3 +96,33 @@ export async function updateWorkspaceGoogleTokens({
     },
   })
 }
+
+interface FindWorkspaceByIdParams {
+  workspaceId: string
+}
+
+export async function findWorkspaceById({
+  workspaceId,
+}: FindWorkspaceByIdParams) {
+  return prisma.workspace.findUnique({ where: { id: workspaceId } })
+}
+
+interface UpdateWorkspaceHubSpotTokensParams {
+  workspaceId: string
+  refreshToken: string | null
+  enabled: boolean
+}
+
+export async function updateWorkspaceHubSpotTokens({
+  workspaceId,
+  refreshToken,
+  enabled,
+}: UpdateWorkspaceHubSpotTokensParams) {
+  return prisma.workspace.update({
+    where: { id: workspaceId },
+    data: {
+      hubspotRefreshToken: refreshToken,
+      hubspotEnabled: enabled,
+    },
+  })
+}

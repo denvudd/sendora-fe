@@ -8,6 +8,7 @@ import {
   listBookingsForDateRange,
   upsertLead,
 } from '@features/commercial/repositories'
+import { syncLeadToHubSpot } from '@features/workspace-settings/lib/sync-lead-to-hubspot'
 
 interface BookAppointmentResult {
   success: boolean
@@ -107,6 +108,16 @@ export async function bookAppointmentAction(data: {
 
     // Link the ChatSession to the Lead so operators can trace conversation → lead
     await linkSessionToLead({ sessionId: session.id, leadId: lead.id })
+
+    void syncLeadToHubSpot({
+      workspaceId,
+      leadId: lead.id,
+      email: validated.data.email,
+      firstName: lead.firstName,
+      lastName: lead.lastName,
+      phone: lead.phone,
+      hubspotContactId: lead.hubspotContactId,
+    })
 
     const booking = await createBooking({
       workspaceId,

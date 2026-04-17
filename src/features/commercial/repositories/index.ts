@@ -41,8 +41,11 @@ export {
 export {
   createLead,
   findLeadById,
+  findLeadByHubSpotContactId,
   listLeadsByWorkspace,
   listLeadsWithFilters,
+  updateLeadContactFields,
+  updateLeadHubSpotSync,
   updateLeadNotes,
   updateLeadStatus,
   upsertLead,
@@ -62,11 +65,13 @@ export {
 export { findOrCreateUser, findUserByClerkId } from './user-repository'
 export {
   createWorkspace,
+  findWorkspaceById,
   findWorkspaceByUserId,
   findWorkspaceByStripeCustomerId,
   updateWorkspace,
   updateWorkspaceStripeCustomerId,
   updateWorkspaceGoogleTokens,
+  updateWorkspaceHubSpotTokens,
 } from './workspace-repository'
 export {
   findAppointmentScheduleByWorkspaceId,

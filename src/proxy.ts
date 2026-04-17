@@ -5,6 +5,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/stripe/webhooks',
+  '/api/hubspot/webhook',
   '/api/chat/(.*)',
   '/api/portal-token/(.*)',
   '/chatbot/(.*)',
