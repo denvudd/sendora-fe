@@ -4,7 +4,7 @@ import { SafariMockup } from '@/shared/components/ui/device-mockups/safari-mocku
 import { useResponsiveSize } from '@/shared/hooks/use-responsive-size'
 
 export function HomeSafariMockupPreview() {
-  const size = useResponsiveSize(1203 / 753, false)
+  const size = useResponsiveSize(940 / 587, false)
 
   if (!size) {
     return <div className="bg-muted/50 animate-pulse" />
@@ -15,7 +15,8 @@ export function HomeSafariMockupPreview() {
       <SafariMockup
         height={size.height}
         imageSrc="/images/app-ui.png"
-        url="shadcn.io"
+        mode="simple"
+        url="sendora.io"
         width={size.width}
       />
     </div>

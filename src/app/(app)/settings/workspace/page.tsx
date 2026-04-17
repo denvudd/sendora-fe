@@ -2,12 +2,16 @@ import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
 import {
+  findActiveSubscriptionByWorkspaceId,
   findOrCreateUser,
   findWorkspaceByUserId,
 } from '@features/commercial/repositories'
+import { HubSpotConnect } from '@features/workspace-settings/components/hubspot-connect'
 import { WorkspaceSettingsForm } from '@features/workspace-settings/components/workspace-settings-form'
 import { redirect } from 'next/navigation'
 
+import { GoogleMeetConnect } from '@/features/appointments/components/google-meet-connect'
+import { PLAN_CODE } from '@/shared/constants/plan-code'
 import { ROUTES } from '@/shared/constants/routes'
 
 const WorkspaceSettingsPage = async (): Promise<ReactElement> => {
@@ -34,6 +38,12 @@ const WorkspaceSettingsPage = async (): Promise<ReactElement> => {
     redirect(ROUTES.Onboarding)
   }
 
+  const subscription = await findActiveSubscriptionByWorkspaceId({
+    workspaceId: workspace.id,
+  })
+  const planCode = subscription?.plan.code ?? PLAN_CODE.STANDARD
+  const isHubSpotAllowed = planCode !== PLAN_CODE.STANDARD
+
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4">
       <div>
@@ -44,6 +54,12 @@ const WorkspaceSettingsPage = async (): Promise<ReactElement> => {
       </div>
 
       <WorkspaceSettingsForm workspace={workspace} />
+
+      <GoogleMeetConnect isConnected={workspace.googleCalendarEnabled} />
+      <HubSpotConnect
+        isAllowed={isHubSpotAllowed}
+        isConnected={workspace.hubspotEnabled}
+      />
     </div>
   )
 }

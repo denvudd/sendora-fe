@@ -10,6 +10,7 @@ import {
   updateWorkspaceStripeCustomerId,
 } from '@features/commercial/repositories'
 import { findPlanById } from '@features/home/repositories/plan-repository'
+import { BillingInterval, WorkspaceSubscriptionStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -28,19 +29,17 @@ export async function changePlanAction(
   const { userId: clerkId } = await auth()
 
   if (!clerkId) {
-    redirect('/sign-in')
+    redirect(ROUTES.SignIn)
   }
 
   const clerkUser = await currentUser()
 
   if (!clerkUser) {
-    redirect('/sign-in')
+    redirect(ROUTES.SignIn)
   }
 
   const planId = formData.get('planId') as string
-  const billingInterval = formData.get('billingInterval') as
-    | 'MONTHLY'
-    | 'YEARLY'
+  const billingInterval = formData.get('billingInterval') as BillingInterval
 
   if (!planId || !billingInterval) {
     return { message: 'Invalid request.' }
@@ -85,18 +84,18 @@ export async function changePlanAction(
     await createSubscription({
       workspaceId: workspace.id,
       planId,
-      billingInterval: 'MONTHLY',
-      status: 'ACTIVE',
+      billingInterval: BillingInterval.MONTHLY,
+      status: WorkspaceSubscriptionStatus.ACTIVE,
     })
 
-    revalidatePath('/settings/billing')
+    revalidatePath(ROUTES.Billing)
 
     return {}
   }
 
   // ── Resolve Stripe price ID ──────────────────────────────────────────────
   const stripePriceId =
-    billingInterval === 'YEARLY'
+    billingInterval === BillingInterval.YEARLY
       ? plan.stripePriceIdYearly
       : plan.stripePriceIdMonthly
 
@@ -197,7 +196,7 @@ export async function changePlanAction(
       })
     }
 
-    revalidatePath('/settings/billing')
+    revalidatePath(ROUTES.Billing)
 
     return {}
   }
@@ -224,8 +223,8 @@ export async function changePlanAction(
     customer: stripeCustomerId,
     mode: 'subscription',
     line_items: [{ price: stripePriceId, quantity: 1 }],
-    success_url: `${env.NEXT_PUBLIC_APP_URL}/settings/billing?subscription=success`,
-    cancel_url: `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+    success_url: `${env.NEXT_PUBLIC_APP_URL}${ROUTES.Billing}?subscription=success`,
+    cancel_url: `${env.NEXT_PUBLIC_APP_URL}${ROUTES.Billing}`,
     metadata: {
       workspaceId: workspace.id,
       planId,

@@ -119,3 +119,33 @@ Lead detail (/leads/[leadId])
   ├── LeadStatusSelect → updateLeadStatusAction → optimistic update + router.refresh()
   └── LeadNotesForm → updateLeadNotesAction → router.refresh()
 ```
+
+---
+
+## HubSpot Sync
+
+When HubSpot integration is enabled on a workspace (Plus/Ultimate plan), leads are automatically pushed to HubSpot as contacts.
+
+### Triggers
+
+- **On lead create/upsert** (`bookAppointmentAction`) — after `upsertLead()`, `syncLeadToHubSpot()` is called fire-and-forget. Pushes `email`, `firstName`, `lastName`, `phone`. Stores the returned HubSpot contact ID in `Lead.hubspotContactId`.
+- **On status update** (`updateLeadStatusAction`) — after DB update, `syncLeadToHubSpot()` pushes `sendora_lead_status` custom property to HubSpot.
+
+### Inbound sync (HubSpot → Sendora)
+
+HubSpot sends `contact.propertyChange` webhook events to `POST /api/hubspot/webhook` when `firstname`, `lastname`, or `phone` are changed. The handler verifies the HMAC-SHA256 signature, finds the matching lead via `Lead.hubspotContactId`, and updates the lead fields.
+
+### Loop prevention
+
+`Lead.hubspotSyncedAt` is set each time Sendora pushes to HubSpot. Incoming webhook events with `occurredAt < hubspotSyncedAt` are skipped (they are echoes of our own pushes).
+
+### New Lead fields
+
+| Field              | Type        | Description                                             |
+| ------------------ | ----------- | ------------------------------------------------------- |
+| `hubspotContactId` | `String?`   | HubSpot contact ID                                      |
+| `hubspotSyncedAt`  | `DateTime?` | Last Sendora-initiated push timestamp (loop prevention) |
+
+### Feature gate
+
+`syncLeadToHubSpot()` silently returns if the workspace plan is `STANDARD`. The HubSpot connect card in `/settings/workspace` is visible but disabled for Standard users.

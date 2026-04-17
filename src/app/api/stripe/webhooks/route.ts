@@ -61,9 +61,19 @@ async function handleCheckoutCompleted(
     return
   }
 
-  const stripeSubscription = await stripe.subscriptions.retrieve(
-    session.subscription as string,
-  )
+  const subscriptionId =
+    typeof session.subscription === 'string'
+      ? session.subscription
+      : typeof session.subscription === 'object' &&
+          session.subscription !== null
+        ? (session.subscription as { id: string }).id
+        : null
+
+  if (!subscriptionId) {
+    return
+  }
+
+  const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId)
 
   const existing = await findSubscriptionByStripeId({
     stripeSubscriptionId: stripeSubscription.id,
