@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react'
 
 import { currentUser } from '@clerk/nextjs/server'
-import { listActivePlans } from '@features/home/repositories/plan-repository'
 import { OnboardingPage } from '@features/onboarding/components/onboarding-page'
 import { redirect } from 'next/navigation'
+
+import { listActivePlans } from '@/features/commercial/repositories/plan-repository'
 
 const Onboarding = async (): Promise<ReactElement> => {
   const clerkUser = await currentUser()

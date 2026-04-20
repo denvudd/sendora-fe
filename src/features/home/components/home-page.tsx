@@ -2,7 +2,8 @@ import type { ReactElement } from 'react'
 
 import { currentUser } from '@clerk/nextjs/server'
 import { HomePricingPlans } from '@features/home/components/home-pricing-plans'
-import { listActivePlans } from '@features/home/repositories/plan-repository'
+
+import { listActivePlans } from '@/features/commercial/repositories/plan-repository'
 
 import { HomeCTA } from './home-cta'
 import { HomeFAQ } from './home-faq'

@@ -4,10 +4,10 @@ import {
   findWorkspaceByUserId,
   updateWorkspaceStripeCustomerId,
 } from '@features/commercial/repositories'
-import { findPlanById } from '@features/home/repositories/plan-repository'
 import { type NextRequest } from 'next/server'
 
 import { env } from '@/env'
+import { findPlanById } from '@/features/commercial/repositories/plan-repository'
 import { ROUTES } from '@/shared/constants/routes'
 import { stripe } from '@/shared/lib/stripe'
 

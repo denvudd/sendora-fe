@@ -7,6 +7,8 @@ import {
   AccordionTrigger,
 } from '@shared/components/ui/accordion'
 
+import { FadeIn } from './fade-in'
+
 const faqs = [
   {
     question: 'How does the AI chatbot work?',
@@ -42,39 +44,39 @@ const faqs = [
 
 export function HomeFAQ(): ReactElement {
   return (
-    <section className="py-20 lg:py-28 bg-background" id="faq">
-      <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">
+    <section className="py-24 lg:py-32 bg-background" id="faq">
+      <div className="container max-w-6xl mx-auto px-4">
+        <FadeIn className="text-center max-w-[580px] mx-auto mb-16">
+          <span className="inline-block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-primary mb-3">
             FAQ
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          </span>
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-4 leading-[1.18]">
             Frequently Asked Questions
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg leading-relaxed">
             Everything you need to know about Sendora.
           </p>
-        </div>
+        </FadeIn>
 
-        <div className="max-w-2xl mx-auto">
-          <Accordion className="space-y-3">
+        <FadeIn className="max-w-[660px] mx-auto">
+          <Accordion className="space-y-2.5">
             {faqs.map((faq, i) => (
               <AccordionItem
                 // eslint-disable-next-line react/no-array-index-key
                 key={i}
-                className="rounded-xl border border-border/50 bg-card shadow-card px-6 data-[state=open]:shadow-glow data-[state=open]:border-primary/20 transition-all duration-300"
+                className="rounded-2xl border border-border bg-card px-6 data-[state=open]:border-primary/30 data-[state=open]:shadow-md transition-all duration-200"
                 value={`item-${i}`}
               >
-                <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-5">
+                <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-5 text-[0.9375rem]">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
+                <AccordionContent className="text-sm text-muted-foreground leading-[1.75] pb-5">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
+        </FadeIn>
       </div>
     </section>
   )
