@@ -1,7 +1,7 @@
 import { findActiveSubscriptionByWorkspaceId } from '@features/commercial/repositories/subscription-repository'
-import { findPlanByCode } from '@features/home/repositories/plan-repository'
 import { prisma } from '@shared/utils/prisma'
 
+import { findPlanByCode } from '@/features/commercial/repositories/plan-repository'
 import { PLAN_CODE } from '@/shared/constants/plan-code'
 import {
   PLAN_FEATURE_CODE,

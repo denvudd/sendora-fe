@@ -4,7 +4,8 @@ import { CurrentPlanCard } from '@features/billing/components/current-plan-card'
 import { ManageBillingButton } from '@features/billing/components/manage-billing-button'
 import { PlanUpgradeCard } from '@features/billing/components/plan-upgrade-card'
 import { findActiveSubscriptionByWorkspaceId } from '@features/commercial/repositories'
-import { listActivePlans } from '@features/home/repositories/plan-repository'
+
+import { listActivePlans } from '@/features/commercial/repositories/plan-repository'
 
 interface BillingPageProps {
   workspaceId: string

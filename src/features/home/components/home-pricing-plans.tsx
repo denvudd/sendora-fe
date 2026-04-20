@@ -31,7 +31,7 @@ export function HomePricingPlans({
   }
 
   return (
-    <section className="bg-background" id="pricing">
+    <section className="container max-w-6xl mx-auto" id="pricing">
       <div
         className="
             mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16

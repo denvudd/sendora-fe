@@ -302,3 +302,14 @@
     font-family: var(--font-sans);
   }
 }
+
+@layer theme {
+  @keyframes dashFlow {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 16px 0;
+    }
+  }
+}
