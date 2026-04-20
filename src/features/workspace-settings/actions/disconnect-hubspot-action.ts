@@ -45,6 +45,7 @@ export async function disconnectHubSpotAction(): Promise<DisconnectHubSpotResult
       workspaceId: workspace.id,
       refreshToken: null,
       enabled: false,
+      portalId: null,
     })
   } catch {
     return {

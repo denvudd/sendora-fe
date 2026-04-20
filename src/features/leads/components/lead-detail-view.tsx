@@ -70,7 +70,9 @@ interface LeadDetailViewProps {
     createdAt: Date
     sessions: Session[]
     bookings: Booking[]
+    hubspotContactId: string | null
   }
+  hubspot: { portalId: string } | null
 }
 
 function parseQuestionnaireAnswers(
@@ -117,7 +119,10 @@ const BOOKING_STATUS_VARIANTS: Record<
   [BookingStatus.NO_SHOW]: 'destructive',
 }
 
-export function LeadDetailView({ lead }: LeadDetailViewProps): ReactElement {
+export function LeadDetailView({
+  lead,
+  hubspot,
+}: LeadDetailViewProps): ReactElement {
   const name = leadDisplayName(lead)
   const primarySession = lead.sessions[0]
   const questionnaireAnswers = parseQuestionnaireAnswers(lead.metadata)
@@ -187,6 +192,20 @@ export function LeadDetailView({ lead }: LeadDetailViewProps): ReactElement {
                   <ExternalLink className="size-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Source:</span>
                   <span>{lead.source}</span>
+                </div>
+              )}
+
+              {hubspot && lead.hubspotContactId && (
+                <div className="flex items-center gap-2 text-sm">
+                  <ExternalLink className="size-4 text-muted-foreground" />
+                  <a
+                    className="text-foreground hover:underline"
+                    href={`https://app.hubspot.com/contacts/${hubspot.portalId}/contact/${lead.hubspotContactId}`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    View in HubSpot
+                  </a>
                 </div>
               )}
             </CardContent>

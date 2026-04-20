@@ -10,6 +10,7 @@ import {
   ensureSendoraLeadStatusProperty,
   exchangeHubSpotCode,
   getHubSpotAccessToken,
+  getHubSpotPortalId,
 } from '@features/workspace-settings/lib/hubspot'
 import { NextResponse } from 'next/server'
 
@@ -47,13 +48,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.redirect(new URL(ROUTES.Onboarding, request.url))
     }
 
+    const accessToken = await getHubSpotAccessToken(refreshToken)
+    const portalId = await getHubSpotPortalId(accessToken)
+
     await updateWorkspaceHubSpotTokens({
       workspaceId: workspace.id,
       refreshToken,
       enabled: true,
+      portalId: String(portalId),
     })
 
-    const accessToken = await getHubSpotAccessToken(refreshToken)
     await ensureSendoraLeadStatusProperty(accessToken)
   } catch (err) {
     console.error('[hubspot/callback] Failed to exchange tokens:', err)
