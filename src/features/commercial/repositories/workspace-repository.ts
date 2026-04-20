@@ -111,18 +111,21 @@ interface UpdateWorkspaceHubSpotTokensParams {
   workspaceId: string
   refreshToken: string | null
   enabled: boolean
+  portalId?: string | null
 }
 
 export async function updateWorkspaceHubSpotTokens({
   workspaceId,
   refreshToken,
   enabled,
+  portalId,
 }: UpdateWorkspaceHubSpotTokensParams) {
   return prisma.workspace.update({
     where: { id: workspaceId },
     data: {
       hubspotRefreshToken: refreshToken,
       hubspotEnabled: enabled,
+      ...(portalId !== undefined && { hubspotPortalId: portalId }),
     },
   })
 }

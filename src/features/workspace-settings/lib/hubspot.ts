@@ -8,6 +8,7 @@ const HUBSPOT_CONTACTS_BASE_URL =
   'https://api.hubapi.com/crm/v3/objects/contacts'
 const HUBSPOT_PROPERTIES_URL =
   'https://api.hubapi.com/crm/v3/properties/contacts'
+const HUBSPOT_TOKEN_INFO_URL = 'https://api.hubapi.com/oauth/v1/access-tokens'
 
 export const HUBSPOT_LEAD_STATUS_PROPERTY_NAME = 'sendora_lead_status'
 
@@ -106,6 +107,23 @@ export async function ensureSendoraLeadStatusProperty(
       `[HubSpot] Failed to create ${HUBSPOT_LEAD_STATUS_PROPERTY_NAME} property: ${res.status} ${body}`,
     )
   }
+}
+
+export async function getHubSpotPortalId(accessToken: string): Promise<number> {
+  const res = await fetch(`${HUBSPOT_TOKEN_INFO_URL}/${accessToken}`)
+
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`HubSpot token info failed: ${res.status} ${body}`)
+  }
+
+  const data = (await res.json()) as { hub_id?: number }
+
+  if (!data.hub_id) {
+    throw new Error('No hub_id returned from HubSpot')
+  }
+
+  return data.hub_id
 }
 
 interface UpsertHubSpotContactParams {

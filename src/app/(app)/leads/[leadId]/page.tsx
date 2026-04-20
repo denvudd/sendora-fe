@@ -51,7 +51,14 @@ const LeadDetailPage = async ({
 
   return (
     <div className="p-6 md:p-8">
-      <LeadDetailView lead={lead} />
+      <LeadDetailView
+        hubspot={
+          workspace.hubspotEnabled && workspace.hubspotPortalId
+            ? { portalId: workspace.hubspotPortalId }
+            : null
+        }
+        lead={lead}
+      />
     </div>
   )
 }
