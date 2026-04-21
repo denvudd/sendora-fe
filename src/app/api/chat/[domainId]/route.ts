@@ -148,7 +148,6 @@ export async function POST(
   const history = await getSessionMessages({ sessionId: session.id })
 
   const systemPrompt = buildSystemPrompt(chatbot)
-  console.log('🚀 ~ POST ~ systemPrompt:', systemPrompt)
 
   const workspaceId = chatbot.domain.workspaceId
 
