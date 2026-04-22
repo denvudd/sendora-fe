@@ -26,7 +26,7 @@ jobs:
         run: bunx prisma migrate deploy
         env:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-          DATABASE_URL: ${{ secrets.DIRECT_URL }} # migrate deploy використовує DIRECT_URL
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Build
         run: bun run build
@@ -41,7 +41,7 @@ jobs:
           NEXT_PUBLIC_PUSHER_KEY: ${{ secrets.NEXT_PUBLIC_PUSHER_KEY }}
           NEXT_PUBLIC_PUSHER_CLUSTER: ${{ secrets.NEXT_PUBLIC_PUSHER_CLUSTER }}
           NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY }}
-          SKIP_ENV_VALIDATION: true # серверні змінні не потрібні на CI під час білду
+          SKIP_ENV_VALIDATION: true
 
       - name: Prepare standalone artifact
         run: |
