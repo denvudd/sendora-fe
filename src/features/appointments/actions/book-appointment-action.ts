@@ -2,6 +2,7 @@
 
 import { bookingSchema } from '@features/appointments/schemas'
 import {
+  closeSession,
   createBooking,
   findSessionByPortalToken,
   linkSessionToLead,
@@ -9,6 +10,11 @@ import {
   upsertLead,
 } from '@features/commercial/repositories'
 import { syncLeadToHubSpot } from '@features/workspace-settings/lib/sync-lead-to-hubspot'
+import {
+  PUSHER_CHANNELS,
+  PUSHER_EVENTS,
+  pusherServer,
+} from '@shared/lib/pusher'
 
 interface BookAppointmentResult {
   success: boolean
@@ -127,6 +133,21 @@ export async function bookAppointmentAction(data: {
       endsAt,
       timezone: validated.data.timezone,
     })
+
+    const closed = await closeSession({ sessionId: session.id })
+
+    void Promise.all([
+      pusherServer.trigger(
+        PUSHER_CHANNELS.chatSession(closed.sessionUuid),
+        PUSHER_EVENTS.SESSION_CLOSED,
+        {},
+      ),
+      pusherServer.trigger(
+        PUSHER_CHANNELS.workspace(workspaceId),
+        PUSHER_EVENTS.SESSION_UPDATED,
+        { sessionId: closed.id, lastMessage: '', status: 'CLOSED' },
+      ),
+    ])
 
     return {
       success: true,

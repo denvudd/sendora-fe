@@ -11,7 +11,7 @@ import {
   Shield,
 } from 'lucide-react'
 
-import { FadeIn } from './fade-in'
+import { FadeIn } from '../../../shared/components/animations/fade-in'
 
 const features = [
   {

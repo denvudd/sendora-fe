@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/utils/cn'
 
-import { FadeIn } from './fade-in'
+import { FadeIn } from '../../../shared/components/animations/fade-in'
 
 export function HomeCTA({ isSignedIn }: { isSignedIn: boolean }): ReactElement {
   return (

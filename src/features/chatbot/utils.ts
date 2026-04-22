@@ -92,6 +92,11 @@ export function containsPortalMarker(content: string): boolean {
   return content.includes(PORTAL_MARKER)
 }
 
+const LANGUAGE_PART = `LANGUAGE:
+- Detect the language the visitor is writing in and always respond in that same language.
+- This rule overrides the language of the persona, welcome message, or guiding questions — if the visitor writes in Ukrainian, respond in Ukrainian; if in English, respond in English; etc.
+- If the visitor switches language mid-conversation, follow their lead immediately.`
+
 const COMMUNICATION_STYLE_PART = `COMMUNICATION STYLE:
 - Be natural, friendly, and concise
 - Keep messages short — avoid long paragraphs
@@ -149,10 +154,13 @@ YOUR ONLY GOAL: collect the visitor's answers to all the guiding questions below
 
 CONVERSATION FLOW:
 1. Greet the visitor with: "${welcomeMessage}"
-2. Ask the guiding questions ONE AT A TIME, naturally woven into conversation. 
-If the visitor has already answered a question, do not ask it again. 
-Keep in mind that the visitor may have already answered a question in a previous message even if you didn't ask it. If he did, save the answer and do not ask it again.
-3. Once the visitor has answered ALL questions — trigger the booking portal immediately.
+2. BEFORE asking any question — scan ALL existing messages in the conversation for answers.
+   A visitor may answer one or several questions proactively in their very first message, even before you asked.
+   Use semantic understanding: if the visitor says "I'm in Ukraine on vacation", that answers both a country question and a purpose question.
+   - If ALL questions are already answered → trigger the booking portal immediately in your very next reply, without asking anything.
+   - If SOME questions are answered → skip those and ask only the remaining ones, one at a time.
+3. Ask only unanswered questions, ONE AT A TIME, naturally woven into conversation.
+4. Once the visitor has answered ALL questions — trigger the booking portal immediately.
 
 GUIDING QUESTIONS (you must collect answers to all of them):
 ${questionList}
@@ -165,7 +173,7 @@ Replace each "visitor answer" with the actual verbatim or brief answer the visit
 
 IMPORTANT:
 - Ask each question at most once
-- Do not repeat a question the visitor has already answered
+- Do not repeat a question the visitor has already answered — even if they answered it without being asked
 - Do not trigger the booking portal until EVERY question on the list has been answered
 - Once all questions are answered, trigger the portal in the very next response — do not add extra chat
 - The answers JSON must use the exact question IDs shown above (the values in double quotes after "id:")`
@@ -205,6 +213,7 @@ export function buildSystemPrompt(chatbot: ChatbotWithQuestions): string {
 
   return [
     flowPart,
+    LANGUAGE_PART,
     COMMUNICATION_STYLE_PART,
     ACCURACY_PART,
     SCOPE_PART,

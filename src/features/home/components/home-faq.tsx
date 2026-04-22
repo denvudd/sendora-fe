@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from '@shared/components/ui/accordion'
 
-import { FadeIn } from './fade-in'
+import { FadeIn } from '../../../shared/components/animations/fade-in'
 
 const faqs = [
   {

@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 import { Code2, MessageCircle, TrendingUp } from 'lucide-react'
 
-import { FadeIn } from './fade-in'
+import { FadeIn } from '../../../shared/components/animations/fade-in'
 
 const steps = [
   {
