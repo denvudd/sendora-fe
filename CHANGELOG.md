@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/denvudd/sendora-fe/compare/v1.2.0...v1.2.1) (2026-04-22)
+
+### Bug Fixes
+
+- added force-dynamic for onboarding and homepage ([8aa1f96](https://github.com/denvudd/sendora-fe/commit/8aa1f96814f9263a8cd94415a870eb525591e4b9))
+
 # [1.2.0](https://github.com/denvudd/sendora-fe/compare/v1.1.0...v1.2.0) (2026-04-22)
 
 ### Bug Fixes
