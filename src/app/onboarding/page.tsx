@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation'
 
 import { listActivePlans } from '@/features/commercial/repositories/plan-repository'
 
+export const dynamic = 'force-dynamic'
+
 const Onboarding = async (): Promise<ReactElement> => {
   const clerkUser = await currentUser()
 

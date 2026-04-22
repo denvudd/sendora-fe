@@ -42,6 +42,22 @@ jobs:
           NEXT_PUBLIC_PUSHER_CLUSTER: ${{ secrets.NEXT_PUBLIC_PUSHER_CLUSTER }}
           NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY }}
           SKIP_ENV_VALIDATION: true
+          DATABASE_URL: postgresql://dummy:dummy@dummy/dummy?sslmode=require
+          DIRECT_URL: postgresql://dummy:dummy@dummy/dummy?sslmode=require
+          CLERK_SECRET_KEY: sk_test_build_placeholder
+          STRIPE_SECRET_KEY: sk_test_build_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_build_placeholder
+          OPENAI_API_KEY: build_placeholder
+          PUSHER_APP_ID: build_placeholder
+          PUSHER_KEY: build_placeholder
+          PUSHER_SECRET: build_placeholder
+          PUSHER_CLUSTER: eu
+          GOOGLE_CLIENT_ID: build_placeholder.apps.googleusercontent.com
+          GOOGLE_CLIENT_SECRET: build_placeholder
+          GOOGLE_REDIRECT_URI: https://placeholder.com/callback
+          HUBSPOT_CLIENT_ID: build_placeholder
+          HUBSPOT_CLIENT_SECRET: build_placeholder
+          HUBSPOT_REDIRECT_URI: https://placeholder.com/callback
 
       - name: Prepare standalone artifact
         run: |
