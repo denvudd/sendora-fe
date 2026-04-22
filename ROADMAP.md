@@ -72,31 +72,7 @@
 
 ---
 
-## Next — Planned
-
-### 4. Email Marketing MVP
-
-**Why:** Email marketing is the second pillar of Sendora's value prop — "unify chatbots with email marketing." Without it, Sendora competes with Intercom/Crisp/Tidio and loses on features. With it, the "capture + nurture in one tool" niche becomes real.
-
-**Pre-condition:** Validate with 5 paying/potential customers before building. Confirm "I would pay for this" feedback.
-
-**Scope:**
-
-- Campaign builder: name, subject line, HTML/text body (rich text editor)
-- Audience: all leads, filtered by status/domain/date, manual selection
-- Send immediately or schedule for a specific time
-- Trigger-based emails: post-booking follow-up, welcome sequence on first chatbot interaction
-- Send history and basic delivery stats (sent, opened, clicked)
-- Enforce MAX_EMAILS_PER_MONTH plan limit
-
-**Infrastructure note:** Raw Nodemailer risks deliverability issues at scale. Switch to Resend or SendGrid for campaign sends.
-
-**Dependencies:** Lead Management UI (audience selection), email infrastructure decision
-**Plan gate:** All plans (limited by MAX_EMAILS_PER_MONTH)
-
----
-
-### 5. Booking Status Management UI
+### 4. Booking Status Management UI
 
 **Why:** The Booking model has PENDING / CONFIRMED / COMPLETED / CANCELLED / NO_SHOW statuses but there is no UI to change them in `/appointments`. Operators currently cannot confirm or complete a booking.
 
@@ -107,21 +83,6 @@
 - Status-based visual indicators (color-coded badges, calendar highlights)
 
 **Dependencies:** Appointments UI (done), Booking model (done)
-
----
-
-### 6. Financial Dashboard
-
-**Why:** Mentioned in MVP.md but not implemented. As in-chat payments get built, operators need a clear view of revenue flowing through Sendora.
-
-**Scope:**
-
-- Revenue summary cards (total, this month, by domain)
-- Recent transactions list linked to leads
-- Payment history table with filters and export
-- Revenue over time chart (Recharts)
-
-**Dependencies:** In-Chat Payments (not yet scoped), Stripe data
 
 ---
 
