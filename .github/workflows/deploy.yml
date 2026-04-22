@@ -81,5 +81,6 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
+            export PATH=$PATH:/home/deploy/.bun/bin
             pm2 restart sendora || pm2 start /var/www/sendora/server.js --name sendora
             pm2 save
