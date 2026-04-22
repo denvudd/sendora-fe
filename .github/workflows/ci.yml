@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -34,6 +34,32 @@ jobs:
         run: bun run type-check
 
       - name: Build
+        run: bun run build
         env:
           SKIP_ENV_VALIDATION: true
-        run: bun run build
+          DATABASE_URL: postgresql://dummy:dummy@dummy/dummy?sslmode=require
+          DIRECT_URL: postgresql://dummy:dummy@dummy/dummy?sslmode=require
+          CLERK_SECRET_KEY: sk_test_build_placeholder
+          STRIPE_SECRET_KEY: sk_test_build_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_build_placeholder
+          OPENAI_API_KEY: build_placeholder
+          PUSHER_APP_ID: build_placeholder
+          PUSHER_KEY: build_placeholder
+          PUSHER_SECRET: build_placeholder
+          PUSHER_CLUSTER: eu
+          GOOGLE_CLIENT_ID: build_placeholder.apps.googleusercontent.com
+          GOOGLE_CLIENT_SECRET: build_placeholder
+          GOOGLE_REDIRECT_URI: https://placeholder.com/callback
+          HUBSPOT_CLIENT_ID: build_placeholder
+          HUBSPOT_CLIENT_SECRET: build_placeholder
+          HUBSPOT_REDIRECT_URI: https://placeholder.com/callback
+          NEXT_PUBLIC_APP_URL: https://placeholder.com
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_build_placeholder
+          NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+          NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+          NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /dashboard
+          NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: /dashboard
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_build_placeholder
+          NEXT_PUBLIC_PUSHER_KEY: build_placeholder
+          NEXT_PUBLIC_PUSHER_CLUSTER: eu
+          NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY: build_placeholder
