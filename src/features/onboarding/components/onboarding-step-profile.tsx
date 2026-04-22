@@ -51,7 +51,7 @@ export function OnboardingStepProfile({
 
   return (
     <form action={action}>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pl-0 pr-4">
         <Field data-invalid={!!state.errors?.firstName}>
           <Label htmlFor="firstName">First name</Label>
           <Input
@@ -91,8 +91,13 @@ export function OnboardingStepProfile({
         {state.message && <FieldError>{state.message}</FieldError>}
       </CardContent>
 
-      <CardFooter className="mt-4">
-        <Button className="w-full" disabled={isPending} size="lg" type="submit">
+      <CardFooter className="mt-4 bg-transparent justify-end border-t-0 pl-0 pr-4">
+        <Button
+          className="w-full md:w-auto"
+          disabled={isPending}
+          size="lg"
+          type="submit"
+        >
           {isPending ? 'Saving…' : 'Continue'}
         </Button>
       </CardFooter>

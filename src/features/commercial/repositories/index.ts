@@ -1,19 +1,54 @@
 export {
+  addMessage,
+  closeSession,
+  createChatbot,
+  findChatbotByDomainId,
+  findChatbotByIdPublic,
+  findChatbotWithPlanByDomainId,
+  findOrCreateSession,
+  findSessionByPortalToken,
+  findSessionByUuid,
+  findSessionsByWorkspaceId,
+  findSessionWithMessages,
+  generatePortalToken,
+  getSessionMessages,
+  linkSessionToLead,
+  replaceQuestions,
+  setSessionAnswers,
+  setSessionHuman,
+  setSessionHumanBySessionId,
+  updateChatbot,
+} from './chatbot-repository'
+export {
   createBooking,
+  findBookingWithLeadById,
   listBookingsByWorkspace,
+  listBookingsForDateRange,
+  listUpcomingBookingsWithLeads,
+  updateBookingMeetingLink,
   updateBookingStatus,
 } from './booking-repository'
 export {
   createDomain,
   deleteDomain,
+  findDomainById,
   listDomainsByWorkspace,
   setPrimaryDomain,
+  updateDomain,
   updateDomainVerification,
+  updateDomainVerificationCheck,
 } from './domain-repository'
 export {
   createLead,
+  findLeadById,
+  findLeadByHubSpotContactId,
   listLeadsByWorkspace,
+  listLeadsWithFilters,
+  updateLeadContactFields,
+  updateLeadHubSpotSync,
+  updateLeadNotes,
   updateLeadStatus,
+  upsertLead,
 } from './lead-repository'
 export {
   createPayment,
@@ -21,8 +56,34 @@ export {
   updatePaymentStatus,
 } from './payment-repository'
 export {
-  findOrCreateUser,
-  findUserByClerkId,
-  updateUser,
-} from './user-repository'
-export { createWorkspace, findWorkspaceByUserId } from './workspace-repository'
+  createSubscription,
+  findActiveSubscriptionByWorkspaceId,
+  findSubscriptionByStripeId,
+  updateSubscription,
+  cancelSubscription,
+} from './subscription-repository'
+export { findOrCreateUser, findUserByClerkId } from './user-repository'
+export {
+  createWorkspace,
+  findWorkspaceById,
+  findWorkspaceByUserId,
+  findWorkspaceByStripeCustomerId,
+  updateWorkspace,
+  updateWorkspaceStripeCustomerId,
+  updateWorkspaceGoogleTokens,
+  updateWorkspaceHubSpotTokens,
+} from './workspace-repository'
+export {
+  findAppointmentScheduleByWorkspaceId,
+  upsertAppointmentSchedule,
+} from './appointment-schedule-repository'
+export {
+  getDashboardKpis,
+  getLeadStatusCounts,
+  getLeadsTrendLast30Days,
+} from './dashboard-repository'
+export type {
+  DashboardKpis,
+  LeadDailyCount,
+  LeadStatusCount,
+} from './dashboard-repository'

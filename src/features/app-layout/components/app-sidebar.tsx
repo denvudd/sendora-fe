@@ -7,29 +7,37 @@ import { SidebarDomains } from './sidebar-domains'
 import { SidebarLogo } from './sidebar-logo'
 import { SidebarNav } from './sidebar-nav'
 import { SidebarUser } from './sidebar-user'
-import { WorkflowSwitcher } from './workflow-switcher'
+import { WorkspaceSwitcher } from './workspace-switcher'
 
 interface AppSidebarProps {
   workspace: Workspace
   domains: Domain[]
+  canAddDomain: boolean
+  domainLimit: number | null
 }
 
 export function AppSidebar({
   workspace,
   domains,
+  canAddDomain,
+  domainLimit,
 }: AppSidebarProps): ReactElement {
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarLogo />
       <SidebarSeparator />
-      <WorkflowSwitcher
+      <WorkspaceSwitcher
         logoUrl={workspace.logoUrl}
         workspaceName={workspace.name}
       />
       <SidebarSeparator />
       <SidebarNav />
       <SidebarSeparator />
-      <SidebarDomains domains={domains} />
+      <SidebarDomains
+        canAddDomain={canAddDomain}
+        domainLimit={domainLimit}
+        domains={domains}
+      />
       <SidebarUser />
     </Sidebar>
   )

@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Puzzle,
   Settings,
+  Users2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -25,6 +26,7 @@ import { usePathname } from 'next/navigation'
 const ICON_MAP = {
   LayoutGrid,
   MessageSquare,
+  Users2,
   Puzzle,
   Settings,
   Calendar,
@@ -51,7 +53,7 @@ export function SidebarNav(): ReactElement {
                   render={<Link href={item.href} />}
                   tooltip={item.label}
                 >
-                  <Icon className="size-6" />
+                  <Icon />
                   <span className="truncate font-medium text-md">
                     {item.label}
                   </span>

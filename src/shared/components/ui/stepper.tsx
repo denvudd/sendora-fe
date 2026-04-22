@@ -46,6 +46,8 @@ interface StepperListProps {
   primitives: StepperListPrimitives
   /** Return true to disable a step's trigger button. */
   isStepDisabled?: (stepId: string) => boolean
+  /** Match `Stepper.Root` / `Stepper.List` orientation from @stepperize/react. */
+  orientation?: 'horizontal' | 'vertical'
   className?: string
 }
 
@@ -53,21 +55,39 @@ export function StepperList({
   stepper,
   primitives: { List, Item, Trigger, Indicator, Title, Separator },
   isStepDisabled,
+  orientation = 'horizontal',
   className,
 }: StepperListProps): ReactElement {
   const { all, current } = stepper.state
   const currentId = current.data.id
   const currentIndex = current.index
+  const isVertical = orientation === 'vertical'
 
   return (
-    <List className={cn('flex w-full items-center gap-0', className)}>
+    <List
+      className={cn(
+        'm-0 list-none p-0',
+        isVertical
+          ? 'flex w-full flex-col items-stretch gap-0'
+          : 'flex w-full items-center gap-0',
+        className,
+      )}
+      orientation={orientation}
+    >
       {all.map((step, index) => {
         const isActive = step.id === currentId
         const isDone = index < currentIndex
 
         return (
           <Fragment key={step.id}>
-            <Item className="flex min-w-0 flex-1 flex-col gap-1" step={step.id}>
+            <Item
+              className={cn(
+                'flex min-w-0 flex-col gap-1',
+                !isVertical && 'flex-1',
+                isVertical && 'w-full',
+              )}
+              step={step.id}
+            >
               <Trigger
                 className={cn(
                   'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors',
@@ -110,7 +130,14 @@ export function StepperList({
               </Trigger>
             </Item>
             {index < all.length - 1 ? (
-              <Separator className="mx-1 hidden h-px min-w-[1rem] flex-1 bg-border sm:mx-2 sm:block" />
+              isVertical ? (
+                <Separator
+                  className="mx-auto h-4 w-px shrink-0 border-0 bg-border"
+                  orientation="vertical"
+                />
+              ) : (
+                <Separator className="mx-1 hidden h-px min-w-4 flex-1 bg-border sm:mx-2 sm:block" />
+              )
             ) : null}
           </Fragment>
         )

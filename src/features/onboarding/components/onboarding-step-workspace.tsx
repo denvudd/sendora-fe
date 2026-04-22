@@ -4,12 +4,11 @@ import type { ReactElement } from 'react'
 
 import { createWorkspaceAction } from '@features/onboarding/actions/create-workspace-action'
 import { Button } from '@shared/components/ui/button'
-import { ColorPickerField } from '@shared/components/ui/color-picker-field'
 import { Field, FieldError } from '@shared/components/ui/field'
 import { Input } from '@shared/components/ui/input'
 import { Label } from '@shared/components/ui/label'
 import { UploadcareUploader } from '@shared/components/ui/uploadcare-uploader'
-import { useActionState, useRef } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 
 import { CardContent, CardFooter } from '@/shared/components/ui/card'
 
@@ -18,6 +17,7 @@ interface OnboardingStepWorkspaceProps {
   slug: string
   logoUrl: string
   onBack: () => void
+  onSuccess: (workspaceId: string) => void
   onNameChange: (value: string) => void
   onSlugChange: (value: string) => void
   onLogoUrlChange: (value: string) => void
@@ -28,9 +28,9 @@ interface OnboardingFormState {
     name?: string[]
     slug?: string[]
     logoUrl?: string[]
-    primaryColor?: string[]
   }
   message?: string
+  workspaceId?: string
 }
 
 /** Maps workspace display name to a slug matching createWorkspaceSchema (lowercase, hyphens, max 48). */
@@ -51,6 +51,7 @@ export function OnboardingStepWorkspace({
   slug,
   logoUrl,
   onBack,
+  onSuccess,
   onNameChange,
   onSlugChange,
   onLogoUrlChange,
@@ -61,9 +62,15 @@ export function OnboardingStepWorkspace({
   >(createWorkspaceAction, {})
   const isSlugManuallyEditedRef = useRef(false)
 
+  useEffect(() => {
+    if (state.workspaceId) {
+      onSuccess(state.workspaceId)
+    }
+  }, [state.workspaceId, onSuccess])
+
   return (
     <form action={action}>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pl-0 pr-4">
         <Field data-invalid={!!state.errors?.name}>
           <Label htmlFor="name">Workspace name</Label>
           <Input
@@ -117,24 +124,27 @@ export function OnboardingStepWorkspace({
           onCdnUrlChange={onLogoUrlChange}
         />
 
-        <ColorPickerField error={state.errors?.primaryColor?.[0]} />
-
         {state.message && <FieldError>{state.message}</FieldError>}
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-2 mt-4">
-        <Button className="w-full" disabled={isPending} size="lg" type="submit">
-          {isPending ? 'Creating…' : 'Create workspace'}
-        </Button>
+      <CardFooter className="flex flex-col md:flex-row gap-2 md:justify-between mt-4 bg-transparent border-t-0 pl-0 pr-4">
         <Button
-          className="w-full"
+          className="w-full md:w-auto"
           disabled={isPending}
           size="lg"
           type="button"
-          variant="ghost"
+          variant="outline"
           onClick={onBack}
         >
           Back
+        </Button>
+        <Button
+          className="w-full md:w-auto"
+          disabled={isPending}
+          size="lg"
+          type="submit"
+        >
+          {isPending ? 'Creating…' : 'Create workspace'}
         </Button>
       </CardFooter>
     </form>

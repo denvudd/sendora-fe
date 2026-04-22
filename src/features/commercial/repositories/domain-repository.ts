@@ -1,3 +1,4 @@
+import { checkFeatureAllowed } from '@features/commercial/lib/feature-limits'
 import { prisma } from '@shared/utils/prisma'
 
 interface CreateDomainParams {
@@ -20,6 +21,19 @@ interface SetPrimaryDomainParams {
   workspaceId: string
 }
 
+interface FindDomainByIdParams {
+  domainId: string
+  workspaceId: string
+}
+
+interface UpdateDomainParams {
+  domainId: string
+  workspaceId: string
+  hostname?: string
+  iconUrl?: string | null
+  isPrimary?: boolean
+}
+
 interface UpdateDomainVerificationParams {
   domainId: string
   workspaceId: string
@@ -32,8 +46,23 @@ export async function createDomain({
   hostname,
   isPrimary = false,
 }: CreateDomainParams) {
+  const currentCount = await prisma.domain.count({ where: { workspaceId } })
+  const check = await checkFeatureAllowed({
+    workspaceId,
+    featureCode: 'MAX_DOMAINS',
+    currentCount,
+  })
+
+  if (!check.allowed) {
+    throw new Error(
+      `Domain limit reached. Your plan allows up to ${check.limit} domain${check.limit === 1 ? '' : 's'}.`,
+    )
+  }
+
+  const verificationToken = crypto.randomUUID()
+
   return prisma.domain.create({
-    data: { workspaceId, hostname, isPrimary },
+    data: { workspaceId, hostname, isPrimary, verificationToken },
   })
 }
 
@@ -71,6 +100,51 @@ export async function setPrimaryDomain({
   ])
 }
 
+export async function findDomainById({
+  domainId,
+  workspaceId,
+}: FindDomainByIdParams) {
+  return prisma.domain.findFirst({
+    where: { id: domainId, workspaceId },
+  })
+}
+
+export async function updateDomain({
+  domainId,
+  workspaceId,
+  hostname,
+  iconUrl,
+  isPrimary,
+}: UpdateDomainParams) {
+  if (isPrimary) {
+    const [, updated] = await prisma.$transaction([
+      prisma.domain.updateMany({
+        where: { workspaceId },
+        data: { isPrimary: false },
+      }),
+      prisma.domain.update({
+        where: { id: domainId, workspaceId },
+        data: {
+          ...(hostname !== undefined && { hostname }),
+          ...(iconUrl !== undefined && { iconUrl }),
+          isPrimary: true,
+        },
+      }),
+    ])
+
+    return updated
+  }
+
+  return prisma.domain.update({
+    where: { id: domainId, workspaceId },
+    data: {
+      ...(hostname !== undefined && { hostname }),
+      ...(iconUrl !== undefined && { iconUrl }),
+      ...(isPrimary !== undefined && { isPrimary }),
+    },
+  })
+}
+
 export async function updateDomainVerification({
   domainId,
   workspaceId,
@@ -80,5 +154,22 @@ export async function updateDomainVerification({
   return prisma.domain.update({
     where: { id: domainId, workspaceId },
     data: { isVerified, verifiedAt: verifiedAt ?? null },
+  })
+}
+
+interface UpdateDomainVerificationCheckParams {
+  domainId: string
+  isVerified: boolean
+  lastVerifiedCheckAt: Date
+}
+
+export async function updateDomainVerificationCheck({
+  domainId,
+  isVerified,
+  lastVerifiedCheckAt,
+}: UpdateDomainVerificationCheckParams) {
+  return prisma.domain.update({
+    where: { id: domainId },
+    data: { isVerified, lastVerifiedCheckAt },
   })
 }

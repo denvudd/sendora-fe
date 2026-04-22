@@ -34,11 +34,4 @@ export const createWorkspaceSchema = z.object({
     )
     .trim(),
   logoUrl: z.string().url('Invalid logo URL.').optional(),
-  primaryColor: z
-    .string()
-    .refine(
-      val => !val || /^#[0-9A-Fa-f]{6}$/.test(val),
-      'Primary color must be a valid hex color (#RRGGBB).',
-    )
-    .optional(),
 })

@@ -2,6 +2,7 @@ import type { ReactElement, ReactNode } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { AppSidebar } from '@features/app-layout/components/app-sidebar'
+import { getEffectiveLimits } from '@features/commercial/lib/feature-limits'
 import {
   findOrCreateUser,
   findWorkspaceByUserId,
@@ -13,6 +14,8 @@ import {
   SidebarTrigger,
 } from '@shared/components/ui/sidebar'
 import { redirect } from 'next/navigation'
+
+import { ROUTES } from '@/shared/constants/routes'
 
 const AppLayout = async ({
   children,
@@ -36,21 +39,30 @@ const AppLayout = async ({
   const dbUser = await findOrCreateUser({
     clerkId,
     email: clerkUser.emailAddresses[0].emailAddress,
-    firstName: clerkUser.firstName,
-    lastName: clerkUser.lastName,
   })
 
   const workspace = await findWorkspaceByUserId({ userId: dbUser.id })
 
   if (!workspace) {
-    redirect('/onboarding')
+    redirect(ROUTES.Onboarding)
   }
 
-  const domains = await listDomainsByWorkspace({ workspaceId: workspace.id })
+  const [domains, limits] = await Promise.all([
+    listDomainsByWorkspace({ workspaceId: workspace.id }),
+    getEffectiveLimits(workspace.id),
+  ])
+
+  const domainLimit = limits.MAX_DOMAINS
+  const canAddDomain = domainLimit === null || domains.length < domainLimit
 
   return (
     <SidebarProvider>
-      <AppSidebar domains={domains} workspace={workspace} />
+      <AppSidebar
+        canAddDomain={canAddDomain}
+        domainLimit={domainLimit}
+        domains={domains}
+        workspace={workspace}
+      />
       <SidebarInset>
         <header className="flex h-12 items-center gap-2 border-b border-border px-4 md:hidden">
           <SidebarTrigger />
