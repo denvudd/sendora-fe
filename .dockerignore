@@ -1,0 +1,10 @@
+# .dockerignore
+node_modules
+.next
+.git
+.claude
+.husky
+docs
+*.md
+*.log
+.env*.local
