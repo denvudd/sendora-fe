@@ -13,6 +13,8 @@ import { Button } from '@shared/components/ui/button'
 import { FieldError } from '@shared/components/ui/field'
 import { useActionState, useState } from 'react'
 
+import { CardFooter } from '@/shared/components/ui/card'
+
 interface OnboardingStepPlanProps {
   workspaceId: string
   plans: PlanWithFeatures[]
@@ -67,14 +69,16 @@ export function OnboardingStepPlan({
         <input name="workspaceId" type="hidden" value={workspaceId} />
         <input name="planId" type="hidden" value={selectedPlanId ?? ''} />
         <input name="billingInterval" type="hidden" value={billingInterval} />
-        <Button
-          className="w-full md:w-auto"
-          disabled={isPending || !selectedPlanId}
-          size="lg"
-          type="submit"
-        >
-          {isPending ? 'Setting up…' : 'Continue'}
-        </Button>
+        <CardFooter className="bg-transparent justify-end border-t-0 pl-0 pr-4">
+          <Button
+            className="w-full md:w-auto"
+            disabled={isPending || !selectedPlanId}
+            size="lg"
+            type="submit"
+          >
+            {isPending ? 'Setting up…' : 'Continue'}
+          </Button>
+        </CardFooter>
       </form>
     </div>
   )
