@@ -1,5 +1,9 @@
 # Fullstack AI Sales Bot with CRM
 
+## Demo
+
+https://4war8f91kk.ucarecd.net/fbf8d373-bea0-4eff-bfa4-fe29e4378f91/
+
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), React 19, TypeScript 5
@@ -152,4 +156,16 @@ Releases are automated via [semantic-release](https://semantic-release.gitbook.i
 
 ## Deployment
 
-The app is deployed to a DigitalOcean Droplet as a Next.js standalone build, served via `pm2`. Prisma migrations run as part of the deploy pipeline before the build step.
+The app is deployed to a DigitalOcean Droplet as a Next.js standalone build, served via `pm2`.
+
+**Deploy sequence (triggered on push to `main`):**
+
+1. **Install deps** — `bun install --frozen-lockfile`
+2. **Generate Prisma client** — `bunx prisma generate`
+3. **Run migrations** — `bunx prisma migrate deploy` (non-interactive, applies pending migrations against production DB via `DIRECT_URL`)
+4. **Build** — `bun run build` (outputs standalone bundle to `.next/standalone/`)
+5. **Prepare artifact** — copies `.next/static/` and `public/` into the standalone folder
+6. **Rsync to Droplet** — transfers `.next/standalone/` to `/var/www/sendora/` via SSH, with `--delete` to remove stale files (excludes `.env.local`)
+7. **Restart** — SSH into Droplet, runs `pm2 restart sendora` (or `pm2 start server.js --name sendora` on first deploy), then `pm2 save`
+
+**Server setup:** the Droplet runs Node.js + pm2. The standalone `server.js` is the Next.js production server — no separate web server (nginx/caddy) required unless you add one for SSL termination.
