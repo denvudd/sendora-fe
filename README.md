@@ -1,67 +1,155 @@
-# Next.js Application
-
-This repository contains a production-oriented Next.js application template with strict TypeScript setup, App Router architecture, and automated quality checks.
+# Fullstack AI Sales Bot with CRM
 
 ## Tech Stack
 
-- Next.js 16 (App Router)
-- React 19
-- TypeScript 5
-- Tailwind CSS 4
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript 5
+- **Styling:** Tailwind CSS 4, Shadcn UI
+- **Auth:** Clerk
+- **Database:** PostgreSQL via Prisma (hosted on Neon)
+- **AI:** OpenAI SDK (`ai`, `@ai-sdk/openai`)
+- **Payments:** Stripe
+- **Realtime:** Pusher
+- **File uploads:** Uploadcare
+- **Email:** Resend
+- **Integrations:** Google Calendar (OAuth), HubSpot CRM
+- **State:** Zustand (client), RSC + Server Actions (server)
 
 ## Core Libraries
 
-- `zod` - schema validation and type-safe contracts
-- `react-hook-form` + `@hookform/resolvers` - form state and validation integration
-- `zustand` - local client state management
-- `@tanstack/react-query` - server-state fetching, caching, and synchronization
-- `@t3-oss/env-nextjs` - runtime environment variable validation
-- `clsx` + `tailwind-merge` - safe Tailwind className composition without conflicts
+- `zod` — schema validation
+- `react-hook-form` + `@hookform/resolvers` — form state and validation
+- `@t3-oss/env-nextjs` — runtime env variable validation
+- `clsx` + `tailwind-merge` — safe className composition
+- `date-fns` — date utilities
+- `recharts` — charts
 
 ## Project Structure
 
-- `src/app` - route entrypoints, layouts, and global providers
-- `src/features` - domain and feature logic
-- `src/shared` - shared components, hooks, utilities, and types
+```
+src/app       — route entrypoints, layouts, providers
+src/features  — domain and feature logic
+src/shared    — shared components, hooks, constants, utils, types
+```
+
+Dependency flow: `shared` → `features` → `app`. No reverse imports.
 
 ## Requirements
 
 - Node.js `>=22.0.0`
-- bun
+- Bun
+- Docker + Docker Compose (optional, for Docker-based local dev)
 
 ## Local Development
 
+**Without Docker:**
+
 ```bash
 bun install
-cp .env.example .env.local
-bun run dev
+cp .env.example .env
+# fill in real values in .env
+bun dev
+```
+
+**With Docker:**
+
+```bash
+cp .env.example .env
+# fill in real values in .env
+docker compose up --build
 ```
 
 App runs on `http://localhost:3000`.
 
+On first Docker start: installs deps, generates Prisma client, runs migrations, starts dev server. Hot reload works via filesystem polling (required on Windows).
+
+### Docker commands
+
+```bash
+docker compose up --build        # first run (builds image)
+docker compose up                # normal start
+docker compose down              # stop
+docker compose down -v           # full reset (removes named volumes)
+
+docker compose exec app bunx prisma migrate dev --name <name>  # new migration
+docker compose exec app bunx prisma studio                     # Prisma Studio
+docker compose exec app bun prisma:seed                        # seed DB
+docker compose exec app sh                                     # shell
+```
+
 ## Scripts
 
-- `bun run dev` - start the development server
-- `bun run build` - create a production build
-- `bun run start` - run the production build locally
-- `bun run lint` - run ESLint checks
-- `bun run lint:fix` - run ESLint with auto-fixes
-- `bun run type-check` - run TypeScript checks (`tsc --noEmit`)
-- `bun run format` - format files with Prettier
+| Command                  | Description                       |
+| ------------------------ | --------------------------------- |
+| `bun dev`                | Start dev server                  |
+| `bun build`              | Production build                  |
+| `bun start`              | Run production build              |
+| `bun lint`               | ESLint check                      |
+| `bun lint:fix`           | ESLint with auto-fix              |
+| `bun type-check`         | TypeScript check (`tsc --noEmit`) |
+| `bun format`             | Prettier format                   |
+| `bun prisma:generate`    | Generate Prisma client            |
+| `bun prisma:migrate:dev` | Create and apply migration        |
+| `bun prisma:seed`        | Seed the database                 |
 
 ## Environment Variables
 
-- Variables are documented in `.env.example`
-- Local configuration file: `.env.local`
-- Required variables are validated in `src/env.ts`
+All variables are documented in `.env.example` and validated at runtime in `src/env.ts`.
 
-## CI and Releases
+Key groups:
 
-- CI runs lint, type-check, and build on pull requests and pushes
-- Releases can be automated using conventional commits and semantic-release
+| Group      | Variables                                                                          |
+| ---------- | ---------------------------------------------------------------------------------- |
+| App        | `NEXT_PUBLIC_APP_URL`, `NODE_ENV`                                                  |
+| Database   | `DATABASE_URL`, `DIRECT_URL`                                                       |
+| Clerk      | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, redirect URLs             |
+| OpenAI     | `OPENAI_API_KEY`                                                                   |
+| Stripe     | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
+| Pusher     | `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, `PUSHER_CLUSTER` + public variants |
+| Uploadcare | `NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY`                                                |
+| Resend     | `RESEND_API_KEY`                                                                   |
+| Google     | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`                  |
+| HubSpot    | `HUBSPOT_CLIENT_ID`, `HUBSPOT_CLIENT_SECRET`, `HUBSPOT_REDIRECT_URI`               |
+
+## Commit Convention
+
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/) — enforced by `commitlint` via Husky pre-commit hook.
+
+```
+feat: add new feature
+fix: fix a bug
+chore: maintenance task
+docs: documentation only
+refactor: code change without feature/fix
+```
+
+Breaking changes: append `!` after type or add `BREAKING CHANGE:` footer.
+
+## Git Hooks (Husky + lint-staged)
+
+On every commit:
+
+- `eslint --fix` + `prettier --write` on staged `*.{js,ts,tsx}` files
+- `prettier --write` on staged `*.{json,md}` files
+- `commitlint` validates the commit message format
+
+## CI/CD (GitHub Actions)
+
+| Workflow     | Trigger                    | Steps                                                      |
+| ------------ | -------------------------- | ---------------------------------------------------------- |
+| **CI**       | PR or push to `main`/`dev` | lint → type-check → build                                  |
+| **Release**  | Push to `main`             | semantic-release (changelog, GitHub release, version bump) |
+| **Deploy**   | Push to `main`             | build → rsync standalone to DigitalOcean → pm2 restart     |
+| **Renovate** | Schedule                   | Dependency update PRs                                      |
+
+## Releases
+
+Releases are automated via [semantic-release](https://semantic-release.gitbook.io/) on push to `main`:
+
+- Analyzes commits since last release
+- Bumps version in `package.json` based on commit types (`feat` → minor, `fix` → patch, breaking → major)
+- Generates `CHANGELOG.md`
+- Creates a GitHub release with release notes
 
 ## Deployment
 
-- The application is deployable to any Node.js-compatible platform.
-- For managed hosting, Vercel is the default option for Next.js projects.
-- Production runtime requires Node.js `>=22.0.0`.
+The app is deployed to a DigitalOcean Droplet as a Next.js standalone build, served via `pm2`. Prisma migrations run as part of the deploy pipeline before the build step.

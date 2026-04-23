@@ -3,12 +3,22 @@
 import type { ReactElement } from 'react'
 
 import { buttonVariants } from '@shared/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@shared/components/ui/dialog'
 import { ArrowRight, CalendarDays, Play, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
 import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/utils/cn'
+
+const DEMO_VIDEO_URL =
+  'https://4war8f91kk.ucarecd.net/fbf8d373-bea0-4eff-bfa4-fe29e4378f91/'
 
 function ChatMockup() {
   const typing2Ref = useRef<HTMLDivElement>(null)
@@ -191,16 +201,34 @@ export function HomeHero({
                 Get Started Free
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
-              <Link
-                className={cn(
-                  buttonVariants({ size: 'lg', variant: 'outline' }),
-                  'text-base px-7 py-6',
-                )}
-                href="#how-it-works"
-              >
-                <Play className="w-4 h-4 mr-1" />
-                Watch Demo
-              </Link>
+              <Dialog>
+                <DialogTrigger
+                  render={
+                    <button
+                      className={cn(
+                        buttonVariants({ size: 'lg', variant: 'outline' }),
+                        'text-base px-7 py-6',
+                      )}
+                      type="button"
+                    />
+                  }
+                >
+                  <Play className="w-4 h-4 mr-1" />
+                  Watch Demo
+                </DialogTrigger>
+                <DialogContent className="gap-0 overflow-hidden sm:max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>Product demo</DialogTitle>
+                  </DialogHeader>
+                  <video
+                    className="aspect-video w-full max-h-[min(70vh,720px)] mt-5 rounded-lg shadow-xl bg-black"
+                    preload="metadata"
+                    src={DEMO_VIDEO_URL}
+                    controls
+                    playsInline
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
 
             <p

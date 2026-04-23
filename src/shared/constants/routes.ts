@@ -6,7 +6,6 @@ export const ROUTES = {
   Billing: '/settings/billing',
   WorkspaceSettings: '/settings/workspace',
   Appointments: '/appointments',
-  EmailMarketing: '/email-marketing',
 
   // Auth routes
   SignUp: '/sign-up',
@@ -31,7 +30,6 @@ export interface NavItem {
     | 'Puzzle'
     | 'Settings'
     | 'Calendar'
-    | 'Mail'
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -40,5 +38,4 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Leads', href: ROUTES.Leads, icon: 'Users2' },
   { label: 'Appointments', href: ROUTES.Appointments, icon: 'Calendar' },
   { label: 'Settings', href: ROUTES.Settings, icon: 'Settings' },
-  { label: 'Email Marketing', href: ROUTES.EmailMarketing, icon: 'Mail' },
 ]
