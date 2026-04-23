@@ -14,7 +14,6 @@ import { NAV_ITEMS } from '@shared/constants/routes'
 import {
   Calendar,
   LayoutGrid,
-  Mail,
   MessageSquare,
   Puzzle,
   Settings,
@@ -30,7 +29,6 @@ const ICON_MAP = {
   Puzzle,
   Settings,
   Calendar,
-  Mail,
 } as const
 
 export function SidebarNav(): ReactElement {
