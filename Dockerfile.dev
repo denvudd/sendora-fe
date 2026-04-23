@@ -1,0 +1,14 @@
+FROM oven/bun:1
+
+RUN apt-get update -y && \
+    apt-get install -y openssl ca-certificates dos2unix && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY docker/entrypoint.dev.sh /entrypoint.dev.sh
+RUN dos2unix /entrypoint.dev.sh && chmod +x /entrypoint.dev.sh
+
+EXPOSE 3000
+
+ENTRYPOINT ["/entrypoint.dev.sh"]
