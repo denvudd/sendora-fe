@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/denvudd/sendora-fe/compare/v1.2.1...v1.3.0) (2026-04-23)
+
+### Features
+
+- added demo video, removed email marketing page ([36afc38](https://github.com/denvudd/sendora-fe/commit/36afc38ca09932b4bf3d5086e19aeaa25f12bddc))
+- added docker for local development, updated README ([14e2dbf](https://github.com/denvudd/sendora-fe/commit/14e2dbfc8b47c428bd3b8ab399118f9405f93394))
+
 ## [1.2.1](https://github.com/denvudd/sendora-fe/compare/v1.2.0...v1.2.1) (2026-04-22)
 
 ### Bug Fixes
