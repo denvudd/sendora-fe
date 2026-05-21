@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
@@ -9,6 +10,11 @@ import {
 import { redirect } from 'next/navigation'
 
 import { ROUTES } from '@/shared/constants/routes'
+
+export const metadata: Metadata = {
+  title: 'Billing',
+  robots: { index: false },
+}
 
 const SettingsBillingPage = async (): Promise<ReactElement> => {
   const { userId: clerkId } = await auth()

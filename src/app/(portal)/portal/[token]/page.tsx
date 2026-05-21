@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { findSessionByPortalToken } from '@features/commercial/repositories'
@@ -5,6 +6,10 @@ import { PortalBookingFlow } from '@features/portal/components/portal-booking-fl
 import { notFound } from 'next/navigation'
 
 import { PLAN_CODE } from '@/shared/constants/plan-code'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 interface PortalPageProps {
   params: Promise<{ token: string }>

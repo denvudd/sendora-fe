@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { ChatbotWidget } from '@features/chatbot/components/chatbot-widget'
@@ -13,6 +14,10 @@ import {
 import { PLAN_CODE } from '@/shared/constants/plan-code'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 const DOMAIN_RECHECK_INTERVAL = 60 * 60 * 1000
 

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
@@ -21,6 +22,11 @@ import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 
 import { ROUTES } from '@/shared/constants/routes'
+
+export const metadata: Metadata = {
+  title: 'Leads',
+  robots: { index: false },
+}
 
 interface LeadsPageProps {
   searchParams: Promise<{
