@@ -118,20 +118,25 @@ Then do the following:
 - End your response with this EXACT JSON on a new line:
 ${REALTIME_MARKER}
 
+CRITICAL — copy the line above character-for-character. Do NOT change the key name (e.g. do NOT write "human", "handoff", or anything else). The system will break if the key is wrong.
+
 Rules:
 - Do NOT add anything after the JSON
 - Only trigger on an explicit request for a human — not on frustration alone`
 
 const PORTAL_TRIGGER_PART = `BOOKING PORTAL TRIGGER:
-When you are ready to send the visitor to the booking portal, end your response with TWO JSON lines:
-1. The collected answers (if any guiding questions were asked)
-2. The portal marker
+When you are ready to send the visitor to the booking portal, end your response with the portal marker line shown below.
+
+The portal marker MUST be output character-for-character as:
+${PORTAL_MARKER}
+
+CRITICAL — do NOT rename the key (e.g. do NOT write "booking_portal", "booking", "portal_link", or anything else). The system will break if the key differs from "portal".
 
 Rules:
-- Do NOT add anything after the JSON lines
+- Do NOT add anything after the portal marker line
 - Do NOT explain the JSON
-- Send them exactly once at the right moment (see your flow below)
-- If no guiding questions were asked, output only the portal marker line`
+- Send it exactly once at the right moment (see your flow below)
+- If guiding questions were asked, output the answers JSON on the line BEFORE the portal marker`
 
 // Flow when guiding questions exist
 function withQuestionsFlow(
@@ -170,6 +175,7 @@ WHEN TRIGGERING THE PORTAL — output these TWO lines at the end of your respons
 ${PORTAL_MARKER}
 
 Replace each "visitor answer" with the actual verbatim or brief answer the visitor gave.
+CRITICAL: the second line must be exactly ${PORTAL_MARKER} — do NOT change "portal" to any other key name.
 
 IMPORTANT:
 - Ask each question at most once
