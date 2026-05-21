@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { buttonVariants } from '@shared/components/ui/button'
@@ -10,6 +11,11 @@ import {
 import Link from 'next/link'
 
 import { ROUTES } from '@/shared/constants/routes'
+
+export const metadata: Metadata = {
+  title: 'Settings',
+  robots: { index: false },
+}
 
 const SettingsPage = (): ReactElement => (
   <div className="mx-auto w-full max-w-3xl space-y-6 p-4">

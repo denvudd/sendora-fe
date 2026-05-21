@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
@@ -11,6 +12,11 @@ import { DomainPage } from '@features/domains/components/domain-page'
 import { notFound, redirect } from 'next/navigation'
 
 import { ROUTES } from '@/shared/constants/routes'
+
+export const metadata: Metadata = {
+  title: 'Domain Settings',
+  robots: { index: false },
+}
 
 interface DomainDetailPageProps {
   params: Promise<{ domainId: string }>

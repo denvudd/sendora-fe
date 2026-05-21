@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { currentUser } from '@clerk/nextjs/server'
@@ -7,6 +8,11 @@ import { redirect } from 'next/navigation'
 import { listActivePlans } from '@/features/commercial/repositories/plan-repository'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Onboarding',
+  robots: { index: false, follow: false },
+}
 
 const Onboarding = async (): Promise<ReactElement> => {
   const clerkUser = await currentUser()

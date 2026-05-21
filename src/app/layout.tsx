@@ -19,8 +19,41 @@ const fontMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.sendora.forum'),
+  title: {
+    default: 'Sendora',
+    template: '%s | Sendora',
+  },
   description: 'AI-powered conversational sales and email marketing platform.',
-  title: 'Sendora',
+  openGraph: {
+    type: 'website',
+    siteName: 'Sendora',
+    title: 'Sendora',
+    description:
+      'AI-powered conversational sales and email marketing platform.',
+    url: 'https://www.sendora.forum',
+    images: [
+      {
+        url: '/images/app-ui.png',
+        width: 1200,
+        height: 630,
+        alt: 'Sendora — AI-powered sales platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sendora',
+    description:
+      'AI-powered conversational sales and email marketing platform.',
+    images: ['/images/app-ui.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+  },
 }
 
 const RootLayout = ({ children }: { children: ReactNode }): ReactElement => (
