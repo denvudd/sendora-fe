@@ -1,3 +1,9 @@
+# [1.4.0](https://github.com/denvudd/sendora-fe/compare/v1.3.1...v1.4.0) (2026-05-21)
+
+### Features
+
+- implement comprehensive SEO setup including metadata, robots, and sitemap ([3615cfb](https://github.com/denvudd/sendora-fe/commit/3615cfb95c7c0bfcb40b4e1b2166ccfbd2a7ec07))
+
 ## [1.3.1](https://github.com/denvudd/sendora-fe/compare/v1.3.0...v1.3.1) (2026-05-21)
 
 ### Bug Fixes
