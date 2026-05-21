@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/denvudd/sendora-fe/compare/v1.3.0...v1.3.1) (2026-05-21)
+
+### Bug Fixes
+
+- update chatbot response rules for portal trigger and JSON formatting ([9a263f6](https://github.com/denvudd/sendora-fe/commit/9a263f617f340bef6859d0198289d3d2488aed70))
+
 # [1.3.0](https://github.com/denvudd/sendora-fe/compare/v1.2.1...v1.3.0) (2026-04-23)
 
 ### Features
