@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactElement } from 'react'
 
 import { auth, currentUser } from '@clerk/nextjs/server'
@@ -10,6 +11,11 @@ import { LeadDetailView } from '@features/leads/components/lead-detail-view'
 import { notFound, redirect } from 'next/navigation'
 
 import { ROUTES } from '@/shared/constants/routes'
+
+export const metadata: Metadata = {
+  title: 'Lead Detail',
+  robots: { index: false },
+}
 
 interface LeadDetailPageProps {
   params: Promise<{ leadId: string }>
